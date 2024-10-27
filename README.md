@@ -4,20 +4,20 @@ Provides server information and management functions such as stop, start, restar
 
 ### How to Get This Running
 
-The first time you start this you will need to do all of the following.
+The first time you start this you will need to copy .env.default over to .env.
 
 ```sh
-  echo "PORT=3000" > .env
-  echo "DATABASE_URL="file:./dev.db"" >> .env
-  npm install
-  npx prisma migrate dev --name init
-  npm run start
+cp .env.default .env
 ```
 
-After the first time you should only use
+The service can be setup and started like this.
 
 ```sh
-  npm install
-  npx prisma migrate dev --name init
-  npm run start
+npm install
+npx prisma migrate dev --name init
+npm run start
 ```
+
+### Manual Testing
+
+To make trying the service out easier I have provided an insomnia.json. You can try the service out with the [Insomnia](https://insomnia.rest/) tool by importing the insomnia/insomnia.json file in to your insomnia scratchpad. There is no need to make an account to do this.
