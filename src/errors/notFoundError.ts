@@ -1,12 +1,21 @@
+import { ErrorMessageNames, ErrorMessages } from "../constants";
+import { formatMessage } from "../utils";
+
 class NotFoundError implements Error {
-  name: string = "NotFoundError";
+  name: string = ErrorMessageNames.notFoundError;
   message: string = "";
 
   constructor(resource: string, ids: string[]) {
     if (ids.length > 1) {
-      this.message = `The ${resource} with ids ${ids} were not found.`;
+      this.message = formatMessage(ErrorMessages.multipleNotFoundError, {
+        resource,
+        ids: ids.join(","),
+      });
     } else {
-      this.message = `The ${resource} with id ${ids[0]} was not found.`;
+      this.message = formatMessage(ErrorMessages.singleNotFoundError, {
+        resource,
+        id: ids[0],
+      });
     }
   }
 }
