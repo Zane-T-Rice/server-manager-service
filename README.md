@@ -57,11 +57,14 @@ To make trying the service out easier I have provided an insomnia.json. You can 
 
 ### Docker
 
-If you would like to run this in a docker container (I know I do), then feel free to use the example Dockerfile provided in docker/Dockerfile as a guide. You will, at the very least, need to update the `/path/to/server-manager-service` to be the real path to this repository.
+If you would like to run this in a docker container (I know I do), then feel free to use the example Dockerfile provided in docker/Dockerfile as a guide. You will, at the very least, need to update the `/path/to/server-manager-service` in the below run command to be the real path to this repository.
 
 The image can be built and started using these commands from within the directory with the Dockerfile.
 
 ```sh
 docker build -t server-manager-service --no-cache .
-docker run --name=server-manager-service -d -p 3000:3000/tcp -p 3000:3000/udp --restart unless-stopped server-manager-service
+docker run --name=server-manager-service -d \
+  -p 3000:3000/udp -p 3000:3000/tcp \
+  -v /path/to/server-manager-service:/server-manager-service \
+  --restart unless-stopped server-manager-service
 ```

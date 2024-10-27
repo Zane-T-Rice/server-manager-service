@@ -1,12 +1,7 @@
 FROM nixos/nix
 
 RUN nix-channel --update
-RUN nix-env -i git nodejs nodePackages_latest.pnpm nodePackages_latest.vercel nodePackages_latest.prisma openssl
-VOLUME /path/to/server-manager-service:/server-manager-service
-WORKDIR /server-manager-service
-RUN cp .env.default .env
-RUN npm install
-RUN npx prisma migrate dev --name init
+RUN nix-env -iA nixpkgs.git nixpkgs.nodejs nixpkgs.nodePackages_latest.pnpm nixpkgs.nodePackages_latest.vercel nixpkgs.nodePackages_latest.prisma nixpkgs.openssl
 
 EXPOSE 3000/udp
 EXPOSE 3000/tcp
