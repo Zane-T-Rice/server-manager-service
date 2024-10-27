@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import express, { Request, Response } from "express";
-import createError from "http-errors";
+import express, { NextFunction, Request, Response } from "express";
 import logger from "morgan";
-import serversRouter from "./routes/servers";
+import { serversRouter } from "./routes/servers";
+import { InternalServerError } from "./errors";
 dotenv.config();
 
 const app = express();
@@ -15,19 +15,15 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/servers", serversRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
-
 // error handler
-app.use(function (err: Error, req: Request, res: Response) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+  if (err.name === "NotFoundError") {
+    res.status(404).json(err);
+  } else if (err.name == "InternalServerError") {
+    res.status(500).json(err);
+  }
 
-  // render the error page
-  res.status(500).send();
+  res.status(500).json(new InternalServerError());
 });
 
 app.listen(process.env.PORT, () => {});

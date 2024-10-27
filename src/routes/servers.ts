@@ -1,54 +1,81 @@
-import express from "express";
+import { exec as exec2 } from "child_process";
 import { PrismaClient } from "@prisma/client";
+import { promisify } from "util";
+import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
+import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
+const exec = promisify(exec2);
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const wrappedRouter = new ExpressRouterWrapper();
 
 /* POST a new server. */
-router.post("/", async function (req, res) {
+wrappedRouter.post("/", async function (req, res) {
   const { applicationName, containerName } = req.body;
-  const server = await prisma.server.create({
-    data: { applicationName, containerName },
-  });
+  const server = await prisma.server
+    .create({
+      data: { applicationName, containerName },
+    })
+    .catch((e) => handleDatabaseErrors(e, "server", []));
+  res.json(server);
+});
+
+/* POST restart an existing server. */
+wrappedRouter.post("/:id/restart", async (req, res, next) => {
+  const { id } = req.params;
+  const server = await prisma.server
+    .findUnique({ where: { id: String(id) } })
+    .catch((e) => handleDatabaseErrors(e, "server", [id]));
+  await exec(`docker restart ${server?.containerName}`);
   res.json(server);
 });
 
 /* GET all servers. */
-router.get("/", async function (req, res) {
-  const servers = await prisma.server.findMany();
+wrappedRouter.get("/", async function (req, res) {
+  const servers = await prisma.server
+    .findMany()
+    .catch((e) => handleDatabaseErrors(e, "server", []));
   res.json(servers);
 });
 
 /* GET server by id. */
-router.get("/:id", async function (req, res) {
+wrappedRouter.get("/:id", async function (req, res) {
   const { id } = req.params;
-  const servers = await prisma.server.findUnique({ where: { id: String(id) } });
-  res.json(servers);
+  const server = await prisma.server
+    .findUniqueOrThrow({
+      where: { id: String(id) },
+    })
+    .catch((e) => handleDatabaseErrors(e, "server", [id]));
+  res.json(server);
 });
 
 /* PATCH a new server. */
-router.patch("/:id", async function (req, res) {
+wrappedRouter.patch("/:id", async function (req, res) {
   const { id } = req.params;
   const { applicationName, containerName } = req.body;
   const existingServer = await prisma.server.findUnique({
     where: { id: String(id) },
   });
-  const server = await prisma.server.update({
-    data: { ...existingServer, applicationName, containerName },
-    where: { id: String(id) },
-  });
+  const server = await prisma.server
+    .update({
+      data: { ...existingServer, applicationName, containerName },
+      where: { id: String(id) },
+    })
+    .catch((e) => handleDatabaseErrors(e, "server", [id]));
   res.json(server);
 });
 
 /* DELETE an existing server. */
-router.delete("/:id", async function (req, res) {
+wrappedRouter.delete("/:id", async function (req, res) {
   const { id } = req.params;
-  const server = await prisma.server.delete({
-    where: {
-      id: String(id),
-    },
-  });
+  const server = await prisma.server
+    .delete({
+      where: {
+        id: String(id),
+      },
+    })
+    .catch((e) => handleDatabaseErrors(e, "server", [id]));
   res.json(server);
 });
 
-export default router;
+const serversRouter = wrappedRouter.router;
+export { serversRouter };

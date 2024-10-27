@@ -2,7 +2,22 @@
 
 Provides server information and management functions such as stop, start, restart.
 
-### Plans
+### How to Get This Running
 
-Be able to return a list of available servers. (GET /servers) (Done)
-Be able to restart a server. (POST /server/:serverid/restart)
+The first time you start this you will need to do all of the following.
+
+```sh
+  echo "PORT=3000" > .env
+  echo "DATABASE_URL="file:./dev.db"" >> .env
+  npm install
+  npx prisma migrate dev --name init
+  npm run start
+```
+
+After the first time you should only use
+
+```sh
+  npm install
+  npx prisma migrate dev --name init
+  npm run start
+```
