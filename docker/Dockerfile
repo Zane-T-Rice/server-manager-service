@@ -4,7 +4,7 @@ RUN nix-channel --update
 RUN nix-env -i git nodejs nodePackages_latest.pnpm nodePackages_latest.vercel nodePackages_latest.prisma openssl
 VOLUME /path/to/server-manager-service:/server-manager-service
 WORKDIR /server-manager-service
-COPY .env.default .env
+RUN cp .env.default .env
 RUN npm install
 RUN npx prisma migrate dev --name init
 
