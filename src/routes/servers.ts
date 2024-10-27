@@ -1,8 +1,8 @@
 import { exec as exec2 } from "child_process";
-import { PrismaClient } from "@prisma/client";
-import { promisify } from "util";
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
+import { PrismaClient } from "@prisma/client";
+import { promisify } from "util";
 const exec = promisify(exec2);
 
 const prisma = new PrismaClient();
@@ -20,7 +20,7 @@ wrappedRouter.post("/", async function (req, res) {
 });
 
 /* POST restart an existing server. */
-wrappedRouter.post("/:id/restart", async (req, res, next) => {
+wrappedRouter.post("/:id/restart", async (req, res) => {
   const { id } = req.params;
   const server = await prisma.server
     .findUnique({ where: { id: String(id) } })

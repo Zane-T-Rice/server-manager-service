@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
 import express, { NextFunction, Request, Response } from "express";
+import { InternalServerError } from "./errors";
 import logger from "morgan";
 import { serversRouter } from "./routes/servers";
-import { InternalServerError } from "./errors";
 dotenv.config();
 
 const app = express();
@@ -16,14 +16,17 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/servers", serversRouter);
 
 // error handler
+// Even though next is not used, the type needs to match the error handling middleware
+// in order to actually overload it.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
   if (err.name === "NotFoundError") {
     res.status(404).json(err);
   } else if (err.name == "InternalServerError") {
     res.status(500).json(err);
+  } else {
+    res.status(500).json(new InternalServerError());
   }
-
-  res.status(500).json(new InternalServerError());
 });
 
 app.listen(process.env.PORT, () => {});
