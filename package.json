@@ -6,7 +6,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "ts-node src/app.ts",
     "lint": "eslint --fix --max-warnings=0 src/*.ts src/**/*.ts --flag unstable_ts_config",
-    "test": "rm -rf build && npm run build && jest build/ --coverage --verbose --passWithNoTests",
+    "test": "rm -rf build && npm run build && jest --coverage --verbose --passWithNoTests --rootDir build",
     "migrate": "npx prisma migrate dev --name init"
   },
   "dependencies": {
