@@ -19,7 +19,7 @@ Studio                  : 0.502.0
 
 #### If You Are On NixOS Then Put This In Your configuration.nix To Install Prisma
 
-Also works great in home-manager if you use that. You will need to change environment.variables to home.sessionVariables and put the same packages in the home.packages list instead of environment.systemPackages.
+Installing the packages in home-manager also works great if you use that. However, I found that the environment variables did not work in home-manager, so maybe leave those in configuration.nix. This can also all be done using nix-env and/or nix-shell, of course.
 
 ```sh
   environment.systemPackages = with pkgs; [
