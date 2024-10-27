@@ -16,10 +16,10 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/servers", serversRouter);
 
 // error handler
-// Even though next is not used, the type needs to match the error handling middleware
-// in order to actually overload it.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+  console.error(err);
+
   if (err.name === "NotFoundError") {
     res.status(404).json(err);
   } else if (err.name == "InternalServerError") {

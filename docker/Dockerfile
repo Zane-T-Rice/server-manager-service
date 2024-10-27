@@ -1,7 +1,7 @@
 FROM nixos/nix
 
 RUN nix-channel --update
-RUN nix-env -iA nixpkgs.git nixpkgs.nodejs nixpkgs.nodePackages_latest.pnpm nixpkgs.nodePackages_latest.vercel nixpkgs.nodePackages_latest.prisma nixpkgs.openssl
+RUN nix-env -iA nixpkgs.git nixpkgs.nodejs nixpkgs.nodePackages_latest.pnpm nixpkgs.nodePackages_latest.vercel nixpkgs.nodePackages_latest.prisma nixpkgs.openssl nixpkgs.gnused nixpkgs.docker
 
 EXPOSE 3000/udp
 EXPOSE 3000/tcp

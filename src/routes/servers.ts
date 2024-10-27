@@ -25,7 +25,7 @@ wrappedRouter.post("/:id/restart", async (req, res) => {
   const server = await prisma.server
     .findUnique({ where: { id: String(id) } })
     .catch((e) => handleDatabaseErrors(e, "server", [id]));
-  await exec(`docker restart ${server?.containerName}`);
+  await exec(`docker restart '${server?.containerName}'`);
   res.json(server);
 });
 
