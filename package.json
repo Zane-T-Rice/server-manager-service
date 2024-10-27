@@ -17,6 +17,9 @@
     "morgan": "~1.9.1"
   },
   "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/eslint__eslintrc": "^2.1.2",
+    "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/morgan": "^1.9.9",

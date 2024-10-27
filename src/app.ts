@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import createError from "http-errors";
 import logger from "morgan";
 import serversRouter from "./routes/servers";
@@ -21,7 +21,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+app.use(function (err: Error, req: Request, res: Response) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};

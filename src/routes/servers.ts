@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 /* POST a new server. */
-router.post("/", async function (req, res, next) {
+router.post("/", async function (req, res) {
   const { applicationName, containerName } = req.body;
   const server = await prisma.server.create({
     data: { applicationName, containerName },
@@ -14,20 +14,20 @@ router.post("/", async function (req, res, next) {
 });
 
 /* GET all servers. */
-router.get("/", async function (req, res, next) {
+router.get("/", async function (req, res) {
   const servers = await prisma.server.findMany();
   res.json(servers);
 });
 
 /* GET server by id. */
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", async function (req, res) {
   const { id } = req.params;
   const servers = await prisma.server.findUnique({ where: { id: String(id) } });
   res.json(servers);
 });
 
 /* PATCH a new server. */
-router.patch("/:id", async function (req, res, next) {
+router.patch("/:id", async function (req, res) {
   const { id } = req.params;
   const { applicationName, containerName } = req.body;
   const existingServer = await prisma.server.findUnique({
@@ -41,7 +41,7 @@ router.patch("/:id", async function (req, res, next) {
 });
 
 /* DELETE an existing server. */
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", async function (req, res) {
   const { id } = req.params;
   const server = await prisma.server.delete({
     where: {
