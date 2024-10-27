@@ -1,12 +1,12 @@
-require("dotenv").config();
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var logger = require("morgan");
+import * as dotenv from "dotenv";
+import * as path from "path";
+import express, { NextFunction, Request, Response } from "express";
+import createError from "http-errors";
+import logger from "morgan";
+import serversRouter from "./routes/servers";
+dotenv.config();
 
-var serversRouter = require("./routes/servers");
-
-var app = express();
+const app = express();
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -21,15 +21,15 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  console.log(req.app.get("env"));
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  res.status(500).send();
 });
 
-module.exports = app;
+app.listen(process.env.PORT, () => {});
+
+export default app;

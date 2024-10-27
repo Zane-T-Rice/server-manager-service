@@ -1,0 +1,197 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-10-27T01:15:49.850Z",
+  "__export_source": "insomnia.desktop.app:v10.0.0",
+  "resources": [
+    {
+      "_id": "req_ff1c6d4f50864772955ed3e247ccab37",
+      "parentId": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "modified": 1729991206772,
+      "created": 1729989017560,
+      "url": "{{ _['server-manager-service-url'] }}/servers",
+      "name": "servers",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"applicationName\": \"abioticfactor\",\n\t\"containerName\": \"houseofabiotichomies\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "User-Agent", "value": "insomnia/10.0.0" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1729988719081,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "parentId": "wrk_scratchpad",
+      "modified": 1729988712348,
+      "created": 1729988712348,
+      "name": "server-manager-service",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1729988712348,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_scratchpad",
+      "parentId": null,
+      "modified": 1716635192520,
+      "created": 1716635192520,
+      "name": "Scratch Pad",
+      "description": "",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_e10570275adf4be09e9baaf5a01bb3a6",
+      "parentId": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "modified": 1729990447443,
+      "created": 1729988717277,
+      "url": "{{ _['server-manager-service-url'] }}/servers",
+      "name": "servers",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/10.0.0" }],
+      "authentication": {},
+      "metaSortKey": -1729988718981,
+      "isPrivate": false,
+      "pathParameters": [],
+      "afterResponseScript": "",
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_9ef8838d0bef46f4924f01bf479a11ef",
+      "parentId": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "modified": 1729990578237,
+      "created": 1729989639164,
+      "url": "{{ _['server-manager-service-url'] }}/servers/:id",
+      "name": "servers by id",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/10.0.0" }],
+      "authentication": {},
+      "metaSortKey": -1729988713577.5,
+      "isPrivate": false,
+      "pathParameters": [
+        { "name": "id", "value": "{{ _['server-manager-service-server-id'] }}" }
+      ],
+      "afterResponseScript": "",
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_9b85041af4bf419da7f3599898460735",
+      "parentId": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "modified": 1729990353523,
+      "created": 1729989307420,
+      "url": "{{ _['server-manager-service-url'] }}/servers/:id",
+      "name": "servers",
+      "description": "",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"applicationName\": \"valheim\",\n\t\"containerName\": \"oldzanesworld\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "User-Agent", "value": "insomnia/10.0.0" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1729988702770.5,
+      "isPrivate": false,
+      "pathParameters": [
+        { "name": "id", "value": "{{ _['server-manager-service-server-id'] }}" }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_b73cfd5b77d34bda9e91ffac822c07dd",
+      "parentId": "fld_da18ab0cea23439db85adf2482f04fcd",
+      "modified": 1729990417215,
+      "created": 1729990412307,
+      "url": "{{ _['server-manager-service-url'] }}/servers/:id",
+      "name": "servers by id",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [{ "name": "User-Agent", "value": "insomnia/10.0.0" }],
+      "authentication": {},
+      "metaSortKey": -1729988702670.5,
+      "isPrivate": false,
+      "pathParameters": [
+        { "name": "id", "value": "{{ _['server-manager-service-server-id'] }}" }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "env_99d30891da4bdcebc63947a8fc17f076de878684",
+      "parentId": "wrk_scratchpad",
+      "modified": 1729990622538,
+      "created": 1716635231848,
+      "name": "Base Environment",
+      "data": {
+        "server-manager-service-url": "localhost:3000",
+        "server-manager-service-server-id": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["server-manager-service-url", "server-manager-service-server-id"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1716635231848,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_99d30891da4bdcebc63947a8fc17f076de878684",
+      "parentId": "wrk_scratchpad",
+      "modified": 1729990506795,
+      "created": 1716635231851,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    }
+  ]
+}
