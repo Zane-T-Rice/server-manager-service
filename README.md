@@ -69,3 +69,8 @@ docker run --name=server-manager-service -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped server-manager-service
 ```
+
+### To Do
+
+Input validation in controllers.
+Probaby add integration tests. Right now it is all unit tests.

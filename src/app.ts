@@ -3,7 +3,7 @@ import * as path from "path";
 import { appErrorHandler } from "./middlewares/appErrorHandler";
 import express from "express";
 import logger from "morgan";
-import { serversRouter } from "./routes/servers";
+import { serversRouter } from "./routes/serversRoutes";
 dotenv.config();
 
 const app = express();
