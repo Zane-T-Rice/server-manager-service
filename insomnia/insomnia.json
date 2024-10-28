@@ -1,13 +1,13 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2024-10-27T01:24:50.079Z",
+  "__export_date": "2024-10-28T06:11:13.567Z",
   "__export_source": "insomnia.desktop.app:v10.0.0",
   "resources": [
     {
       "_id": "req_16ad96f78e9a46f599d904935ee5fe02",
       "parentId": "fld_c2b3046c63c944ed9cc6ebb369e7d083",
-      "modified": 1729991206772,
+      "modified": 1730023032684,
       "created": 1729989017560,
       "url": "{{ _['server-manager-service-url'] }}/servers",
       "name": "servers",
@@ -15,7 +15,7 @@
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n\t\"applicationName\": \"abioticfactor\",\n\t\"containerName\": \"houseofabiotichomies\"\n}"
+        "text": "{\n\t\"applicationName\": \"server-manager-service\",\n\t\"containerName\": \"server-manager-service\"\n}"
       },
       "parameters": [],
       "headers": [
@@ -37,7 +37,7 @@
     {
       "_id": "fld_c2b3046c63c944ed9cc6ebb369e7d083",
       "parentId": "wrk_scratchpad",
-      "modified": 1729992278573,
+      "modified": 1730091443026,
       "created": 1729988712348,
       "name": "server-manager-service",
       "description": "",
@@ -60,6 +60,35 @@
       "description": "",
       "scope": "collection",
       "_type": "workspace"
+    },
+    {
+      "_id": "req_9942eba8caf14be6981f261310c179e3",
+      "parentId": "fld_c2b3046c63c944ed9cc6ebb369e7d083",
+      "modified": 1729994546615,
+      "created": 1729994445453,
+      "url": "{{ _['server-manager-service-url'] }}/servers/:id/restart",
+      "name": "restart servers by id",
+      "description": "",
+      "method": "POST",
+      "body": { "mimeType": "application/json", "text": "{}" },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "User-Agent", "value": "insomnia/10.0.0" }
+      ],
+      "authentication": {},
+      "metaSortKey": -1729988719031,
+      "isPrivate": false,
+      "pathParameters": [
+        { "name": "id", "value": "{{ _['server-manager-service-server-id'] }}" }
+      ],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
     },
     {
       "_id": "req_82bdcd8b7cfb45f2b48f5514c31ca48b",
@@ -116,7 +145,7 @@
     {
       "_id": "req_17d2d795104e417bb141126d8805a5a1",
       "parentId": "fld_c2b3046c63c944ed9cc6ebb369e7d083",
-      "modified": 1729990353523,
+      "modified": 1730089173975,
       "created": 1729989307420,
       "url": "{{ _['server-manager-service-url'] }}/servers/:id",
       "name": "servers",
