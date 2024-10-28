@@ -80,6 +80,12 @@ When running this service in docker the node_modules/, package-lock.json, and ge
 sudo chown $USER:users -R prisma node_modules package-lock.json
 ```
 
+I've also noticed git-hooks can end up looking for the server-manager-service directory in /server-manager-service (which is where it will be in the container). You can make a symlink at /server-manager-service to fix it.
+
+```sh
+sudo ln -snf $PWD /server-manager-service
+```
+
 ### To Do
 
 Input validation in controllers.
