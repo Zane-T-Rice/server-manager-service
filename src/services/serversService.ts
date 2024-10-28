@@ -6,10 +6,15 @@ import { promisify } from "util";
 const exec = promisify(exec2);
 
 class ServersService {
+  static instance: ServersService;
   prisma: PrismaClient;
 
   constructor(prisma?: PrismaClient) {
-    this.prisma = prisma ?? new PrismaClient();
+    ServersService.instance = ServersService.instance ?? this;
+    ServersService.instance.prisma =
+      ServersService.instance.prisma ?? prisma ?? new PrismaClient();
+    this.prisma = ServersService.instance.prisma; // Effectively initializes PrismaClient as a singleton.
+    return ServersService.instance;
   }
 
   /* POST a new server. */

@@ -16,7 +16,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/servers", serversRouter);
 
 // error handler
-
 app.use(appErrorHandler);
 
 app.listen(process.env.PORT, () => {});

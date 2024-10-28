@@ -65,10 +65,19 @@ describe("ServersService", () => {
       .mockResolvedValue(mockServerRecord);
   });
 
-  it("should use passed in prisma client", () => {
+  it("should use passed in prisma client if no prisma client is set", () => {
+    // @ts-ignore
+    ServersService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const serversService2 = new ServersService(prisma);
     expect(serversService2.prisma).toEqual(prisma);
+  });
+
+  it("should use existing prisma client even if another is passed in", () => {
+    const currentPrisma = ServersService.instance.prisma;
+    const prisma = new PrismaClient();
+    const serversService2 = new ServersService(prisma);
+    expect(serversService2.prisma).toEqual(currentPrisma);
   });
 
   describe("POST /", () => {

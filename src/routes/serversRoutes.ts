@@ -4,25 +4,25 @@ import { ServersController } from "../controllers";
 
 const prisma = new PrismaClient();
 const wrappedRouter = new ExpressRouterWrapper();
-const serversController = new ServersController(prisma);
+new ServersController(prisma); // Initialize ServersController singleton
 
 /* POST a new server. */
-wrappedRouter.post("/", serversController.createServer);
+wrappedRouter.post("/", ServersController.instance.createServer);
 
 /* POST restart an existing server. */
-wrappedRouter.post("/:id/restart", serversController.createServer);
+wrappedRouter.post("/:id/restart", ServersController.instance.restartServer);
 
 /* GET all servers. */
-wrappedRouter.get("/", serversController.createServer);
+wrappedRouter.get("/", ServersController.instance.getServers);
 
 /* GET server by id. */
-wrappedRouter.get("/:id", serversController.createServer);
+wrappedRouter.get("/:id", ServersController.instance.getServerById);
 
 /* PATCH a new server. */
-wrappedRouter.patch("/:id", serversController.createServer);
+wrappedRouter.patch("/:id", ServersController.instance.patchServer);
 
 /* DELETE an existing server. */
-wrappedRouter.delete("/:id", serversController.createServer);
+wrappedRouter.delete("/:id", ServersController.instance.deleteServer);
 
 const serversRouter = wrappedRouter.router;
 export { serversRouter, wrappedRouter };
