@@ -88,6 +88,6 @@ sudo ln -snf $PWD /server-manager-service
 
 ### To Do
 
-Input validation in controllers.
-Probaby add integration tests. Right now it is all unit tests.
-Maybe use faker or something similar in tests.
+- Input validation in controllers.
+- Probaby add integration tests. Right now it is all unit tests.
+- Maybe use faker or something similar in tests.
