@@ -74,3 +74,4 @@ docker run --name=server-manager-service -d \
 
 Input validation in controllers.
 Probaby add integration tests. Right now it is all unit tests.
+Maybe use faker or something similar in tests.

@@ -1,5 +1,5 @@
-import { exec as exec2 } from "child_process";
 import { Request, Response } from "express";
+import { exec as exec2 } from "child_process";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
@@ -8,7 +8,7 @@ const exec = promisify(exec2);
 class ServersService {
   prisma: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma?: PrismaClient) {
     this.prisma = prisma ?? new PrismaClient();
   }
 
@@ -27,7 +27,7 @@ class ServersService {
   async restartServer(req: Request, res: Response) {
     const { id } = req.params;
     const server = await this.prisma.server
-      .findUnique({ where: { id: String(id) } })
+      .findUniqueOrThrow({ where: { id: String(id) } })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     await exec(`docker restart '${server?.containerName}'`);
     res.json(server);
@@ -56,12 +56,9 @@ class ServersService {
   async patchServer(req: Request, res: Response) {
     const { id } = req.params;
     const { applicationName, containerName } = req.body;
-    const existingServer = await this.prisma.server.findUnique({
-      where: { id: String(id) },
-    });
     const server = await this.prisma.server
       .update({
-        data: { ...existingServer, applicationName, containerName },
+        data: { applicationName, containerName },
         where: { id: String(id) },
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));

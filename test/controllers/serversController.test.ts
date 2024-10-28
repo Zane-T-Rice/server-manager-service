@@ -18,8 +18,8 @@ describe("ServersController", () => {
   });
 
   describe("createServer", () => {
-    it("should call createServer in ServersService", () => {
-      serversController.createServer(req, res);
+    it("should call createServer in ServersService", async () => {
+      await serversController.createServer(req, res);
       expect(
         serversController.serversService.createServer
       ).toHaveBeenCalledWith(req, res);
@@ -27,8 +27,8 @@ describe("ServersController", () => {
   });
 
   describe("restartServer", () => {
-    it("should call restartServer in ServersService", () => {
-      serversController.restartServer(req, res);
+    it("should call restartServer in ServersService", async () => {
+      await serversController.restartServer(req, res);
       expect(
         serversController.serversService.restartServer
       ).toHaveBeenCalledWith(req, res);
@@ -36,8 +36,8 @@ describe("ServersController", () => {
   });
 
   describe("getServers", () => {
-    it("should call getServers in ServersService", () => {
-      serversController.getServers(req, res);
+    it("should call getServers in ServersService", async () => {
+      await serversController.getServers(req, res);
       expect(serversController.serversService.getServers).toHaveBeenCalledWith(
         req,
         res
@@ -46,8 +46,8 @@ describe("ServersController", () => {
   });
 
   describe("getServerById", () => {
-    it("should call getServerById in ServersService", () => {
-      serversController.getServerById(req, res);
+    it("should call getServerById in ServersService", async () => {
+      await serversController.getServerById(req, res);
       expect(
         serversController.serversService.getServerById
       ).toHaveBeenCalledWith(req, res);
@@ -55,8 +55,8 @@ describe("ServersController", () => {
   });
 
   describe("patchServer", () => {
-    it("should call patchServer in ServersService", () => {
-      serversController.patchServer(req, res);
+    it("should call patchServer in ServersService", async () => {
+      await serversController.patchServer(req, res);
       expect(serversController.serversService.patchServer).toHaveBeenCalledWith(
         req,
         res
@@ -65,8 +65,8 @@ describe("ServersController", () => {
   });
 
   describe("deleteServer", () => {
-    it("should call deleteServer in ServersService", () => {
-      serversController.deleteServer(req, res);
+    it("should call deleteServer in ServersService", async () => {
+      await serversController.deleteServer(req, res);
       expect(
         serversController.serversService.deleteServer
       ).toHaveBeenCalledWith(req, res);

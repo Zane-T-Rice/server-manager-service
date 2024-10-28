@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { ServersService } from "../services";
 import { PrismaClient } from "@prisma/client";
+import { ServersService } from "../services";
 
 class ServersController {
   serversService: ServersService;
