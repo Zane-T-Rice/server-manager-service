@@ -74,10 +74,10 @@ docker run --name=server-manager-service -d \
   --restart unless-stopped server-manager-service
 ```
 
-When running this service in docker the node_modules/, package-lock.json, and generated files in prism/ will belong to root:root. If this is ever annoying you can change the owner by using this command or one like it.
+When running this service in docker the node_modules/, package-lock.json, .env, and generated files in prism/ will belong to root:root. If this is ever annoying you can change the owner by using this command or one like it.
 
 ```sh
-sudo chown $USER:users -R prisma node_modules package-lock.json
+sudo chown "$USER":users -R prisma node_modules package-lock.json .env
 ```
 
 I've also noticed git-hooks can end up looking for the server-manager-service directory in /server-manager-service (which is where it will be in the container). You can make a symlink at /server-manager-service to fix it.
