@@ -1,6 +1,10 @@
 # server-manager-service
 
-Provides server information and management functions such as stop, start, restart.
+Provides server information and management functions such as restart.
+The intent is not to call docker commands for information about the containers, but to have that information stored in this service by a user through REST APIs.
+The interface with docker is just to restart the containers, but theoretically it could be used with something other than docker with minimal code changes.
+
+In other words, this service should exist independently of docker, but happens to be able to run `docker restart` with the names of the containers that it has stored.
 
 ### Requirements
 
@@ -68,6 +72,12 @@ docker run --name=server-manager-service -d \
   -v /path/to/server-manager-service:/server-manager-service \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped server-manager-service
+```
+
+When running this service in docker the node_modules/, package-lock.json, and generated files in prism/ will belong to root:root. If this is ever annoying you can change the owner by using this command or one like it.
+
+```sh
+sudo chown $USER:users -R prisma node_modules package-lock.json
 ```
 
 ### To Do
