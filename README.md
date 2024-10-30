@@ -41,11 +41,10 @@ Installing the packages in home-manager also works great if you use that. Howeve
 
 ### How to Get This Running
 
-The first time you start this you will need to copy .env.default over to .env. Set HOST to the appropriate value. For local development, you would probably use localhost, but when this is deployed you would want to use the deployment server's IP.
+The first time you start this you will need to copy .env.default over to .env. Make sure HOST is set to the appropriate value. For local development, you would probably use localhost (the default), but when this is deployed you would want to use the deployment server's IP.
 
 ```sh
 cp .env.default .env
-sed -i "s/HOST=/HOST=localhost/" .env
 ```
 
 The service can be setup and started like this.
