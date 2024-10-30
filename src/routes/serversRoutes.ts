@@ -25,4 +25,4 @@ wrappedRouter.patch("/:id", ServersController.instance.patchServer);
 wrappedRouter.delete("/:id", ServersController.instance.deleteServer);
 
 const serversRouter = wrappedRouter.router;
-export { serversRouter, wrappedRouter };
+export { serversRouter, wrappedRouter as wrappedServersRouter };

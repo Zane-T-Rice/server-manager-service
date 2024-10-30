@@ -3,7 +3,7 @@ import * as path from "path";
 import { appErrorHandler } from "./middlewares/appErrorHandler";
 import express from "express";
 import logger from "morgan";
-import { serversRouter } from "./routes/serversRoutes";
+import { portsRouter, serversRouter } from "./routes";
 dotenv.config();
 
 const app = express();
@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/servers", serversRouter);
+app.use("/servers/:serverId/ports", portsRouter);
 
 // error handler
 app.use(appErrorHandler);
