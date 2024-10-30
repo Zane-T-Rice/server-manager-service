@@ -23,7 +23,7 @@ const indexContent = fs
   .toString()
   .replace(
     /https:\/\/petstore.swagger.io\/.*\/swagger.(json|yaml)/,
-    `http://localhost:${process.env.PORT}/swagger-files/serverManagerService.yaml`
+    `http://${process.env.HOST}:${process.env.PORT}/swagger-files/serverManagerService.yaml`
   );
 app.get(`${swaggerRoutePath}/swagger-initializer.js`, (req, res) => {
   res.send(indexContent);
