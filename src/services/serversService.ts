@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { exec as exec2 } from "child_process";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
+import { PortsService } from "./portsService";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
-import { PortsService } from "./portsService";
 const exec = promisify(exec2);
 
 class ServersService {

@@ -1,10 +1,10 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
+import { portsRouter, serversRouter } from "./routes";
 import { appErrorHandler } from "./middlewares/appErrorHandler";
 import express from "express";
 import logger from "morgan";
-import { portsRouter, serversRouter } from "./routes";
 import path from "path";
 dotenv.config();
 
