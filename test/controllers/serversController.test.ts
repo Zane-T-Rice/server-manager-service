@@ -4,7 +4,6 @@ import { Request, Response } from "express";
 import { ServersService } from "../../src/services";
 jest.mock("@prisma/client");
 jest.mock("../../src/services/serversService");
-jest.mock("../../src/services/serversService");
 
 describe("ServersController", () => {
   const req: Request = jest.fn() as unknown as Request;
@@ -22,7 +21,7 @@ describe("ServersController", () => {
 
   it("should use passed in prisma client", () => {
     const prisma = new PrismaClient();
-    const serversController2 = new ServersController(prisma);
+    new ServersController(prisma);
     expect(ServersService).toHaveBeenCalledWith(prisma);
   });
 

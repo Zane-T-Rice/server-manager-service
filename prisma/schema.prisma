@@ -27,6 +27,8 @@ model Port {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   number Int
   protocol String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Volume {
@@ -35,6 +37,8 @@ model Volume {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   hostPath String
   containerPath String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EnvironmentVariable {
@@ -43,4 +47,6 @@ model EnvironmentVariable {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   name String
   value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
