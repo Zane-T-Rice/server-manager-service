@@ -7,8 +7,6 @@ info:
 externalDocs:
   description: GitHub
   url: https://github.com/Zane-T-Rice/server-manager-service
-servers:
-  - url: http://localhost:3000
 tags:
   - name: servers
     description: The root of managing and configuring your Servers
