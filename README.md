@@ -59,6 +59,14 @@ npm run start
 
 To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see the API spec as well as use the APIs.
 
+#### Local Testing
+
+I have found this command to be useful to reset my local database during development where things can get pretty messy. Always make sure your final migrations will actually apply to the database in higher environments without a reset though, because you don't want to block your deployment pipeline or lose all your data in those environments.
+
+```sh
+npx prisma db push --force-reset
+```
+
 ### Docker
 
 If you would like to run this in a docker container (I know I do), then feel free to use the example Dockerfile provided in docker/Dockerfile as a guide. You will, at the very least, need to update the `/path/to/server-manager-service` in the below run command to be the real path to this repository.
