@@ -1,0 +1,7 @@
+description: id of the Server
+name: serverId
+in: path
+required: true
+schema:
+  type: string
+  format: uuid

@@ -1,0 +1,13 @@
+required:
+  - id
+  - number
+  - protocol
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  number:
+    type: number
+  protocol:
+    type: string

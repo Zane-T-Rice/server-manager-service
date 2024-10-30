@@ -1,0 +1,9 @@
+required:
+  - applicationName
+  - containerName
+type: object
+properties:
+  applicationName:
+    type: string
+  containerName:
+    type: string

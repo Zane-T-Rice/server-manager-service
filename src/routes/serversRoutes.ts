@@ -18,6 +18,12 @@ wrappedRouter.get("/", ServersController.instance.getServers);
 /* GET server by id. */
 wrappedRouter.get("/:id", ServersController.instance.getServerById);
 
+/* GET complete server by id. */
+wrappedRouter.get(
+  "/:id/complete",
+  ServersController.instance.getCompleteServerById
+);
+
 /* PATCH a new server. */
 wrappedRouter.patch("/:id", ServersController.instance.patchServer);
 

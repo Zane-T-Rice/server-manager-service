@@ -1,0 +1,5 @@
+description: "The Port could not be found."
+content:
+  application/json:
+    schema:
+      $ref: "./portNotFoundErrorSchema.yaml"

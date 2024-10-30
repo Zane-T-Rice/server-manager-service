@@ -7,19 +7,22 @@ const wrappedRouter = new ExpressRouterWrapper();
 new PortsController(prisma); // Initialize PortsController singleton
 
 /* POST a new port. */
-wrappedRouter.post("/", PortsController.instance.createPort);
+wrappedRouter.post("/:serverId/ports", PortsController.instance.createPort);
 
 /* GET all ports. */
-wrappedRouter.get("/", PortsController.instance.getPorts);
+wrappedRouter.get("/:serverId/ports", PortsController.instance.getPorts);
 
 /* GET port by id. */
-wrappedRouter.get("/:id", PortsController.instance.getPortById);
+wrappedRouter.get("/:serverId/ports/:id", PortsController.instance.getPortById);
 
 /* PATCH a new port. */
-wrappedRouter.patch("/:id", PortsController.instance.patchPort);
+wrappedRouter.patch("/:serverId/ports/:id", PortsController.instance.patchPort);
 
 /* DELETE an existing port. */
-wrappedRouter.delete("/:id", PortsController.instance.deletePort);
+wrappedRouter.delete(
+  "/:serverId/ports/:id",
+  PortsController.instance.deletePort
+);
 
 const portsRouter = wrappedRouter.router;
 export { portsRouter, wrappedRouter as wrappedPortsRouter };

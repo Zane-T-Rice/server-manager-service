@@ -1,0 +1,5 @@
+description: "The Server could not be found."
+content:
+  application/json:
+    schema:
+      $ref: "./serverNotFoundErrorSchema.yaml"

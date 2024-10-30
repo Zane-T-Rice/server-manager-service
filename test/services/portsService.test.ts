@@ -84,7 +84,7 @@ describe("PortsService", () => {
           ...commonParams,
           ...body,
         },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
     });
@@ -103,7 +103,7 @@ describe("PortsService", () => {
           ...body,
           ...commonParams,
         },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -145,7 +145,7 @@ describe("PortsService", () => {
       await portsService.getPortById(req, res);
       expect(portsService.prisma.port.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
     });
@@ -161,7 +161,7 @@ describe("PortsService", () => {
       }
       expect(portsService.prisma.port.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -178,7 +178,7 @@ describe("PortsService", () => {
       expect(portsService.prisma.port.update).toHaveBeenCalledWith({
         data: { ...body },
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
     });
@@ -195,7 +195,7 @@ describe("PortsService", () => {
       expect(portsService.prisma.port.update).toHaveBeenCalledWith({
         data: { ...body },
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -211,7 +211,7 @@ describe("PortsService", () => {
       await portsService.deletePort(req, res);
       expect(portsService.prisma.port.delete).toHaveBeenCalledWith({
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
     });
@@ -227,7 +227,7 @@ describe("PortsService", () => {
       }
       expect(portsService.prisma.port.delete).toHaveBeenCalledWith({
         where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
-        select: portsService.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),

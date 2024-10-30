@@ -1,0 +1,8 @@
+type: object
+properties:
+  description:
+    type: string
+    example: "InternalServerError"
+  message:
+    type: string
+    example: "Your request cannot be processed at this time. The server may be having a bad day."

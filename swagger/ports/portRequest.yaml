@@ -1,0 +1,5 @@
+description: Create a new port
+content:
+  application/json:
+    schema:
+      $ref: "./portRequestSchema.yaml"

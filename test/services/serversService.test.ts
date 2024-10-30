@@ -1,5 +1,5 @@
 import * as child_process from "child_process";
-import { ServersService } from "../../src/services";
+import { PortsService, ServersService } from "../../src/services";
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
@@ -85,7 +85,7 @@ describe("ServersService", () => {
       await serversService.createServer(req, res);
       expect(serversService.prisma.server.create).toHaveBeenCalledWith({
         data: body,
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
     });
@@ -101,7 +101,7 @@ describe("ServersService", () => {
       }
       expect(serversService.prisma.server.create).toHaveBeenCalledWith({
         data: body,
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -119,7 +119,7 @@ describe("ServersService", () => {
         serversService.prisma.server.findUniqueOrThrow
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
         `docker restart '${mockServerRecord.containerName}'`,
@@ -141,7 +141,7 @@ describe("ServersService", () => {
         serversService.prisma.server.findUniqueOrThrow
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -185,7 +185,7 @@ describe("ServersService", () => {
         serversService.prisma.server.findUniqueOrThrow
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
     });
@@ -203,7 +203,53 @@ describe("ServersService", () => {
         serversService.prisma.server.findUniqueOrThrow
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
+      });
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [mockServerRecord.id]
+      );
+      expect(res.json).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("GET /:id/complete", () => {
+    it("Should return complete server", async () => {
+      await serversService.getCompleteServerById(req, res);
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: { id: mockServerRecord.id },
+        select: {
+          ...ServersService.defaultServerSelect,
+          ports: {
+            select: PortsService.defaultPortSelect,
+          },
+        },
+      });
+      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+    });
+    it("should handle any database errors", async () => {
+      expect.assertions(4);
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockRejectedValue(new Error());
+      try {
+        await serversService.getCompleteServerById(req, res);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: { id: mockServerRecord.id },
+        select: {
+          ...ServersService.defaultServerSelect,
+          ports: {
+            select: PortsService.defaultPortSelect,
+          },
+        },
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -220,7 +266,7 @@ describe("ServersService", () => {
       expect(serversService.prisma.server.update).toHaveBeenCalledWith({
         data: { ...body },
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
     });
@@ -237,7 +283,7 @@ describe("ServersService", () => {
       expect(serversService.prisma.server.update).toHaveBeenCalledWith({
         data: { ...body },
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
@@ -253,7 +299,7 @@ describe("ServersService", () => {
       await serversService.deleteServer(req, res);
       expect(serversService.prisma.server.delete).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
     });
@@ -269,7 +315,7 @@ describe("ServersService", () => {
       }
       expect(serversService.prisma.server.delete).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
-        select: serversService.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),

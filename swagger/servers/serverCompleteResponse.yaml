@@ -1,0 +1,12 @@
+description: Success
+content:
+  application/json:
+    schema:
+      allOf:
+        - type: object
+          properties:
+            ports:
+              type: array
+              items:
+                $ref: "../ports/portResponseSchema.yaml"
+        - $ref: "./serverResponseSchema.yaml"

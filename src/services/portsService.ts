@@ -6,7 +6,7 @@ class PortsService {
   static instance: PortsService;
   prisma: PrismaClient;
 
-  defaultPortSelect = {
+  static defaultPortSelect = {
     id: true,
     number: true,
     protocol: true,
@@ -31,7 +31,7 @@ class PortsService {
           number,
           protocol,
         },
-        select: this.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", []));
     res.json(port);
@@ -43,7 +43,7 @@ class PortsService {
     const ports = await this.prisma.port
       .findMany({
         where: { serverId: String(serverId) },
-        select: this.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", []));
     res.json(ports);
@@ -55,7 +55,7 @@ class PortsService {
     const port = await this.prisma.port
       .findUniqueOrThrow({
         where: { id: String(id), serverId: String(serverId) },
-        select: this.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", [id]));
     res.json(port);
@@ -72,7 +72,7 @@ class PortsService {
           number,
           protocol,
         },
-        select: this.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", [id]));
     res.json(port);
@@ -84,7 +84,7 @@ class PortsService {
     const port = await this.prisma.port
       .delete({
         where: { id: String(id), serverId: String(serverId) },
-        select: this.defaultPortSelect,
+        select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", [id]));
     res.json(port);

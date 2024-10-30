@@ -57,7 +57,7 @@ npm run start
 
 ### Manual Testing
 
-To make trying the service out easier I have provided an insomnia.json. You can try the service out with the [Insomnia](https://insomnia.rest/) tool by importing the insomnia/insomnia.json file in to your insomnia scratchpad. There is no need to make an account to do this.
+To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see the API spec as well as use the APIs.
 
 ### Docker
 
@@ -90,5 +90,3 @@ sudo ln -snf $PWD /server-manager-service
 
 - Input validation in controllers.
 - Probaby add integration tests. Right now it is all unit tests.
-- Maybe use faker or something similar in tests.
-- Maybe auto-generate Swagger instead of exporting the Insomnia file

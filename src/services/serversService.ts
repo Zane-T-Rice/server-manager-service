@@ -3,13 +3,14 @@ import { exec as exec2 } from "child_process";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
+import { PortsService } from "./portsService";
 const exec = promisify(exec2);
 
 class ServersService {
   static instance: ServersService;
   prisma: PrismaClient;
 
-  defaultServerSelect = {
+  static defaultServerSelect = {
     id: true,
     applicationName: true,
     containerName: true,
@@ -32,7 +33,7 @@ class ServersService {
           applicationName,
           containerName,
         },
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", []));
     res.json(server);
@@ -44,7 +45,7 @@ class ServersService {
     const server = await this.prisma.server
       .findUniqueOrThrow({
         where: { id: String(id) },
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     await exec(`docker restart '${server?.containerName}'`);
@@ -55,7 +56,7 @@ class ServersService {
   async getServers(req: Request, res: Response) {
     const servers = await this.prisma.server
       .findMany({
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", []));
     res.json(servers);
@@ -67,7 +68,24 @@ class ServersService {
     const server = await this.prisma.server
       .findUniqueOrThrow({
         where: { id: String(id) },
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
+      })
+      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+    res.json(server);
+  }
+
+  /* GET complete server by id. */
+  async getCompleteServerById(req: Request, res: Response) {
+    const { id } = req.params;
+    const server = await this.prisma.server
+      .findUniqueOrThrow({
+        where: { id: String(id) },
+        select: {
+          ...ServersService.defaultServerSelect,
+          ports: {
+            select: PortsService.defaultPortSelect,
+          },
+        },
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);
@@ -84,7 +102,7 @@ class ServersService {
           applicationName,
           containerName,
         },
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);
@@ -98,7 +116,7 @@ class ServersService {
         where: {
           id: String(id),
         },
-        select: this.defaultServerSelect,
+        select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);

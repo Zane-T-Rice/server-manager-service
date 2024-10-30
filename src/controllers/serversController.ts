@@ -31,6 +31,11 @@ class ServersController {
     await ServersService.instance.getServerById(req, res);
   }
 
+  /* GET complete server by id. */
+  async getCompleteServerById(req: Request, res: Response) {
+    await ServersService.instance.getCompleteServerById(req, res);
+  }
+
   /* PATCH a new server. */
   async patchServer(req: Request, res: Response) {
     await ServersService.instance.patchServer(req, res);

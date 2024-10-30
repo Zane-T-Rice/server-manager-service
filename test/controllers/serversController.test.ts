@@ -15,6 +15,7 @@ describe("ServersController", () => {
     restartServer: jest.fn(),
     getServers: jest.fn(),
     getServerById: jest.fn(),
+    getCompleteServerById: jest.fn(),
     patchServer: jest.fn(),
     deleteServer: jest.fn(),
   };
@@ -59,6 +60,15 @@ describe("ServersController", () => {
         req,
         res
       );
+    });
+  });
+
+  describe("getCompleteServerById", () => {
+    it("should call getCompleteServerById in ServersService", async () => {
+      await serversController.getCompleteServerById(req, res);
+      expect(
+        ServersService.instance.getCompleteServerById
+      ).toHaveBeenCalledWith(req, res);
     });
   });
 

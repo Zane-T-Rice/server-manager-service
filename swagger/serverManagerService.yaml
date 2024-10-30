@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Server Manager Service
+  description: |-
+    Define and control your servers with these routes.
+  version: 0.1.0
+externalDocs:
+  description: GitHub
+  url: https://github.com/Zane-T-Rice/server-manager-service
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: servers
+    description: The root of managing and configuring your Servers
+  - name: ports
+    description: Manage a Server's Ports
+paths:
+  /servers:
+    get:
+      tags:
+        - servers
+      summary: Get all Servers
+      operationId: getServers
+      responses:
+        "200":
+          $ref: "./servers/serverArrayResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    post:
+      tags:
+        - servers
+      summary: Create a new server
+      operationId: createServer
+      requestBody:
+        $ref: "./servers/serverRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/restart:
+    post:
+      tags:
+        - servers
+      summary: Restart a Server by id
+      operationId: restartServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}:
+    get:
+      tags:
+        - servers
+      summary: Get a Server by id
+      operationId: getServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - servers
+      summary: Update a Server by id
+      operationId: patchServer
+      requestBody:
+        $ref: "./servers/serverRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - servers
+      summary: Delete a server by id
+      operationId: deleteServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
+  /servers/{serverId}/complete:
+    get:
+      tags:
+        - servers
+      summary: Get a complete Server by id
+      description: A complete Server will have all related resources hydrated on to the response.
+      operationId: getServerComplete
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverCompleteResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/ports:
+    post:
+      tags:
+        - ports
+      summary: Create a new port
+      operationId: createPort
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      requestBody:
+        $ref: "./ports/portRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./ports/portResponse.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - ports
+      summary: Get Ports of Server
+      operationId: getPorts
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./ports/portArrayResponse.yaml"
+        "404":
+          $ref: "./ports/errors/portNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/ports/{portId}:
+    get:
+      tags:
+        - ports
+      summary: Get a Port by id
+      operationId: getPort
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/portIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./ports/portResponse.yaml"
+        "404":
+          $ref: "./ports/errors/portNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - ports
+      summary: Update a Port by id
+      operationId: patchPort
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/portIdInPath.yaml"
+      requestBody:
+        $ref: "./ports/portRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./ports/portResponse.yaml"
+        "404":
+          $ref: "./ports/errors/portNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - ports
+      summary: Delete a port by id
+      operationId: deletePort
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/portIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./ports/portResponse.yaml"
+        "404":
+          $ref: "./ports/errors/portNotFoundError.yaml"

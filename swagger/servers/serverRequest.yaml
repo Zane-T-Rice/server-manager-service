@@ -1,0 +1,5 @@
+description: Create a new server
+content:
+  application/json:
+    schema:
+      $ref: "./serverRequestSchema.yaml"
