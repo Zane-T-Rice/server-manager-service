@@ -9,6 +9,12 @@ class ServersService {
   static instance: ServersService;
   prisma: PrismaClient;
 
+  defaultServerSelect = {
+    id: true,
+    applicationName: true,
+    containerName: true,
+  };
+
   constructor(prisma?: PrismaClient) {
     ServersService.instance = ServersService.instance ?? this;
     ServersService.instance.prisma =
@@ -22,7 +28,11 @@ class ServersService {
     const { applicationName, containerName } = req.body;
     const server = await this.prisma.server
       .create({
-        data: { applicationName, containerName },
+        data: {
+          applicationName,
+          containerName,
+        },
+        select: this.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", []));
     res.json(server);
@@ -32,7 +42,10 @@ class ServersService {
   async restartServer(req: Request, res: Response) {
     const { id } = req.params;
     const server = await this.prisma.server
-      .findUniqueOrThrow({ where: { id: String(id) } })
+      .findUniqueOrThrow({
+        where: { id: String(id) },
+        select: this.defaultServerSelect,
+      })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     await exec(`docker restart '${server?.containerName}'`);
     res.json(server);
@@ -41,7 +54,9 @@ class ServersService {
   /* GET all servers. */
   async getServers(req: Request, res: Response) {
     const servers = await this.prisma.server
-      .findMany()
+      .findMany({
+        select: this.defaultServerSelect,
+      })
       .catch((e) => handleDatabaseErrors(e, "server", []));
     res.json(servers);
   }
@@ -52,6 +67,7 @@ class ServersService {
     const server = await this.prisma.server
       .findUniqueOrThrow({
         where: { id: String(id) },
+        select: this.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);
@@ -63,8 +79,12 @@ class ServersService {
     const { applicationName, containerName } = req.body;
     const server = await this.prisma.server
       .update({
-        data: { applicationName, containerName },
         where: { id: String(id) },
+        data: {
+          applicationName,
+          containerName,
+        },
+        select: this.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);
@@ -78,6 +98,7 @@ class ServersService {
         where: {
           id: String(id),
         },
+        select: this.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);

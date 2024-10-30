@@ -2,9 +2,9 @@
 
 Provides server information and management functions such as restart.
 The intent is not to call docker commands for information about the containers, but to have that information stored in this service by a user through REST APIs.
-The interface with docker is just to restart the containers, but theoretically it could be used with something other than docker with minimal code changes.
+The interface with docker is exists, but theoretically it could be used with something other than docker with minimal code changes.
 
-In other words, this service should exist independently of docker, but happens to be able to run `docker restart` with the names of the containers that it has stored.
+In other words, this service should exist independently of docker, but happens to be able to run docker commands with the data about the servers that it has stored.
 
 ### Requirements
 
