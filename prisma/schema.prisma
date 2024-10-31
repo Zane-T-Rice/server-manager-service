@@ -17,6 +17,7 @@ model Server {
   ports Port[]
   volumes Volume[]
   environmentVariables EnvironmentVariable[]
+  files File[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -47,6 +48,15 @@ model EnvironmentVariable {
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   name String
   value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id String @id @default(uuid())
+  serverId String // FK of server which owns this record.
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  content String // The content of the file as a plain string.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
