@@ -16,20 +16,10 @@ tags:
     description: Manage a Server's Volumes
   - name: environmentVariables
     description: Manage a Server's EnvironmentVariables
+  - name: files
+    description: Manage a Server's build Files
 paths:
   /servers:
-    get:
-      tags:
-        - servers
-      summary: Get all Servers
-      operationId: getServers
-      responses:
-        "200":
-          $ref: "./servers/serverArrayResponse.yaml"
-        "404":
-          $ref: "./servers/errors/serverNotFoundError.yaml"
-        "500":
-          $ref: "./common/errors/internalServerError.yaml"
     post:
       tags:
         - servers
@@ -43,17 +33,14 @@ paths:
           $ref: "./servers/serverResponse.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/restart:
-    post:
+    get:
       tags:
         - servers
-      summary: Restart a Server by id
-      operationId: restartServer
-      parameters:
-        - $ref: "./common/serverIdInPath.yaml"
+      summary: Get all Servers
+      operationId: getServers
       responses:
         "200":
-          $ref: "./servers/serverResponse.yaml"
+          $ref: "./servers/serverArrayResponse.yaml"
         "404":
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
@@ -112,6 +99,21 @@ paths:
       responses:
         "200":
           $ref: "./servers/serverCompleteResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/restart:
+    post:
+      tags:
+        - servers
+      summary: Restart a Server by id
+      operationId: restartServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverResponse.yaml"
         "404":
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
@@ -347,3 +349,80 @@ paths:
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
         "404":
           $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
+  /servers/{serverId}/files:
+    post:
+      tags:
+        - files
+      summary: Create a new file
+      operationId: createFile
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      requestBody:
+        $ref: "./files/fileRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./files/fileResponse.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - files
+      summary: Get Files of Server
+      operationId: getFiles
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./files/fileArrayResponse.yaml"
+        "404":
+          $ref: "./files/errors/fileNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/files/{fileId}:
+    get:
+      tags:
+        - files
+      summary: Get a File by id
+      operationId: getFile
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/fileIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./files/fileResponse.yaml"
+        "404":
+          $ref: "./files/errors/fileNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - files
+      summary: Update a File by id
+      operationId: patchFile
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/fileIdInPath.yaml"
+      requestBody:
+        $ref: "./files/fileRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./files/fileResponse.yaml"
+        "404":
+          $ref: "./files/errors/fileNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - files
+      summary: Delete a File by id
+      operationId: deleteFile
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/fileIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./files/fileResponse.yaml"
+        "404":
+          $ref: "./files/errors/fileNotFoundError.yaml"

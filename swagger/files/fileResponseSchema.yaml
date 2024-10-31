@@ -1,0 +1,10 @@
+required:
+  - id
+  - content
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  content:
+    type: string

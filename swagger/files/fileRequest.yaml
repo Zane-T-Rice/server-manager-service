@@ -1,0 +1,5 @@
+description: Create a new file
+content:
+  application/json:
+    schema:
+      $ref: "./fileRequestSchema.yaml"

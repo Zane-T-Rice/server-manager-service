@@ -1,0 +1,6 @@
+required:
+  - content
+type: object
+properties:
+  content:
+    type: string
