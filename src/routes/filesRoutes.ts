@@ -1,6 +1,6 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { PrismaClient } from "@prisma/client";
 import { FilesController } from "../controllers";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const wrappedRouter = new ExpressRouterWrapper();

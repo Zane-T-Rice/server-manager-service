@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { FilesService } from "../services";
+import { PrismaClient } from "@prisma/client";
 
 class FilesController {
   static instance: FilesController;
