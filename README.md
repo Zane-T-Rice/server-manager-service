@@ -69,14 +69,16 @@ npx prisma db push --force-reset
 
 ### Docker
 
-If you would like to run this in a docker container (I know I do), then feel free to use the example Dockerfile provided in docker/Dockerfile as a guide. You will, at the very least, need to update the `/path/to/server-manager-service` in the below run command to be the real path to this repository.
+If you would like to run this in a docker container (I know I do), then feel free to use the example Dockerfile provided in docker/Dockerfile as a guide. You will, at the very least, need to update the `/path/to/` in the below command to be the real path to this repository.
 
 The image can be built and started using these commands from within the directory with the Dockerfile. Note that the docker.sock is mounted because this service exists to provide the ability to manage your docker containers.
 
 ```sh
-docker build -t server-manager-service --no-cache .
-docker run --name=server-manager-service -d \
-  -p 3000:3000/udp -p 3000:3000/tcp \
+  docker build server-manager-service --no-cache --build-arg ENV=local .
+
+  docker run --name=server-manager-service -d \
+  -p 2999:3000/udp \
+  -p 3000:3000/tcp \
   -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped server-manager-service
