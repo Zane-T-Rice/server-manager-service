@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { EnvironmentVariablesService } from "../services";
+import { PrismaClient } from "@prisma/client";
 
 class EnvironmentVariablesController {
   static instance: EnvironmentVariablesController;

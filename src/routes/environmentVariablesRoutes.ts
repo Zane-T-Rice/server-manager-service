@@ -1,5 +1,5 @@
-import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
 import { EnvironmentVariablesController } from "../controllers";
+import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
