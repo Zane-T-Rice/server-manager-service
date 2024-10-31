@@ -1,6 +1,7 @@
 import * as child_process from "child_process";
 import {
   EnvironmentVariablesService,
+  FilesService,
   PortsService,
   ServersService,
   VolumesService,
@@ -238,6 +239,9 @@ describe("ServersService", () => {
             select:
               EnvironmentVariablesService.defaultEnvironmentVariableSelect,
           },
+          files: {
+            select: FilesService.defaultFileSelect,
+          },
         },
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
@@ -267,6 +271,9 @@ describe("ServersService", () => {
           environmentVariables: {
             select:
               EnvironmentVariablesService.defaultEnvironmentVariableSelect,
+          },
+          files: {
+            select: FilesService.defaultFileSelect,
           },
         },
       });

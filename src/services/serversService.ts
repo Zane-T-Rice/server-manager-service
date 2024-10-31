@@ -6,6 +6,7 @@ import { PortsService } from "./portsService";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
 import { VolumesService } from "./volumesService";
+import { FilesService } from "./filesService";
 const exec = promisify(exec2);
 
 class ServersService {
@@ -93,6 +94,9 @@ class ServersService {
           environmentVariables: {
             select:
               EnvironmentVariablesService.defaultEnvironmentVariableSelect,
+          },
+          files: {
+            select: FilesService.defaultFileSelect,
           },
         },
       })
