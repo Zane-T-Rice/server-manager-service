@@ -21,6 +21,11 @@ class ServersController {
     await ServersService.instance.restartServer(req, res);
   }
 
+  /* POST update an existing server. */
+  async updateServer(req: Request, res: Response) {
+    await ServersService.instance.updateServer(req, res);
+  }
+
   /* GET all servers. */
   async getServers(req: Request, res: Response) {
     await ServersService.instance.getServers(req, res);

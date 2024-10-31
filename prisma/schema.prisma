@@ -14,6 +14,7 @@ model Server {
   id String @id @default(uuid())
   applicationName String
   containerName String
+  isUpdatable Boolean @default(false)
   ports Port[]
   volumes Volume[]
   environmentVariables EnvironmentVariable[]
@@ -56,6 +57,7 @@ model File {
   id String @id @default(uuid())
   serverId String // FK of server which owns this record.
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  name String // The name of the file.
   content String // The content of the file as a plain string.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

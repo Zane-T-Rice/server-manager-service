@@ -118,6 +118,21 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/update:
+    post:
+      tags:
+        - servers
+      summary: Update a Server by id
+      operationId: updateServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverCompleteResponse.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
   /servers/{serverId}/ports:
     post:
       tags:

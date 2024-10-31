@@ -25,7 +25,7 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 
 describe("FilesService", () => {
   const commonParams = { serverId: "serverId" };
-  const body = { content: "text in a file" };
+  const body = { content: "text in a file", name: "filename" };
   const mockFileRecord = {
     id: "fileid",
     ...commonParams,

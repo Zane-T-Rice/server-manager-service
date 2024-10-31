@@ -32,7 +32,11 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("ServersService", () => {
-  const body = { applicationName: "appName", containerName: "containerName" };
+  const body = {
+    applicationName: "appName",
+    containerName: "containerName",
+    isUpdatable: false,
+  };
   const mockServerRecord = {
     id: "serverid",
     ...body,
@@ -161,6 +165,17 @@ describe("ServersService", () => {
   describe("GET /", () => {
     it("Should return list of servers", async () => {
       await serversService.getServers(req, res);
+      expect(serversService.prisma.server.findMany).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
+    });
+    it("Should return list of servers that are updatable", async () => {
+      const isUpdatableRequest: Request = {
+        ...req,
+        query: {
+          isUpdatable: "true",
+        },
+      } as unknown as Request;
+      await serversService.getServers(isUpdatableRequest, res);
       expect(serversService.prisma.server.findMany).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
     });

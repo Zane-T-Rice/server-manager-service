@@ -1,11 +1,14 @@
+import * as fs from "node:fs";
 import { Request, Response } from "express";
 import { EnvironmentVariablesService } from "./environmentVariablesService";
 import { exec as exec2 } from "child_process";
 import { FilesService } from "./filesService";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
+import path from "node:path";
 import { PortsService } from "./portsService";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
+import { randomUUID } from "crypto";
 import { VolumesService } from "./volumesService";
 const exec = promisify(exec2);
 
@@ -17,6 +20,23 @@ class ServersService {
     id: true,
     applicationName: true,
     containerName: true,
+    isUpdatable: true,
+  };
+
+  static completeServerSelect = {
+    ...ServersService.defaultServerSelect,
+    ports: {
+      select: PortsService.defaultPortSelect,
+    },
+    volumes: {
+      select: VolumesService.defaultVolumeSelect,
+    },
+    environmentVariables: {
+      select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
+    },
+    files: {
+      select: FilesService.defaultFileSelect,
+    },
   };
 
   constructor(prisma?: PrismaClient) {
@@ -29,12 +49,13 @@ class ServersService {
 
   /* POST a new server. */
   async createServer(req: Request, res: Response) {
-    const { applicationName, containerName } = req.body;
+    const { applicationName, containerName, isUpdatable } = req.body;
     const server = await this.prisma.server
       .create({
         data: {
           applicationName,
           containerName,
+          isUpdatable,
         },
         select: ServersService.defaultServerSelect,
       })
@@ -55,12 +76,92 @@ class ServersService {
     res.json(server);
   }
 
+  /* POST update an existing server. */
+  async updateServer(req: Request, res: Response) {
+    const { id } = req.params;
+    const dbServer = await this.prisma.server
+      .findUniqueOrThrow({
+        where: { id: String(id) },
+        select: ServersService.completeServerSelect,
+      })
+      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+
+    // Makes typescript accept that server is not null.
+    // Really it can never be because Prisma would throw if it
+    // did not find a server above and handleDatabaseErrors is guaranteed
+    // to throw.
+    const server = dbServer!;
+
+    // Write build files to temporary directory
+    const temporaryDirectoryName = `temp-${randomUUID()}`;
+    await exec(`mkdir /${temporaryDirectoryName}`);
+
+    server.files.forEach((file) =>
+      fs.writeFileSync(
+        path.join(`/${temporaryDirectoryName}`, path.basename(file.name)),
+        JSON.parse(file.content)
+      )
+    );
+
+    // Build new image
+    const dockerBuild: string[] = [
+      `cd /${temporaryDirectoryName} &&`,
+      `docker build -t '${server.containerName}' --no-cache`,
+    ];
+    server.environmentVariables.forEach((variable) => {
+      dockerBuild.push(`--build-arg ${variable.name}=${variable.value}`);
+    });
+    await exec(dockerBuild.join(" "));
+
+    // Stop current container
+    await exec(`docker stop ${server.containerName}`);
+
+    // Remove current container
+    await exec(`docker rm ${server.containerName}`);
+
+    // Run new container
+    const dockerRun: string[] = [
+      `docker run --name=${server.containerName} -d --restart unless-stopped ${server.containerName}`,
+    ];
+    server.ports.forEach((port) => {
+      dockerRun.push(`-p ${port.number}:${port.number}/${port.protocol}`);
+    });
+    server.volumes.forEach((volume) => {
+      dockerRun.push(`-v ${volume.hostPath}:${volume.containerPath}`);
+    });
+    await exec(dockerRun.join(" "));
+
+    // Cleanup temporary directory
+    await exec(`rm -rf /${temporaryDirectoryName}`);
+
+    // Respond with complete server to indicate the update is complete.
+    res.json(server);
+  }
+
+  stringToBoolean(value: string): boolean | undefined {
+    let result;
+    if (value === undefined || value == null) {
+      result = undefined;
+    } else if (value.toLowerCase() === "true") {
+      result = true;
+    } else if (value.toLowerCase() === "false") {
+      result = false;
+    } else {
+      result = undefined;
+    }
+    return result;
+  }
+
   /* GET all servers. */
   async getServers(req: Request, res: Response) {
+    const { isUpdatable: isUpdatableQuery } = req.query;
+    const isUpdatable = this.stringToBoolean(isUpdatableQuery as string);
+    const query = {
+      select: ServersService.defaultServerSelect,
+      where: { isUpdatable },
+    };
     const servers = await this.prisma.server
-      .findMany({
-        select: ServersService.defaultServerSelect,
-      })
+      .findMany(query)
       .catch((e) => handleDatabaseErrors(e, "server", []));
     res.json(servers);
   }
@@ -83,22 +184,7 @@ class ServersService {
     const server = await this.prisma.server
       .findUniqueOrThrow({
         where: { id: String(id) },
-        select: {
-          ...ServersService.defaultServerSelect,
-          ports: {
-            select: PortsService.defaultPortSelect,
-          },
-          volumes: {
-            select: VolumesService.defaultVolumeSelect,
-          },
-          environmentVariables: {
-            select:
-              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
-          },
-          files: {
-            select: FilesService.defaultFileSelect,
-          },
-        },
+        select: ServersService.completeServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);
@@ -107,13 +193,14 @@ class ServersService {
   /* PATCH a new server. */
   async patchServer(req: Request, res: Response) {
     const { id } = req.params;
-    const { applicationName, containerName } = req.body;
+    const { applicationName, containerName, isUpdatable } = req.body;
     const server = await this.prisma.server
       .update({
         where: { id: String(id) },
         data: {
           applicationName,
           containerName,
+          isUpdatable,
         },
         select: ServersService.defaultServerSelect,
       })

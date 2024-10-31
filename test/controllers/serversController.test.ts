@@ -46,6 +46,16 @@ describe("ServersController", () => {
     });
   });
 
+  describe("updateServer", () => {
+    it("should call updateServer in ServersService", async () => {
+      await serversController.updateServer(req, res);
+      expect(ServersService.instance.updateServer).toHaveBeenCalledWith(
+        req,
+        res
+      );
+    });
+  });
+
   describe("getServers", () => {
     it("should call getServers in ServersService", async () => {
       await serversController.getServers(req, res);

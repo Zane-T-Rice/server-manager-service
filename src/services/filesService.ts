@@ -9,6 +9,7 @@ class FilesService {
   static defaultFileSelect = {
     id: true,
     content: true,
+    name: true,
   };
 
   constructor(prisma?: PrismaClient) {
@@ -22,12 +23,13 @@ class FilesService {
   /* POST a new file. */
   async createFile(req: Request, res: Response) {
     const { serverId } = req.params;
-    const { content } = req.body;
+    const { content, name } = req.body;
     const file = await this.prisma.file
       .create({
         data: {
           serverId,
           content,
+          name,
         },
         select: FilesService.defaultFileSelect,
       })
@@ -62,12 +64,13 @@ class FilesService {
   /* PATCH a new file. */
   async patchFile(req: Request, res: Response) {
     const { id, serverId } = req.params;
-    const { content } = req.body;
+    const { content, name } = req.body;
     const file = await this.prisma.file
       .update({
         where: { id: String(id), serverId: String(serverId) },
         data: {
           content,
+          name,
         },
         select: FilesService.defaultFileSelect,
       })

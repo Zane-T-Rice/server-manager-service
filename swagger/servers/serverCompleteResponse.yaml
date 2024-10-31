@@ -12,13 +12,19 @@ content:
                 $ref: "../ports/portResponseSchema.yaml"
         - type: object
           properties:
-            ports:
+            volumes:
               type: array
               items:
                 $ref: "../volumes/volumeResponseSchema.yaml"
         - type: object
           properties:
-            ports:
+            environmentVariables:
               type: array
               items:
                 $ref: "../environmentVariables/environmentVariableResponseSchema.yaml"
+        - type: object
+          properties:
+            files:
+              type: array
+              items:
+                $ref: "../files/fileResponseSchema.yaml"

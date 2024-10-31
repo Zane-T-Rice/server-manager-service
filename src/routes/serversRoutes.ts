@@ -12,6 +12,9 @@ wrappedRouter.post("/", ServersController.instance.createServer);
 /* POST restart an existing server. */
 wrappedRouter.post("/:id/restart", ServersController.instance.restartServer);
 
+/* POST restart an existing server. */
+wrappedRouter.post("/:id/update", ServersController.instance.updateServer);
+
 /* GET all servers. */
 wrappedRouter.get("/", ServersController.instance.getServers);
 
