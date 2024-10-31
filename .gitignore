@@ -1,7 +1,7 @@
 .env
 package-lock.json
 node_modules
-prisma/migrations
+migrations
 dev.db
 dev.db-journal
 coverage
