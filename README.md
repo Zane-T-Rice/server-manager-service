@@ -96,6 +96,17 @@ I've also noticed git-hooks can end up looking for the server-manager-service di
 sudo ln -snf $PWD /server-manager-service
 ```
 
+### Database
+
+The database files will be created in server-manager-service/prisma/db.
+If you want to keep the db folder safe outside of the repo, then move the db folder to the new location and make a symlink to the the db folder's new home.
+
+```sh
+mv /path/to/server-manager-server/prisma/db /new/path/to/db
+ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
+```
+
+
 ### To Do
 
 - Input validation in controllers.
