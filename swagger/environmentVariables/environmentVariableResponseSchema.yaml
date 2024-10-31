@@ -1,13 +1,13 @@
 required:
   - id
-  - number
-  - protocol
+  - name
+  - value
 type: object
 properties:
   id:
     type: string
     format: uuid
-  number:
-    type: number
-  protocol:
+  name:
+    type: string
+  value:
     type: string

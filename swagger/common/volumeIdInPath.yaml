@@ -1,0 +1,7 @@
+description: id of the Volume
+name: volumeId
+in: path
+required: true
+schema:
+  type: string
+  format: uuid

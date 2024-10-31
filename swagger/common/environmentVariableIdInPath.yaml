@@ -1,0 +1,7 @@
+description: id of the EnvironmentVariable
+name: environmentVariableId
+in: path
+required: true
+schema:
+  type: string
+  format: uuid

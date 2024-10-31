@@ -1,10 +1,9 @@
 required:
-  - number
-  - protocol
+  - hostPath
+  - containerPath
 type: object
 properties:
-  number:
-    type: number
-  protocol:
+  hostPath:
+    type: string
+  containerPath:
     - type: string
-      enum: [udp, tcp]

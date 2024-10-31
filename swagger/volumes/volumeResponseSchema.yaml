@@ -1,13 +1,13 @@
 required:
   - id
-  - number
-  - protocol
+  - hostPath
+  - containerPath
 type: object
 properties:
   id:
     type: string
     format: uuid
-  number:
-    type: number
-  protocol:
+  hostPath:
+    type: string
+  containerPath:
     type: string

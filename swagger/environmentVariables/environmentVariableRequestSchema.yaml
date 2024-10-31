@@ -1,10 +1,9 @@
 required:
-  - number
-  - protocol
+  - name
+  - value
 type: object
 properties:
-  number:
-    type: number
-  protocol:
-    - type: string
-      enum: [udp, tcp]
+  name:
+    type: string
+  value:
+    type: string

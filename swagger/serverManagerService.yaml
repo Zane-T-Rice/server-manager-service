@@ -12,6 +12,10 @@ tags:
     description: The root of managing and configuring your Servers
   - name: ports
     description: Manage a Server's Ports
+  - name: volumes
+    description: Manage a Server's Volumes
+  - name: environmentVariables
+    description: Manage a Server's EnvironmentVariables
 paths:
   /servers:
     get:
@@ -189,3 +193,157 @@ paths:
           $ref: "./ports/portResponse.yaml"
         "404":
           $ref: "./ports/errors/portNotFoundError.yaml"
+  /servers/{serverId}/volumes:
+    post:
+      tags:
+        - volumes
+      summary: Create a new volume
+      operationId: createEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      requestBody:
+        $ref: "./volumes/volumeRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./volumes/volumeResponse.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - volumes
+      summary: Get EnvironmentVariables of Server
+      operationId: getEnvironmentVariables
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./volumes/volumeArrayResponse.yaml"
+        "404":
+          $ref: "./volumes/errors/volumeNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/volumes/{volumeId}:
+    get:
+      tags:
+        - volumes
+      summary: Get a EnvironmentVariable by id
+      operationId: getEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/volumeIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./volumes/volumeResponse.yaml"
+        "404":
+          $ref: "./volumes/errors/volumeNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - volumes
+      summary: Update a EnvironmentVariable by id
+      operationId: patchEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/volumeIdInPath.yaml"
+      requestBody:
+        $ref: "./volumes/volumeRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./volumes/volumeResponse.yaml"
+        "404":
+          $ref: "./volumes/errors/volumeNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - volumes
+      summary: Delete a volume by id
+      operationId: deleteEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/volumeIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./volumes/volumeResponse.yaml"
+        "404":
+          $ref: "./volumes/errors/volumeNotFoundError.yaml"
+  /servers/{serverId}/environmentVariables:
+    post:
+      tags:
+        - environmentVariables
+      summary: Create a new environmentVariable
+      operationId: createEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      requestBody:
+        $ref: "./environmentVariables/environmentVariableRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./environmentVariables/environmentVariableResponse.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - environmentVariables
+      summary: Get EnvironmentVariables of Server
+      operationId: getEnvironmentVariables
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./environmentVariables/environmentVariableArrayResponse.yaml"
+        "404":
+          $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /servers/{serverId}/environmentVariables/{environmentVariableId}:
+    get:
+      tags:
+        - environmentVariables
+      summary: Get a EnvironmentVariable by id
+      operationId: getEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/environmentVariableIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./environmentVariables/environmentVariableResponse.yaml"
+        "404":
+          $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - environmentVariables
+      summary: Update a EnvironmentVariable by id
+      operationId: patchEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/environmentVariableIdInPath.yaml"
+      requestBody:
+        $ref: "./environmentVariables/environmentVariableRequest.yaml"
+        required: true
+      responses:
+        "200":
+          $ref: "./environmentVariables/environmentVariableResponse.yaml"
+        "404":
+          $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - environmentVariables
+      summary: Delete a EnvironmentVariable by id
+      operationId: deleteEnvironmentVariable
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/environmentVariableIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./environmentVariables/environmentVariableResponse.yaml"
+        "404":
+          $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
