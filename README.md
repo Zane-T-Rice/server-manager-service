@@ -74,10 +74,10 @@ If you would like to run this in a docker container (I know I do), then feel fre
 The image can be built and started using these commands from within the directory with the Dockerfile. Note that the docker.sock is mounted because this service exists to provide the ability to manage your docker containers.
 
 ```sh
-  docker build server-manager-service --no-cache --build-arg ENV=local .
+  docker build -t server-manager-service --no-cache --build-arg ENV=local .
 
   docker run --name=server-manager-service -d \
-  -p 2999:3000/udp \
+  -p 3000:3000/udp \
   -p 3000:3000/tcp \
   -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
   -v /var/run/docker.sock:/var/run/docker.sock \
