@@ -1,0 +1,5 @@
+description: Create a new environmentVariable
+content:
+  application/json:
+    schema:
+      $ref: "./environmentVariableRequestSchema.yaml"

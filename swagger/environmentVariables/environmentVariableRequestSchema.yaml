@@ -1,0 +1,10 @@
+required:
+  - number
+  - protocol
+type: object
+properties:
+  number:
+    type: number
+  protocol:
+    - type: string
+      enum: [udp, tcp]

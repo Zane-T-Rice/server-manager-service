@@ -3,10 +3,22 @@ content:
   application/json:
     schema:
       allOf:
+        - $ref: "./serverResponseSchema.yaml"
         - type: object
           properties:
             ports:
               type: array
               items:
                 $ref: "../ports/portResponseSchema.yaml"
-        - $ref: "./serverResponseSchema.yaml"
+        - type: object
+          properties:
+            ports:
+              type: array
+              items:
+                $ref: "../volumes/volumeResponseSchema.yaml"
+        - type: object
+          properties:
+            ports:
+              type: array
+              items:
+                $ref: "../environmentVariables/environmentVariableResponseSchema.yaml"

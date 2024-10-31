@@ -1,0 +1,8 @@
+type: object
+properties:
+  description:
+    type: string
+    example: "NotFoundError"
+  message:
+    type: string
+    example: "The Volume with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found."
