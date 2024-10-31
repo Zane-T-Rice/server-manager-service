@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
 import {
   environmentVariablesRouter,
+  filesRouter,
   portsRouter,
   serversRouter,
   volumesRouter,
@@ -40,6 +41,7 @@ app.use("/servers", serversRouter);
 app.use("/servers", portsRouter);
 app.use("/servers", environmentVariablesRouter);
 app.use("/servers", volumesRouter);
+app.use("/servers", filesRouter);
 
 // error handler
 app.use(appErrorHandler);
