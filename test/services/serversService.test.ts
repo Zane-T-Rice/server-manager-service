@@ -1,5 +1,10 @@
 import * as child_process from "child_process";
-import { PortsService, ServersService } from "../../src/services";
+import {
+  EnvironmentVariablesService,
+  PortsService,
+  ServersService,
+  VolumesService,
+} from "../../src/services";
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
@@ -226,6 +231,13 @@ describe("ServersService", () => {
           ports: {
             select: PortsService.defaultPortSelect,
           },
+          volumes: {
+            select: VolumesService.defaultVolumeSelect,
+          },
+          environmentVariables: {
+            select:
+              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
+          },
         },
       });
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
@@ -248,6 +260,13 @@ describe("ServersService", () => {
           ...ServersService.defaultServerSelect,
           ports: {
             select: PortsService.defaultPortSelect,
+          },
+          volumes: {
+            select: VolumesService.defaultVolumeSelect,
+          },
+          environmentVariables: {
+            select:
+              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
           },
         },
       });

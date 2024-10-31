@@ -4,6 +4,8 @@ import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
 import { PortsService } from "./portsService";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
+import { VolumesService } from "./volumesService";
+import { EnvironmentVariablesService } from "./environmentVariablesService";
 const exec = promisify(exec2);
 
 class ServersService {
@@ -84,6 +86,13 @@ class ServersService {
           ...ServersService.defaultServerSelect,
           ports: {
             select: PortsService.defaultPortSelect,
+          },
+          volumes: {
+            select: VolumesService.defaultVolumeSelect,
+          },
+          environmentVariables: {
+            select:
+              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
           },
         },
       })

@@ -74,6 +74,8 @@ paths:
         - servers
       summary: Update a Server by id
       operationId: patchServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./servers/serverRequest.yaml"
         required: true
