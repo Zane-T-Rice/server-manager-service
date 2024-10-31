@@ -1,7 +1,5 @@
 .env
-package-lock.json
 node_modules
-migrations
 dev.db
 dev.db-journal
 coverage
