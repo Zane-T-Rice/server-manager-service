@@ -3,4 +3,6 @@ required:
 type: object
 properties:
   content:
+    description: JSON.stringify of the contents of the file.
+    example: "JSON.stringfy of the contents of the file"
     type: string
