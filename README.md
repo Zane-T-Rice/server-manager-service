@@ -44,7 +44,7 @@ Installing the packages in home-manager also works great if you use that. Howeve
 The first time you start this you will need to copy .env.default over to .env. Make sure HOST is set to the appropriate value. For local development, you would probably use localhost (the default), but when this is deployed you would want to use the deployment server's IP.
 
 ```sh
-cp .env.default .env
+cp ./environments/.env.local .env
 ```
 
 The service can be setup and started like this.
@@ -77,7 +77,7 @@ The image can be built and started using these commands from within the director
 docker build -t server-manager-service --no-cache .
 docker run --name=server-manager-service -d \
   -p 3000:3000/udp -p 3000:3000/tcp \
-  -v /path/to/server-manager-service:/server-manager-service \
+  -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped server-manager-service
 ```
