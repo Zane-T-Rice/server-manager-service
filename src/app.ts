@@ -1,7 +1,12 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
-import { portsRouter, serversRouter } from "./routes";
+import {
+  environmentVariablesRouter,
+  portsRouter,
+  serversRouter,
+  volumesRouter,
+} from "./routes";
 import { appErrorHandler } from "./middlewares/appErrorHandler";
 import express from "express";
 import logger from "morgan";
@@ -33,6 +38,8 @@ app.use(swaggerRoutePath, express.static(swaggerUIFSPath));
 // REST APis
 app.use("/servers", serversRouter);
 app.use("/servers", portsRouter);
+app.use("/servers", environmentVariablesRouter);
+app.use("/servers", volumesRouter);
 
 // error handler
 app.use(appErrorHandler);
