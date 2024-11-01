@@ -118,7 +118,7 @@ class ServersService {
     try {
       // Write out the Dockerfile and any other files this server has configured
       // to a temporary workding directory.
-      await exec(`sudo mkdir ${temporaryDirectoryName}`);
+      await exec(`mkdir ${temporaryDirectoryName}`);
       server.files.forEach((file) =>
         fs.writeFileSync(
           path.join(`${temporaryDirectoryName}`, path.basename(file.name)),
