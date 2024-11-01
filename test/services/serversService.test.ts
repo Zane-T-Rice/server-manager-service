@@ -236,7 +236,7 @@ describe("ServersService", () => {
         child_process.exec as unknown as jest.Mock
       ).toHaveBeenNthCalledWith(
         1,
-        expect.stringMatching(/sudo mkdir .*-.*-.*-.*-.*/),
+        expect.stringMatching(/mkdir .*-.*-.*-.*-.*/),
         expect.any(Function)
       );
       expect(fs.writeFileSync as unknown as jest.Mock).toHaveBeenCalledWith(
