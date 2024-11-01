@@ -271,7 +271,7 @@ describe("ServersService", () => {
         `
       sudo docker stop server-manager-service
       sudo docker rm server-manager-service
-      sudo docker run --name=server-manager-service -d --restart unless-stopped -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock server-manager-service
+      sudo docker run --name=server-manager-service -d --restart unless-stopped -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service
     `,
         expect.any(Function)
       );

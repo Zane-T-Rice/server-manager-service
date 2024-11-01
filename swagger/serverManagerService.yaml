@@ -69,7 +69,7 @@ paths:
     patch:
       tags:
         - servers
-      summary: Update a Server by id
+      summary: Patch a Server by id
       operationId: patchServer
       parameters:
         - $ref: "./common/serverIdInPath.yaml"

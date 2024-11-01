@@ -57,20 +57,17 @@ Installing the packages in home-manager also works great if you use that. Howeve
 
 ### How to Get This Running
 
-The first time you start this you will need to copy create a .env file. Make sure HOST is set to the appropriate value. For local development, you would probably use localhost (the default), but when this is deployed you would want to use the deployment server's IP.
+The service can be setup and started like this. Environment variables can also be placed in a file named .env in the root of the repository.
 
 ```sh
-HOST=localhost
-PORT=3000
-DATABASE_URL=file:./db/dev.db
-```
-
-The service can be setup and started like this.
-
-```sh
-npm install
-npx prisma migrate dev --name init
-npm run start
+(
+  export HOST=localhost
+  export PORT=3000
+  export DATABASE_URL=file:./db/dev.db
+  npm install
+  npx prisma migrate dev --name init
+  npm run start
+)
 ```
 
 ### Manual Testing

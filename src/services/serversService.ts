@@ -113,6 +113,9 @@ class ServersService {
     server.volumes.forEach((volume) => {
       dockerRun.push(`-v ${volume.hostPath}:${volume.containerPath}`);
     });
+    server.environmentVariables.forEach((variable) => {
+      dockerRun.push(`--env ${variable.name}=${variable.value}`);
+    });
     dockerRun.push(`${server.containerName}`);
 
     try {
