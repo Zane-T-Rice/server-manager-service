@@ -129,6 +129,7 @@ paths:
       tags:
         - servers
       summary: Update a Server by id
+      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a server, use the PATCH /servers/{serverId} route instead.
       operationId: updateServer
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
