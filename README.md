@@ -128,3 +128,4 @@ ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
 
 - Input validation in controllers.
 - Probaby add integration tests. Right now it is all unit tests.
+- Creating a port for a non-existent server is 500 instead of 404.
