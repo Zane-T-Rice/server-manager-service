@@ -72,7 +72,7 @@ class ServersService {
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
-    await exec(`sudo docker restart '${server?.containerName}'`);
+    await exec(`docker restart '${server?.containerName}'`);
     res.json(server);
   }
 
@@ -97,7 +97,7 @@ class ServersService {
 
     const dockerBuild: string[] = [
       `cd ${temporaryDirectoryName} &&`,
-      `sudo docker build -t ${server.containerName} --no-cache`,
+      `docker build -t ${server.containerName} --no-cache`,
     ];
     server.environmentVariables.forEach((variable) => {
       dockerBuild.push(`--build-arg ${variable.name}=${variable.value}`);
@@ -105,7 +105,7 @@ class ServersService {
     dockerBuild.push(".");
 
     const dockerRun: string[] = [
-      `sudo docker run --name=${server.containerName} -d --restart unless-stopped`,
+      `docker run --name=${server.containerName} -d --restart unless-stopped`,
     ];
     server.ports.forEach((port) => {
       dockerRun.push(`-p ${port.number}:${port.number}/${port.protocol}`);
@@ -133,15 +133,15 @@ class ServersService {
       await exec(dockerBuild.join(" "));
     } finally {
       // Cleanup temporary directory
-      await exec(`sudo rm -rf ${temporaryDirectoryName}`);
+      await exec(`rm -rf ${temporaryDirectoryName}`);
     }
 
     // Send the instruction to stop, remove, and run the new container all at once.
     // Doing these instructions in one exec allows server-manager-service
     // to update itself.
     await exec(`
-      sudo docker stop ${server.containerName}
-      sudo docker rm ${server.containerName}
+      docker stop ${server.containerName}
+      docker rm ${server.containerName}
       ${dockerRun.join(" ")}
     `);
 

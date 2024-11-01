@@ -137,7 +137,7 @@ describe("ServersService", () => {
         select: ServersService.defaultServerSelect,
       });
       expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
-        `sudo docker restart '${mockServerRecord.containerName}'`,
+        `docker restart '${mockServerRecord.containerName}'`,
         expect.any(Function)
       );
       expect(res.json).toHaveBeenCalledWith(mockServerRecord);
@@ -253,7 +253,7 @@ describe("ServersService", () => {
       ).toHaveBeenNthCalledWith(
         2,
         expect.stringMatching(
-          /cd .*-.*-.*-.*-.* && sudo docker build -t server-manager-service --no-cache --build-arg ENV=local ./
+          /cd .*-.*-.*-.*-.* && docker build -t server-manager-service --no-cache --build-arg ENV=local ./
         ),
         expect.any(Function)
       );
@@ -261,7 +261,7 @@ describe("ServersService", () => {
         child_process.exec as unknown as jest.Mock
       ).toHaveBeenNthCalledWith(
         3,
-        expect.stringMatching(/sudo rm -rf .*-.*-.*-.*-.*/),
+        expect.stringMatching(/rm -rf .*-.*-.*-.*-.*/),
         expect.any(Function)
       );
       expect(
@@ -269,9 +269,9 @@ describe("ServersService", () => {
       ).toHaveBeenNthCalledWith(
         4,
         `
-      sudo docker stop server-manager-service
-      sudo docker rm server-manager-service
-      sudo docker run --name=server-manager-service -d --restart unless-stopped -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service
+      docker stop server-manager-service
+      docker rm server-manager-service
+      docker run --name=server-manager-service -d --restart unless-stopped -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service
     `,
         expect.any(Function)
       );
