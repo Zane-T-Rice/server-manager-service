@@ -75,14 +75,13 @@ npm run start
 
 ### Manual Testing
 
-To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see the API spec as well as use the APIs.
+To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see and interact with the APIs.
+Additionally, there is a combined Swagger spec at swagger/combinedServerManagerService.yaml which can be used with many tools including to be imported in to Insomnia.
 
-#### Local Testing
-
-I have found this command to be useful to reset my local database during development where things can get pretty messy. Always make sure your final migrations will actually apply to the database in higher environments without a reset though, because you don't want to block your deployment pipeline or lose all your data in those environments.
+If your local database becomes a mess you can wipe it out with this command.
 
 ```sh
-npx prisma db push --force-reset
+npx prisma migrate reset
 ```
 
 ### Docker
