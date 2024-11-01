@@ -6,4 +6,4 @@ properties:
   hostPath:
     type: string
   containerPath:
-    - type: string
+    type: string

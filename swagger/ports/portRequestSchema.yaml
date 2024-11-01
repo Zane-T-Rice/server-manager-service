@@ -6,5 +6,4 @@ properties:
   number:
     type: number
   protocol:
-    - type: string
-      enum: [udp, tcp]
+    type: string

@@ -571,10 +571,7 @@ components:
         number:
           type: number
         protocol:
-          - type: string
-            enum:
-              - udp
-              - tcp
+          type: string
     volumeNotFoundErrorSchema:
       type: object
       properties:
@@ -593,7 +590,7 @@ components:
         hostPath:
           type: string
         containerPath:
-          - type: string
+          type: string
     environmentVariableNotFoundErrorSchema:
       type: object
       properties:
