@@ -146,7 +146,7 @@ class ServersService {
     res.json(server);
   }
 
-  stringToBoolean(value: string): boolean | undefined {
+  stringToBoolean(value: string | undefined | null): boolean | undefined {
     let result;
     if (value === undefined || value == null) {
       result = undefined;

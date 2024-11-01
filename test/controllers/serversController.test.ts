@@ -13,6 +13,7 @@ describe("ServersController", () => {
   ServersService.instance = {
     createServer: jest.fn(),
     restartServer: jest.fn(),
+    updateServer: jest.fn(),
     getServers: jest.fn(),
     getServerById: jest.fn(),
     getCompleteServerById: jest.fn(),
