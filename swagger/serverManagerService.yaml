@@ -236,7 +236,7 @@ paths:
     get:
       tags:
         - volumes
-      summary: Get Volume of Server
+      summary: Get Volumes of Server
       operationId: getVolume
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
