@@ -19,6 +19,9 @@ prisma                  : 5.18.0
 @prisma/client          : 5.21.1
 Node.js                 : v20.17.0
 Studio                  : 0.502.0
+
+docker --version
+Docker version 27.3.1, build v27.3.1
 ```
 
 #### If You Are On NixOS Then Put This In Your configuration.nix To Install Prisma
@@ -37,6 +40,13 @@ Installing the packages in home-manager also works great if you use that. Howeve
   environment.variables.PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
   environment.variables.PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
   environment.variables.PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+
+  virtualisation.docker.enable = true;
+
+  # You need to add your user to the "docker" group and logout/login to get the new group.
+  # This is just to show the scope where you add groups. You most likely have a user configuration
+  # section already and should add it there.
+  # users.users.YOUR_USERNAME = { extraGroups = [ "docker" ] }
 ```
 
 ### How to Get This Running
@@ -105,7 +115,6 @@ If you want to keep the db folder safe outside of the repo, then move the db fol
 mv /path/to/server-manager-server/prisma/db /new/path/to/db
 ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
 ```
-
 
 ### To Do
 

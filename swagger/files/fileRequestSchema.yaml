@@ -4,8 +4,7 @@ required:
 type: object
 properties:
   content:
-    description: JSON.stringify of the contents of the file.
-    example: "JSON.stringfy of the contents of the file"
+    description: base64 encoded contents of the file.
     type: string
   name:
     type: string

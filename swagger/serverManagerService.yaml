@@ -38,6 +38,12 @@ paths:
         - servers
       summary: Get all Servers
       operationId: getServers
+      parameters:
+        - in: query
+          name: isUpdatable
+          schema:
+            type: boolean
+          description: filter results based on if a server is updatable or not
       responses:
         "200":
           $ref: "./servers/serverArrayResponse.yaml"
@@ -369,6 +375,7 @@ paths:
       tags:
         - files
       summary: Create a new file
+      description: This takes a base64 encoded file. An easy way to base64 encode a file with node is Buffer.from(fs.readFileSync('filename').toString()).toString('base64').
       operationId: createFile
       parameters:
         - $ref: "./common/serverIdInPath.yaml"

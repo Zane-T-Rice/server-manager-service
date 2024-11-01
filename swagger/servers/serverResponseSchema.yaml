@@ -11,3 +11,5 @@ properties:
     type: string
   containerName:
     type: string
+  isUpdatable:
+    type: boolean
