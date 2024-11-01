@@ -1,0 +1,844 @@
+openapi: 3.0.0
+info:
+  title: Server Manager Service
+  description: Define and control your servers with these routes.
+  version: 0.1.0
+tags:
+  - name: servers
+    description: The root of managing and configuring your Servers
+  - name: ports
+    description: Manage a Server's Ports
+  - name: volumes
+    description: Manage a Server's Volumes
+  - name: environmentVariables
+    description: Manage a Server's EnvironmentVariables
+  - name: files
+    description: Manage a Server's build Files
+externalDocs:
+  description: GitHub
+  url: https://github.com/Zane-T-Rice/server-manager-service
+paths:
+  /servers:
+    post:
+      tags:
+        - servers
+      summary: Create a new server
+      operationId: createServer
+      requestBody:
+        $ref: '#/components/requestBodies/serverRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/serverResponse'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - servers
+      summary: Get all Servers
+      operationId: getServers
+      parameters:
+        - in: query
+          name: isUpdatable
+          schema:
+            type: boolean
+          description: filter results based on if a server is updatable or not
+      responses:
+        '200':
+          $ref: '#/components/responses/serverArrayResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}:
+    get:
+      tags:
+        - servers
+      summary: Get a Server by id
+      operationId: getServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - servers
+      summary: Update a Server by id
+      operationId: patchServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/serverRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/serverResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - servers
+      summary: Delete a server by id
+      operationId: deleteServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverResponse'
+  /servers/{serverId}/complete:
+    get:
+      tags:
+        - servers
+      summary: Get a complete Server by id
+      description: A complete Server will have all related resources hydrated on to the response.
+      operationId: getServerComplete
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverCompleteResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/restart:
+    post:
+      tags:
+        - servers
+      summary: Restart a Server by id
+      operationId: restartServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/update:
+    post:
+      tags:
+        - servers
+      summary: Update a Server by id
+      operationId: updateServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverCompleteResponse'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/ports:
+    post:
+      tags:
+        - ports
+      summary: Create a new port
+      operationId: createPort
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/portRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/portResponse'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - ports
+      summary: Get Ports of Server
+      operationId: getPorts
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/portArrayResponse'
+        '404':
+          $ref: '#/components/responses/portNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/ports/{portId}:
+    get:
+      tags:
+        - ports
+      summary: Get a Port by id
+      operationId: getPort
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/portIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/portResponse'
+        '404':
+          $ref: '#/components/responses/portNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - ports
+      summary: Update a Port by id
+      operationId: patchPort
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/portIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/portRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/portResponse'
+        '404':
+          $ref: '#/components/responses/portNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - ports
+      summary: Delete a port by id
+      operationId: deletePort
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/portIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/portResponse'
+        '404':
+          $ref: '#/components/responses/portNotFoundError'
+  /servers/{serverId}/volumes:
+    post:
+      tags:
+        - volumes
+      summary: Create a new volume
+      operationId: createEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/volumeRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/volumeResponse'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - volumes
+      summary: Get EnvironmentVariables of Server
+      operationId: getEnvironmentVariables
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/volumeArrayResponse'
+        '404':
+          $ref: '#/components/responses/volumeNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/volumes/{volumeId}:
+    get:
+      tags:
+        - volumes
+      summary: Get a EnvironmentVariable by id
+      operationId: getEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/volumeIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/volumeResponse'
+        '404':
+          $ref: '#/components/responses/volumeNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - volumes
+      summary: Update a EnvironmentVariable by id
+      operationId: patchEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/volumeIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/volumeRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/volumeResponse'
+        '404':
+          $ref: '#/components/responses/volumeNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - volumes
+      summary: Delete a volume by id
+      operationId: deleteEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/volumeIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/volumeResponse'
+        '404':
+          $ref: '#/components/responses/volumeNotFoundError'
+  /servers/{serverId}/environmentVariables:
+    post:
+      tags:
+        - environmentVariables
+      summary: Create a new environmentVariable
+      operationId: createEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/environmentVariableRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/environmentVariableResponse'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - environmentVariables
+      summary: Get EnvironmentVariables of Server
+      operationId: getEnvironmentVariables
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/environmentVariableArrayResponse'
+        '404':
+          $ref: '#/components/responses/environmentVariableNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/environmentVariables/{environmentVariableId}:
+    get:
+      tags:
+        - environmentVariables
+      summary: Get a EnvironmentVariable by id
+      operationId: getEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/environmentVariableIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/environmentVariableResponse'
+        '404':
+          $ref: '#/components/responses/environmentVariableNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - environmentVariables
+      summary: Update a EnvironmentVariable by id
+      operationId: patchEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/environmentVariableIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/environmentVariableRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/environmentVariableResponse'
+        '404':
+          $ref: '#/components/responses/environmentVariableNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - environmentVariables
+      summary: Delete a EnvironmentVariable by id
+      operationId: deleteEnvironmentVariable
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/environmentVariableIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/environmentVariableResponse'
+        '404':
+          $ref: '#/components/responses/environmentVariableNotFoundError'
+  /servers/{serverId}/files:
+    post:
+      tags:
+        - files
+      summary: Create a new file
+      description: This takes a base64 encoded file. An easy way to base64 encode a file with node is Buffer.from(fs.readFileSync('filename').toString()).toString('base64').
+      operationId: createFile
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/fileRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/fileResponse'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - files
+      summary: Get Files of Server
+      operationId: getFiles
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/fileArrayResponse'
+        '404':
+          $ref: '#/components/responses/fileNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /servers/{serverId}/files/{fileId}:
+    get:
+      tags:
+        - files
+      summary: Get a File by id
+      operationId: getFile
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/fileIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/fileResponse'
+        '404':
+          $ref: '#/components/responses/fileNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - files
+      summary: Update a File by id
+      operationId: patchFile
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/fileIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/fileRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/fileResponse'
+        '404':
+          $ref: '#/components/responses/fileNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - files
+      summary: Delete a File by id
+      operationId: deleteFile
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/fileIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/fileResponse'
+        '404':
+          $ref: '#/components/responses/fileNotFoundError'
+components:
+  schemas:
+    serverResponseSchema:
+      required:
+        - id
+        - applicationName
+        - containerName
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        applicationName:
+          type: string
+        containerName:
+          type: string
+        isUpdatable:
+          type: boolean
+    serverNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The server with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    internalServerErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: InternalServerError
+        message:
+          type: string
+          example: Your request cannot be processed at this time. The server may be having a bad day.
+    serverRequestSchema:
+      required:
+        - applicationName
+        - containerName
+      type: object
+      properties:
+        applicationName:
+          type: string
+        containerName:
+          type: string
+        isUpdatable:
+          type: boolean
+    portResponseSchema:
+      required:
+        - id
+        - number
+        - protocol
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: number
+        protocol:
+          type: string
+    volumeResponseSchema:
+      required:
+        - id
+        - hostPath
+        - containerPath
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        hostPath:
+          type: string
+        containerPath:
+          type: string
+    environmentVariableResponseSchema:
+      required:
+        - id
+        - name
+        - value
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        value:
+          type: string
+    fileResponseSchema:
+      required:
+        - id
+        - content
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          description: base64 encoded contents of the file.
+          type: string
+        name:
+          type: string
+    portNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The Port with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    portRequestSchema:
+      required:
+        - number
+        - protocol
+      type: object
+      properties:
+        number:
+          type: number
+        protocol:
+          - type: string
+            enum:
+              - udp
+              - tcp
+    volumeNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The Volume with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    volumeRequestSchema:
+      required:
+        - hostPath
+        - containerPath
+      type: object
+      properties:
+        hostPath:
+          type: string
+        containerPath:
+          - type: string
+    environmentVariableNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The EnvironmentVariable with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    environmentVariableRequestSchema:
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    fileNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The File with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    fileRequestSchema:
+      required:
+        - content
+        - name
+      type: object
+      properties:
+        content:
+          description: base64 encoded contents of the file.
+          type: string
+        name:
+          type: string
+  responses:
+    serverArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/serverResponseSchema'
+    serverNotFoundError:
+      description: The Server could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serverNotFoundErrorSchema'
+    internalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/internalServerErrorSchema'
+    serverResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serverResponseSchema'
+    serverCompleteResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/serverResponseSchema'
+              - type: object
+                properties:
+                  ports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/portResponseSchema'
+              - type: object
+                properties:
+                  volumes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/volumeResponseSchema'
+              - type: object
+                properties:
+                  environmentVariables:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/environmentVariableResponseSchema'
+              - type: object
+                properties:
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/fileResponseSchema'
+    portArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/portResponseSchema'
+    portNotFoundError:
+      description: The Port could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/portNotFoundErrorSchema'
+    portResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/portResponseSchema'
+    volumeArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/volumeResponseSchema'
+    volumeNotFoundError:
+      description: The Volume could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/volumeNotFoundErrorSchema'
+    volumeResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/volumeResponseSchema'
+    environmentVariableArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/environmentVariableResponseSchema'
+    environmentVariableNotFoundError:
+      description: The EnvironmentVariable could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/environmentVariableNotFoundErrorSchema'
+    environmentVariableResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/environmentVariableResponseSchema'
+    fileArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/fileResponseSchema'
+    fileNotFoundError:
+      description: The File could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/fileNotFoundErrorSchema'
+    fileResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/fileResponseSchema'
+  requestBodies:
+    serverRequest:
+      description: Create a new server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serverRequestSchema'
+    portRequest:
+      description: Create a new port
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/portRequestSchema'
+    volumeRequest:
+      description: Create a new volume
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/volumeRequestSchema'
+    environmentVariableRequest:
+      description: Create a new environmentVariable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/environmentVariableRequestSchema'
+    fileRequest:
+      description: Create a new file
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/fileRequestSchema'
+  parameters:
+    serverIdInPath:
+      description: id of the Server
+      name: serverId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    portIdInPath:
+      description: id of the Port
+      name: portId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    volumeIdInPath:
+      description: id of the Volume
+      name: volumeId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    environmentVariableIdInPath:
+      description: id of the EnvironmentVariable
+      name: environmentVariableId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    fileIdInPath:
+      description: id of the File
+      name: fileId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid

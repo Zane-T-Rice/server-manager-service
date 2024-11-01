@@ -22,6 +22,12 @@ Studio                  : 0.502.0
 
 docker --version
 Docker version 27.3.1, build v27.3.1
+
+# If you want to make pull requests you will also need redocly
+# Redocly is used to combine the Swagger spec in to a single file so that
+# it can be easily imported or used by more tools, such as Insomnia.
+redocly --version
+1.25.9
 ```
 
 #### If You Are On NixOS Then Put This In Your configuration.nix To Install Prisma
@@ -51,10 +57,12 @@ Installing the packages in home-manager also works great if you use that. Howeve
 
 ### How to Get This Running
 
-The first time you start this you will need to copy .env.default over to .env. Make sure HOST is set to the appropriate value. For local development, you would probably use localhost (the default), but when this is deployed you would want to use the deployment server's IP.
+The first time you start this you will need to copy create a .env file. Make sure HOST is set to the appropriate value. For local development, you would probably use localhost (the default), but when this is deployed you would want to use the deployment server's IP.
 
 ```sh
-cp ./environments/.env.local .env
+HOST=localhost
+PORT=3000
+DATABASE_URL=file:./db/dev.db
 ```
 
 The service can be setup and started like this.
