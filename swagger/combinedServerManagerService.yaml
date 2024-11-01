@@ -235,8 +235,8 @@ paths:
     get:
       tags:
         - volumes
-      summary: Get EnvironmentVariables of Server
-      operationId: getEnvironmentVariables
+      summary: Get Volume of Server
+      operationId: getVolume
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
@@ -250,8 +250,8 @@ paths:
     get:
       tags:
         - volumes
-      summary: Get a EnvironmentVariable by id
-      operationId: getEnvironmentVariable
+      summary: Get a Volume by id
+      operationId: getVolume
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
@@ -265,8 +265,8 @@ paths:
     patch:
       tags:
         - volumes
-      summary: Update a EnvironmentVariable by id
-      operationId: patchEnvironmentVariable
+      summary: Update a Volume by id
+      operationId: patchVolume
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
@@ -283,8 +283,8 @@ paths:
     delete:
       tags:
         - volumes
-      summary: Delete a volume by id
-      operationId: deleteEnvironmentVariable
+      summary: Delete a Volume by id
+      operationId: deleteVolume
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
