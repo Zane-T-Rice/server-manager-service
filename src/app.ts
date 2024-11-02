@@ -23,15 +23,29 @@ const app = express();
 app.use((req, res, next) => {
   req.headers["server-manager-service-trace-id"] =
     req.headers["server-manager-service-trace-id"] ?? randomUUID();
+  res.appendHeader(
+    "server-manager-service-trace-id",
+    req.headers["server-manager-service-trace-id"]
+  );
   next();
 });
 
 // Logger
-app.use(pino());
+app.use(
+  pino({
+    level: process.env.LOG_LEVEL || "info",
+  })
+);
 
 // Parse the request.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Log the request body now that it has been successfully parsed.
+app.use((req, res, next) => {
+  req.log.info(req.body);
+  next();
+});
 
 // REST APis
 app.use("/servers", serversRouter);
@@ -60,10 +74,6 @@ app.use(swaggerRoutePath, express.static(swaggerUIFSPath));
 // error handler
 app.use(appErrorHandler);
 
-app.listen(process.env.PORT, () => {
-  console.log(
-    `Swagger UI at http://${process.env.HOST}:${process.env.PORT}/swagger`
-  );
-});
+app.listen(process.env.PORT);
 
 export default app;
