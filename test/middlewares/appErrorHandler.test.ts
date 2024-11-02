@@ -3,7 +3,11 @@ import { appErrorHandler } from "../../src/middlewares/appErrorHandler";
 import { Request, Response, NextFunction } from "express";
 
 describe("appErrorHandler", () => {
-  const reqMock: Request = jest.fn() as unknown as Request;
+  const reqMock: Request = {
+    log: {
+      error: jest.fn(),
+    },
+  } as unknown as Request;
   const resMock: Response = {
     status: jest.fn(() => resMock),
     json: jest.fn(() => resMock),
