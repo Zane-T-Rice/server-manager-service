@@ -10,6 +10,7 @@ import {
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
+import { ephemeralContainerRun } from "../../src/utils";
 jest.mock("node:fs");
 jest.mock("child_process");
 jest.mock("@prisma/client", () => {
@@ -30,6 +31,11 @@ jest.mock("@prisma/client", () => {
 jest.mock("../../src/utils/handleDatabaseErrors", () => {
   return {
     handleDatabaseErrors: jest.fn().mockRejectedValue(new Error()),
+  };
+});
+jest.mock("../../src/utils/ephemeralContainerRun", () => {
+  return {
+    ephemeralContainerRun: jest.fn(),
   };
 });
 
@@ -136,11 +142,12 @@ describe("ServersService", () => {
         where: { id: mockServerRecord.id },
         select: ServersService.defaultServerSelect,
       });
-      expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
-        `docker restart '${mockServerRecord.containerName}'`,
-        expect.any(Function)
+      expect(ephemeralContainerRun).toHaveBeenCalledWith(
+        req,
+        res,
+        [`docker restart ${mockServerRecord.containerName}`],
+        mockServerRecord
       );
-      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
@@ -163,7 +170,7 @@ describe("ServersService", () => {
         "server",
         [mockServerRecord.id]
       );
-      expect(res.json).not.toHaveBeenCalled();
+      expect(ephemeralContainerRun).not.toHaveBeenCalled();
     });
   });
 
@@ -264,18 +271,16 @@ describe("ServersService", () => {
         expect.stringMatching(/rm -rf .*-.*-.*-.*-.*/),
         expect.any(Function)
       );
-      expect(
-        child_process.exec as unknown as jest.Mock
-      ).toHaveBeenNthCalledWith(
-        4,
-        `
-      docker stop server-manager-service
-      docker rm server-manager-service
-      docker run --name=server-manager-service -d --restart unless-stopped -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service
-    `,
-        expect.any(Function)
+      expect(ephemeralContainerRun).toHaveBeenCalledWith(
+        req,
+        res,
+        [
+          "docker stop server-manager-service",
+          "docker rm server-manager-service",
+          "docker run --name=server-manager-service -d --restart always -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service",
+        ],
+        mockCompleteServerRecord
       );
-      expect(res.json).toHaveBeenCalledWith(mockCompleteServerRecord);
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
@@ -298,7 +303,7 @@ describe("ServersService", () => {
         "server",
         [mockServerRecord.id]
       );
-      expect(res.json).not.toHaveBeenCalled();
+      expect(ephemeralContainerRun).not.toHaveBeenCalled();
     });
   });
 

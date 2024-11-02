@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import { Request, Response } from "express";
 import { EnvironmentVariablesService } from "./environmentVariablesService";
+import { ephemeralContainerRun } from "../utils";
 import { exec as exec2 } from "child_process";
 import { FilesService } from "./filesService";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
@@ -66,14 +67,19 @@ class ServersService {
   /* POST restart an existing server. */
   async restartServer(req: Request, res: Response) {
     const { id } = req.params;
-    const server = await this.prisma.server
+    const dbServer = await this.prisma.server
       .findUniqueOrThrow({
         where: { id: String(id) },
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
-    await exec(`docker restart '${server?.containerName}'`);
-    res.json(server);
+    // Makes typescript accept that server is not null.
+    // Really it can never be because Prisma would throw if it
+    // did not find a server above and handleDatabaseErrors is guaranteed
+    // to throw.
+    const server = dbServer!;
+    const commands = [`docker restart ${server.containerName}`];
+    await ephemeralContainerRun(req, res, commands, server);
   }
 
   /* POST update an existing server. */
@@ -105,7 +111,7 @@ class ServersService {
     dockerBuild.push(".");
 
     const dockerRun: string[] = [
-      `docker run --name=${server.containerName} -d --restart unless-stopped`,
+      `docker run --name=${server.containerName} -d --restart always`,
     ];
     server.ports.forEach((port) => {
       dockerRun.push(`-p ${port.number}:${port.number}/${port.protocol}`);
@@ -120,7 +126,7 @@ class ServersService {
 
     try {
       // Write out the Dockerfile and any other files this server has configured
-      // to a temporary workding directory.
+      // to a temporary working directory.
       await exec(`mkdir ${temporaryDirectoryName}`);
       server.files.forEach((file) =>
         fs.writeFileSync(
@@ -136,17 +142,12 @@ class ServersService {
       await exec(`rm -rf ${temporaryDirectoryName}`);
     }
 
-    // Send the instruction to stop, remove, and run the new container all at once.
-    // Doing these instructions in one exec allows server-manager-service
-    // to update itself.
-    await exec(`
-      docker stop ${server.containerName}
-      docker rm ${server.containerName}
-      ${dockerRun.join(" ")}
-    `);
-
-    // Respond with complete server to indicate the update is complete.
-    res.json(server);
+    const commands = [
+      `docker stop ${server.containerName}`,
+      `docker rm ${server.containerName}`,
+      dockerRun.join(" "),
+    ];
+    await ephemeralContainerRun(req, res, commands, server);
   }
 
   stringToBoolean(value: string | undefined | null): boolean | undefined {
