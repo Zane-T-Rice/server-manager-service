@@ -2,6 +2,7 @@
 FROM nixos/nix
 
 # Install dependencies
+RUN nix-channel --add https://nixos.org/channels/nixos-24.05 nixpkgs
 RUN nix-channel --update
 RUN nix-env -iA nixpkgs.git nixpkgs.nodejs nixpkgs.nodePackages_latest.pnpm nixpkgs.nodePackages_latest.vercel nixpkgs.nodePackages_latest.prisma nixpkgs.openssl nixpkgs.gnused nixpkgs.docker
 
