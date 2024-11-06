@@ -1,15 +1,20 @@
 # See README.md for example build and run commands for this Dockerfile
-FROM nixos/nix
+FROM alpine
+
+# ENV variables for "npx prisma migrate deploy"
+ARG HOST
+ARG PORT
+ARG DATABASE_URL
 
 # Install dependencies
-RUN nix-channel --add https://nixos.org/channels/nixos-24.05 nixpkgs
-RUN nix-channel --update
-RUN nix-env -iA nixpkgs.git nixpkgs.nodejs nixpkgs.nodePackages_latest.pnpm nixpkgs.nodePackages_latest.vercel nixpkgs.nodePackages_latest.prisma nixpkgs.openssl nixpkgs.gnused nixpkgs.docker
+RUN apk add bash git npm openssl docker zlib libgcc glib
 
 # Install latest server-manager-service
 RUN git clone https://github.com/Zane-T-Rice/server-manager-service.git
 WORKDIR /server-manager-service
 RUN npm install
+RUN npm run migrate:dev
+RUN npm run build
 
 COPY ./start-server-manager-service-server.sh /start-server-manager-service-server.sh
 ENTRYPOINT ["bash", "/start-server-manager-service-server.sh"]
