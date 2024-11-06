@@ -65,7 +65,7 @@ describe("FilesService", () => {
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
-    // @ts-ignore
+    // @ts-expect-error to make testing easier
     FilesService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const filesService2 = new FilesService(prisma);

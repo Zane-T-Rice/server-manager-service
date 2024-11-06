@@ -9,7 +9,7 @@ describe("FilesController", () => {
   const req: Request = jest.fn() as unknown as Request;
   const res: Response = jest.fn() as unknown as Response;
   const filesController = new FilesController();
-  // @ts-ignore
+  // @ts-expect-error to make testing easier
   FilesService.instance = {
     createFile: jest.fn(),
     getFiles: jest.fn(),

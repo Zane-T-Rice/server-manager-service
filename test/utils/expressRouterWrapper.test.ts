@@ -33,7 +33,7 @@ describe("expressRouterWrapper", () => {
   ])(
     `should call express router $verb with errorHandler wrapper`,
     async ({ spy, route }) => {
-      // @ts-ignore
+      // @ts-expect-error to make testing easier
       await expressRouterWrapper[route](path, routeFunction);
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
       expect(spy).toHaveBeenCalledWith(path, true);

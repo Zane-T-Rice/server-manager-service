@@ -9,7 +9,7 @@ describe("EnvironmentVariablesController", () => {
   const req: Request = jest.fn() as unknown as Request;
   const res: Response = jest.fn() as unknown as Response;
   const environmentVariablesController = new EnvironmentVariablesController();
-  // @ts-ignore
+  // @ts-expect-error to make testing easier
   EnvironmentVariablesService.instance = {
     createEnvironmentVariable: jest.fn(),
     getEnvironmentVariables: jest.fn(),

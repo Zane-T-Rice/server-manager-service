@@ -1,5 +1,5 @@
 import { NotFoundError } from "../../src/errors";
-import { ErrorMessageNames, ErrorMessages } from "../../src/constants";
+import { ErrorMessageNames } from "../../src/constants";
 
 describe("NotFoundError", () => {
   it(`should have the name ${ErrorMessageNames.notFoundError}`, () => {

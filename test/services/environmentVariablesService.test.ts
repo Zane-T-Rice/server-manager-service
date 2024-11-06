@@ -68,7 +68,7 @@ describe("EnvironmentVariablesService", () => {
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
-    // @ts-ignore
+    // @ts-expect-error to make testing easier
     EnvironmentVariablesService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const environmentVariablesService2 = new EnvironmentVariablesService(

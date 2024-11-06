@@ -9,7 +9,7 @@ describe("PortsController", () => {
   const req: Request = jest.fn() as unknown as Request;
   const res: Response = jest.fn() as unknown as Response;
   const portsController = new PortsController();
-  // @ts-ignore
+  // @ts-expect-error to make testing easier
   PortsService.instance = {
     createPort: jest.fn(),
     getPorts: jest.fn(),

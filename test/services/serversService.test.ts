@@ -87,7 +87,7 @@ describe("ServersService", () => {
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
-    // @ts-ignore
+    // @ts-expect-error to make testing easier
     ServersService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const serversService2 = new ServersService(prisma);
@@ -226,11 +226,12 @@ describe("ServersService", () => {
             name: "Dockerfile",
           },
         ],
-      } as any;
+      };
 
       // Return a complete server
       jest
         .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        // @ts-expect-error to make testing easier
         .mockResolvedValue(mockCompleteServerRecord);
       await serversService.updateServer(req, res);
       expect(

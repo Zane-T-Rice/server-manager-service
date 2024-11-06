@@ -9,7 +9,7 @@ describe("VolumesController", () => {
   const req: Request = jest.fn() as unknown as Request;
   const res: Response = jest.fn() as unknown as Response;
   const volumesController = new VolumesController();
-  // @ts-ignore
+  // @ts-expect-error to make testing easier
   VolumesService.instance = {
     createVolume: jest.fn(),
     getVolumes: jest.fn(),

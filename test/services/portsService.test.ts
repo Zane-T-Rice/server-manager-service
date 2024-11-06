@@ -62,7 +62,7 @@ describe("PortsService", () => {
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
-    // @ts-ignore
+    // @ts-expect-error to make testing easier
     PortsService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const portsService2 = new PortsService(prisma);

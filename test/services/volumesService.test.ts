@@ -65,7 +65,7 @@ describe("VolumesService", () => {
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
-    // @ts-ignore
+    // @ts-expect-error to make testing easier
     VolumesService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const volumesService2 = new VolumesService(prisma);
