@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "ts-node src/app.ts",
+    "start": "node build/src/app.js",
     "start:dev": "ts-node src/app.ts | pino-pretty",
     "lint": "eslint --fix --max-warnings=0 src/*.ts src/**/*.ts --flag unstable_ts_config",
     "test": "rm -rf build && npm run build && jest --coverage --verbose --passWithNoTests --rootDir build",
@@ -21,6 +21,9 @@
     "uuid": "^11.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-typescript": "^7.26.0",
     "@types/eslint": "^9.6.1",
     "@types/eslint__eslintrc": "^2.1.2",
     "@types/eslint__js": "^8.42.3",
