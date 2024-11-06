@@ -111,7 +111,7 @@ class ServersService {
     dockerBuild.push(".");
 
     const dockerRun: string[] = [
-      `docker run --name=${server.containerName} -d --restart always`,
+      `docker run --name=${server.containerName} -d --restart always --network=server-manager-service-network`,
     ];
     server.ports.forEach((port) => {
       dockerRun.push(`-p ${port.number}:${port.number}/${port.protocol}`);

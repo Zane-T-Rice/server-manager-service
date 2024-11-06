@@ -278,7 +278,7 @@ describe("ServersService", () => {
         [
           "docker stop server-manager-service",
           "docker rm server-manager-service",
-          "docker run --name=server-manager-service -d --restart always -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service",
+          "docker run --name=server-manager-service -d --restart always --network=server-manager-service-network -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service",
         ],
         mockCompleteServerRecord
       );
