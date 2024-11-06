@@ -13,7 +13,7 @@ RUN apk add bash git npm openssl docker zlib libgcc glib
 RUN git clone https://github.com/Zane-T-Rice/server-manager-service.git
 WORKDIR /server-manager-service
 RUN npm install
-RUN npm run migrate:dev
+RUN npx prisma generate
 RUN npm run build
 
 COPY ./start-server-manager-service-server.sh /start-server-manager-service-server.sh
