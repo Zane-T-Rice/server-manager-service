@@ -56,7 +56,11 @@ app.use("/servers", filesRouter);
 
 // Swagger
 // Use a workaround for swagger-ui-dist not being able to set custom swagger URL
-app.use("/swagger-files", express.static(path.join(__dirname, "../swagger")));
+// The swaggerPath accounts for running using ts-node (start:dev) versus tsc (start).
+const swaggerPath = fs.existsSync(path.join(__dirname, "../swagger"))
+  ? path.join(__dirname, "../swagger")
+  : path.join(__dirname, "../../swagger");
+app.use("/swagger-files", express.static(swaggerPath));
 const swaggerRoutePath = "/swagger";
 const swaggerUIFSPath = swaggerUI.getAbsoluteFSPath();
 const indexContent = fs
