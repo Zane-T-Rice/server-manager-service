@@ -65,7 +65,7 @@ These commands are safe to repeat.
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   --network server-manager-service-network \
-  --env LOG_LEVEL="info" --env HOST="PUT_YOUR_DEPLOYMENT_HOST_IP" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env LOG_LEVEL="info" --env SWAGGER_HOST_AND_PORT="PUT_YOUR_DEPLOYMENT_HOST_IP" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   server-manager-service
 )
 ```
@@ -115,7 +115,7 @@ These commands can be repeated to build a new container with any new changes.
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   --network=server-manager-service-network \
-  --env LOG_LEVEL="trace" --env HOST="localhost" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env LOG_LEVEL="trace" --env SWAGGER_HOST_AND_PORT="localhost:3000" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   server-manager-service
 )
 ```
