@@ -70,7 +70,7 @@ model File {
 model AuthorizationKey {
   id String @id @default(uuid())
   owner String // The user or application to whom this APIKey belongs
-  value String // The APIKey itself
+  value String // The authroization key itself
   @@unique([owner, value])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
