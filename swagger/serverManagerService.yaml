@@ -18,6 +18,9 @@ tags:
     description: Manage a Server's EnvironmentVariables
   - name: files
     description: Manage a Server's build Files
+servers:
+  - url: /server-manager-service
+  - url: /
 paths:
   /servers:
     post:
@@ -27,7 +30,6 @@ paths:
       operationId: createServer
       requestBody:
         $ref: "./servers/serverRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -75,7 +77,6 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./servers/serverRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -150,7 +151,6 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./ports/portRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -196,7 +196,6 @@ paths:
         - $ref: "./common/portIdInPath.yaml"
       requestBody:
         $ref: "./ports/portRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -222,12 +221,11 @@ paths:
       tags:
         - volumes
       summary: Create a new volume
-      operationId: createEnvironmentVariable
+      operationId: createVolume
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./volumes/volumeRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -237,7 +235,7 @@ paths:
       tags:
         - volumes
       summary: Get Volumes of Server
-      operationId: getVolume
+      operationId: getVolumes
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
@@ -273,7 +271,6 @@ paths:
         - $ref: "./common/volumeIdInPath.yaml"
       requestBody:
         $ref: "./volumes/volumeRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -304,7 +301,6 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./environmentVariables/environmentVariableRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -350,7 +346,6 @@ paths:
         - $ref: "./common/environmentVariableIdInPath.yaml"
       requestBody:
         $ref: "./environmentVariables/environmentVariableRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -382,7 +377,6 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./files/fileRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"
@@ -428,7 +422,6 @@ paths:
         - $ref: "./common/fileIdInPath.yaml"
       requestBody:
         $ref: "./files/fileRequest.yaml"
-        required: true
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"

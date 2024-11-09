@@ -3,6 +3,9 @@ info:
   title: Server Manager Service
   description: Define and control your servers with these routes.
   version: 0.1.0
+servers:
+  - url: /server-manager-service
+  - url: /
 security:
   - ApiKeyAuth: []
   - Owner: []
@@ -29,7 +32,6 @@ paths:
       operationId: createServer
       requestBody:
         $ref: '#/components/requestBodies/serverRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -77,7 +79,6 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/serverRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -152,7 +153,6 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/portRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -198,7 +198,6 @@ paths:
         - $ref: '#/components/parameters/portIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/portRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -224,12 +223,11 @@ paths:
       tags:
         - volumes
       summary: Create a new volume
-      operationId: createEnvironmentVariable
+      operationId: createVolume
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/volumeRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -239,7 +237,7 @@ paths:
       tags:
         - volumes
       summary: Get Volumes of Server
-      operationId: getVolume
+      operationId: getVolumes
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
@@ -275,7 +273,6 @@ paths:
         - $ref: '#/components/parameters/volumeIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/volumeRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -306,7 +303,6 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/environmentVariableRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -352,7 +348,6 @@ paths:
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/environmentVariableRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -384,7 +379,6 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/fileRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'
@@ -430,7 +424,6 @@ paths:
         - $ref: '#/components/parameters/fileIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/fileRequest'
-        required: true
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'
