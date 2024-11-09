@@ -43,6 +43,7 @@ describe("ServersService", () => {
   const body = {
     applicationName: "appName",
     containerName: "containerName",
+    isInResponseChain: false,
     isUpdatable: false,
   };
   const mockServerRecord = {
@@ -142,11 +143,31 @@ describe("ServersService", () => {
         where: { id: mockServerRecord.id },
         select: ServersService.defaultServerSelect,
       });
+      expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
+        `docker restart ${mockServerRecord.containerName}`,
+        expect.any(Function)
+      );
+    });
+    it("Should restart server using an ephemeral container", async () => {
+      const mockServerRecordIsInResponseChain = {
+        ...mockServerRecord,
+        isInResponseChain: true,
+      };
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValueOnce(mockServerRecordIsInResponseChain);
+      await serversService.restartServer(req, res);
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: { id: mockServerRecordIsInResponseChain.id },
+        select: ServersService.defaultServerSelect,
+      });
       expect(ephemeralContainerRun).toHaveBeenCalledWith(
         req,
         res,
-        [`docker restart ${mockServerRecord.containerName}`],
-        mockServerRecord
+        [`docker restart ${mockServerRecordIsInResponseChain.containerName}`],
+        mockServerRecordIsInResponseChain
       );
     });
     it("should handle any database errors", async () => {
@@ -175,65 +196,60 @@ describe("ServersService", () => {
   });
 
   describe("POST /:id/update", () => {
-    it("Should update server", async () => {
-      const mockCompleteServerRecord = {
-        id: "90cfef3f-a0cd-49b6-ada9-7a3958502aad",
-        applicationName: "server-manager-service",
-        containerName: "server-manager-service",
-        isUpdatable: true,
-        ports: [
-          {
-            id: "c237d998-f514-4640-b150-478bf9362bca",
-            number: 3000,
-            protocol: "udp",
-          },
-          {
-            id: "32de6034-59f3-44ea-bd1c-8a3393260ca6",
-            number: 3000,
-            protocol: "tcp",
-          },
-        ],
-        volumes: [
-          {
-            id: "b3e2148d-1e5a-4895-ae4b-0c9c3628699b",
-            hostPath: "/path/to/server-manager-service/prisma/db",
-            containerPath: "/server-manager-service/prisma/db",
-          },
-          {
-            id: "3122939b-5838-4b47-9ec5-5e942520bc15",
-            hostPath: "/var/run/docker.sock",
-            containerPath: "/var/run/docker.sock",
-          },
-        ],
-        environmentVariables: [
-          {
-            id: "cf1f3fe1-cc09-4a9c-8a69-8f25a1883e8c",
-            name: "ENV",
-            value: "local",
-          },
-        ],
-        files: [
-          {
-            id: "4cda33aa-4d2f-49a2-b152-39f8c85db042",
-            content:
-              "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKIyBNaWdyYXRlIGRhdGFiYXNlIHRvIG1ha2Ugc3VyZSBpdCBpcyBpbiBzeW5jIHdpdGggbGF0ZXN0IHNjaGVtYS4KUFJJU01BX0VOR0lORVNfRElSPSQobml4IGV2YWwgbml4cGtncyNwcmlzbWEtZW5naW5lcy5vdXRQYXRoIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIG5peC1jb21tYW5kIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIGZsYWtlcyAgfCBzZWQgJ3MvXi4vLycgfCBzZWQgJ3MvLiQvLycpCmV4cG9ydCBQUklTTUFfUVVFUllfRU5HSU5FX0xJQlJBUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvbGliL2xpYnF1ZXJ5X2VuZ2luZS5ub2RlIgpleHBvcnQgUFJJU01BX1FVRVJZX0VOR0lORV9CSU5BUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvYmluL3F1ZXJ5LWVuZ2luZSIKZXhwb3J0IFBSSVNNQV9TQ0hFTUFfRU5HSU5FX0JJTkFSWT0iJFBSSVNNQV9FTkdJTkVTX0RJUi9iaW4vc2NoZW1hLWVuZ2luZSIKbnB4IHByaXNtYSBtaWdyYXRlIGRlcGxveQoKIyBTdGFydCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlCm5wbSBydW4gc3RhcnQK",
-            name: "start-server-manager-service-server.sh",
-          },
-          {
-            id: "661142ef-1090-46ba-a649-741690f2bc3f",
-            content:
-              "RlJPTSBuaXhvcy9uaXgKCiMgVGhpcyBpcyB0aGUgc3VmZml4IG9mIHdoaWNoZXZlciBmaWxlIGluIGVudmlyb25tZW50cy8gdGhhdCB5b3Ugd2FudCB0byB1c2UuCiMgT3ZlcnJpZGUgRU5WIGZvciBkZXBsb3ltZW50cyB0byBub24tbG9jYWwgZW52aXJvbm1lbnRzIHdpdGggLS1idWlsZC1hcmcgRU5WPXN1ZmZpeC4KRU5WIEVOVj1sb2NhbApBUkcgRU5WCgojIEluc3RhbGwgZGVwZW5kZW5jaWVzClJVTiBuaXgtY2hhbm5lbCAtLXVwZGF0ZQpSVU4gbml4LWVudiAtaUEgbml4cGtncy5naXQgbml4cGtncy5ub2RlanMgbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnBucG0gbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnZlcmNlbCBuaXhwa2dzLm5vZGVQYWNrYWdlc19sYXRlc3QucHJpc21hIG5peHBrZ3Mub3BlbnNzbCBuaXhwa2dzLmdudXNlZCBuaXhwa2dzLmRvY2tlcgoKIyBJbnN0YWxsIGxhdGVzdCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlClJVTiBnaXQgY2xvbmUgaHR0cHM6Ly9naXRodWIuY29tL1phbmUtVC1SaWNlL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UuZ2l0CldPUktESVIgL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UKUlVOIGNwIGVudmlyb25tZW50cy8uZW52LiRFTlYgLmVudgpSVU4gbnBtIGluc3RhbGwKCkVYUE9TRSAzMDAwL3VkcApFWFBPU0UgMzAwMC90Y3AKCkNPUFkgLi9zdGFydC1zZXJ2ZXItbWFuYWdlci1zZXJ2aWNlLXNlcnZlci5zaCAvc3RhcnQtc2VydmVyLW1hbmFnZXItc2VydmljZS1zZXJ2ZXIuc2gKRU5UUllQT0lOVCBbImJhc2giLCAiL3N0YXJ0LXNlcnZlci1tYW5hZ2VyLXNlcnZpY2Utc2VydmVyLnNoIl0K",
-            name: "Dockerfile",
-          },
-        ],
-      };
+    const mockCompleteServerRecord = {
+      id: "90cfef3f-a0cd-49b6-ada9-7a3958502aad",
+      applicationName: "server-manager-service",
+      containerName: "server-manager-service",
+      isInResponseChain: false,
+      isUpdatable: true,
+      ports: [
+        {
+          id: "c237d998-f514-4640-b150-478bf9362bca",
+          number: 3000,
+          protocol: "udp",
+        },
+        {
+          id: "32de6034-59f3-44ea-bd1c-8a3393260ca6",
+          number: 3000,
+          protocol: "tcp",
+        },
+      ],
+      volumes: [
+        {
+          id: "b3e2148d-1e5a-4895-ae4b-0c9c3628699b",
+          hostPath: "/path/to/server-manager-service/prisma/db",
+          containerPath: "/server-manager-service/prisma/db",
+        },
+        {
+          id: "3122939b-5838-4b47-9ec5-5e942520bc15",
+          hostPath: "/var/run/docker.sock",
+          containerPath: "/var/run/docker.sock",
+        },
+      ],
+      environmentVariables: [
+        {
+          id: "cf1f3fe1-cc09-4a9c-8a69-8f25a1883e8c",
+          name: "ENV",
+          value: "local",
+        },
+      ],
+      files: [
+        {
+          id: "4cda33aa-4d2f-49a2-b152-39f8c85db042",
+          content:
+            "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKIyBNaWdyYXRlIGRhdGFiYXNlIHRvIG1ha2Ugc3VyZSBpdCBpcyBpbiBzeW5jIHdpdGggbGF0ZXN0IHNjaGVtYS4KUFJJU01BX0VOR0lORVNfRElSPSQobml4IGV2YWwgbml4cGtncyNwcmlzbWEtZW5naW5lcy5vdXRQYXRoIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIG5peC1jb21tYW5kIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIGZsYWtlcyAgfCBzZWQgJ3MvXi4vLycgfCBzZWQgJ3MvLiQvLycpCmV4cG9ydCBQUklTTUFfUVVFUllfRU5HSU5FX0xJQlJBUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvbGliL2xpYnF1ZXJ5X2VuZ2luZS5ub2RlIgpleHBvcnQgUFJJU01BX1FVRVJZX0VOR0lORV9CSU5BUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvYmluL3F1ZXJ5LWVuZ2luZSIKZXhwb3J0IFBSSVNNQV9TQ0hFTUFfRU5HSU5FX0JJTkFSWT0iJFBSSVNNQV9FTkdJTkVTX0RJUi9iaW4vc2NoZW1hLWVuZ2luZSIKbnB4IHByaXNtYSBtaWdyYXRlIGRlcGxveQoKIyBTdGFydCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlCm5wbSBydW4gc3RhcnQK",
+          name: "start-server-manager-service-server.sh",
+        },
+        {
+          id: "661142ef-1090-46ba-a649-741690f2bc3f",
+          content:
+            "RlJPTSBuaXhvcy9uaXgKCiMgVGhpcyBpcyB0aGUgc3VmZml4IG9mIHdoaWNoZXZlciBmaWxlIGluIGVudmlyb25tZW50cy8gdGhhdCB5b3Ugd2FudCB0byB1c2UuCiMgT3ZlcnJpZGUgRU5WIGZvciBkZXBsb3ltZW50cyB0byBub24tbG9jYWwgZW52aXJvbm1lbnRzIHdpdGggLS1idWlsZC1hcmcgRU5WPXN1ZmZpeC4KRU5WIEVOVj1sb2NhbApBUkcgRU5WCgojIEluc3RhbGwgZGVwZW5kZW5jaWVzClJVTiBuaXgtY2hhbm5lbCAtLXVwZGF0ZQpSVU4gbml4LWVudiAtaUEgbml4cGtncy5naXQgbml4cGtncy5ub2RlanMgbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnBucG0gbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnZlcmNlbCBuaXhwa2dzLm5vZGVQYWNrYWdlc19sYXRlc3QucHJpc21hIG5peHBrZ3Mub3BlbnNzbCBuaXhwa2dzLmdudXNlZCBuaXhwa2dzLmRvY2tlcgoKIyBJbnN0YWxsIGxhdGVzdCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlClJVTiBnaXQgY2xvbmUgaHR0cHM6Ly9naXRodWIuY29tL1phbmUtVC1SaWNlL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UuZ2l0CldPUktESVIgL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UKUlVOIGNwIGVudmlyb25tZW50cy8uZW52LiRFTlYgLmVudgpSVU4gbnBtIGluc3RhbGwKCkVYUE9TRSAzMDAwL3VkcApFWFBPU0UgMzAwMC90Y3AKCkNPUFkgLi9zdGFydC1zZXJ2ZXItbWFuYWdlci1zZXJ2aWNlLXNlcnZlci5zaCAvc3RhcnQtc2VydmVyLW1hbmFnZXItc2VydmljZS1zZXJ2ZXIuc2gKRU5UUllQT0lOVCBbImJhc2giLCAiL3N0YXJ0LXNlcnZlci1tYW5hZ2VyLXNlcnZpY2Utc2VydmVyLnNoIl0K",
+          name: "Dockerfile",
+        },
+      ],
+    };
 
-      // Return a complete server
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        // @ts-expect-error to make testing easier
-        .mockResolvedValue(mockCompleteServerRecord);
-      await serversService.updateServer(req, res);
+    const updateBuildStepExpectations = async () => {
       expect(
         serversService.prisma.server.findUniqueOrThrow
       ).toHaveBeenCalledWith({
@@ -272,6 +288,39 @@ describe("ServersService", () => {
         expect.stringMatching(/rm -rf .*-.*-.*-.*-.*/),
         expect.any(Function)
       );
+    };
+    it("Should update server", async () => {
+      // Return a complete server
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        // @ts-expect-error to make testing easier
+        .mockResolvedValue(mockCompleteServerRecord);
+      await serversService.updateServer(req, res);
+      updateBuildStepExpectations();
+      expect(
+        child_process.exec as unknown as jest.Mock
+      ).toHaveBeenNthCalledWith(
+        4,
+        [
+          "docker stop server-manager-service",
+          "docker rm server-manager-service",
+          "docker run --name=server-manager-service -d --restart always --network=server-manager-service-network -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service",
+        ].join(";"),
+        expect.any(Function)
+      );
+    });
+    it("Should update server using an ephemeral container", async () => {
+      const mockCompleteServerRecordIsInResponseChain = {
+        ...mockCompleteServerRecord,
+        isInResponseChain: true,
+      };
+      // Return a complete server
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        // @ts-expect-error to make testing easier
+        .mockResolvedValue(mockCompleteServerRecordIsInResponseChain);
+      await serversService.updateServer(req, res);
+      updateBuildStepExpectations();
       expect(ephemeralContainerRun).toHaveBeenCalledWith(
         req,
         res,
@@ -280,7 +329,7 @@ describe("ServersService", () => {
           "docker rm server-manager-service",
           "docker run --name=server-manager-service -d --restart always --network=server-manager-service-network -p 3000:3000/udp -p 3000:3000/tcp -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db -v /var/run/docker.sock:/var/run/docker.sock --env ENV=local server-manager-service",
         ],
-        mockCompleteServerRecord
+        mockCompleteServerRecordIsInResponseChain
       );
     });
     it("should handle any database errors", async () => {

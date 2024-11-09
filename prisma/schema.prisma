@@ -14,6 +14,7 @@ model Server {
   id String @id @default(uuid())
   applicationName String
   containerName String
+  isInResponseChain Boolean @default(false)
   isUpdatable Boolean @default(false)
   ports Port[]
   volumes Volume[]

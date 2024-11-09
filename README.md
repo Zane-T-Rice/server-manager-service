@@ -7,11 +7,13 @@ The interface with docker could theoretically be replaced with minimal code chan
 ### Requirements
 
 ```sh
-node --version
-v20.17.0
-
+# Docker is required to run the application.
 docker --version
 Docker version 27.3.1, build v27.3.1
+
+# The rest of these are only required to code.
+node --version
+v20.17.0
 
 # If you want to make pull requests you will also need redocly
 # Redocly is used to combine the Swagger spec in to a single file so that
@@ -27,7 +29,12 @@ This is only required if you want to work on the code or look at the code withou
 ```sh
 (
   npm install
+
+  # Non-NixOS
   npx prisma generate
+
+  # NixOS
+  nix-shell --run "npx prisma generate"
 )
 ```
 

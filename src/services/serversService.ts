@@ -21,6 +21,7 @@ class ServersService {
     id: true,
     applicationName: true,
     containerName: true,
+    isInResponseChain: true,
     isUpdatable: true,
   };
 
@@ -50,12 +51,14 @@ class ServersService {
 
   /* POST a new server. */
   async createServer(req: Request, res: Response) {
-    const { applicationName, containerName, isUpdatable } = req.body;
+    const { applicationName, containerName, isInResponseChain, isUpdatable } =
+      req.body;
     const server = await this.prisma.server
       .create({
         data: {
           applicationName,
           containerName,
+          isInResponseChain,
           isUpdatable,
         },
         select: ServersService.defaultServerSelect,
@@ -79,7 +82,16 @@ class ServersService {
     // to throw.
     const server = dbServer!;
     const commands = [`docker restart ${server.containerName}`];
-    await ephemeralContainerRun(req, res, commands, server);
+    if (server.isInResponseChain) {
+      // This service may be torn down by the restart.
+      // To avoid errors, respond before executing the restart and use an exterior, ephemeral container
+      // to perform the restart.
+      await ephemeralContainerRun(req, res, commands, server);
+    } else {
+      // The operation is safe and should not require an ephemeral container. Respond after execution of commands.
+      await exec(commands.join(";"));
+      res.json(server);
+    }
   }
 
   /* POST update an existing server. */
@@ -147,7 +159,17 @@ class ServersService {
       `docker rm ${server.containerName}`,
       dockerRun.join(" "),
     ];
-    await ephemeralContainerRun(req, res, commands, server);
+
+    if (server.isInResponseChain) {
+      // This service may be torn down by the update.
+      // To avoid errors, respond before executing the update and use an exterior, ephemeral container
+      // to perform the update.
+      await ephemeralContainerRun(req, res, commands, server);
+    } else {
+      // The operation is safe and should not require an ephemeral container. Respond after execution of commands.
+      await exec(commands.join(";"));
+      res.json(server);
+    }
   }
 
   stringToBoolean(value: string | undefined | null): boolean | undefined {
@@ -205,13 +227,15 @@ class ServersService {
   /* PATCH a new server. */
   async patchServer(req: Request, res: Response) {
     const { id } = req.params;
-    const { applicationName, containerName, isUpdatable } = req.body;
+    const { applicationName, containerName, isInResponseChain, isUpdatable } =
+      req.body;
     const server = await this.prisma.server
       .update({
         where: { id: String(id) },
         data: {
           applicationName,
           containerName,
+          isInResponseChain,
           isUpdatable,
         },
         select: ServersService.defaultServerSelect,
