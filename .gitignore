@@ -6,3 +6,5 @@ coverage
 build
 db
 package-lock.json
+./Dockerfile
+./start-server-manager-service-server.sh
