@@ -63,3 +63,15 @@ model File {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// This table will NOT have REST routes. Records to this table must
+// be added manually. The application must only read, never write
+// to this table.
+model AuthorizationKey {
+  id String @id @default(uuid())
+  owner String // The user or application to whom this APIKey belongs
+  value String // The APIKey itself
+  @@unique([owner, value])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

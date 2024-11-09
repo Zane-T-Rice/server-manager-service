@@ -449,3 +449,17 @@ paths:
           $ref: "./files/fileResponse.yaml"
         "404":
           $ref: "./files/errors/fileNotFoundError.yaml"
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: authorization-key
+    Owner:
+      type: apiKey
+      in: header
+      name: owner
+# Apply the API key globally to all operations
+security:
+  - ApiKeyAuth: []
+  - Owner: []

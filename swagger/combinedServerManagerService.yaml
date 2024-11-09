@@ -3,6 +3,9 @@ info:
   title: Server Manager Service
   description: Define and control your servers with these routes.
   version: 0.1.0
+security:
+  - ApiKeyAuth: []
+  - Owner: []
 tags:
   - name: servers
     description: The root of managing and configuring your Servers
@@ -449,6 +452,15 @@ paths:
         '404':
           $ref: '#/components/responses/fileNotFoundError'
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: authorization-key
+    Owner:
+      type: apiKey
+      in: header
+      name: owner
   schemas:
     serverResponseSchema:
       required:

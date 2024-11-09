@@ -1,4 +1,5 @@
 import { InternalServerError, NotFoundError } from "../../src/errors";
+import { NotAuthorizedError } from "../../src/errors/notAuthorizedError";
 import { appErrorHandler } from "../../src/middlewares/appErrorHandler";
 import { Request, Response, NextFunction } from "express";
 
@@ -32,6 +33,14 @@ describe("appErrorHandler", () => {
 
     expect(resMock.status).toHaveBeenCalledWith(500);
     expect(resMock.json).toHaveBeenCalledWith(internalServerError);
+  });
+
+  it("should set 404 status and return NotAuthorizedError", () => {
+    const notAuthorizedError = new NotAuthorizedError();
+    appErrorHandler(notAuthorizedError, reqMock, resMock, nextMock);
+
+    expect(resMock.status).toHaveBeenCalledWith(401);
+    expect(resMock.json).toHaveBeenCalledWith(notAuthorizedError);
   });
 
   it("should set 500 status and return InternalServerError as a default", () => {
