@@ -26,6 +26,7 @@ class ServersService {
     isUpdatable: true,
   };
 
+  /* Used by the updateServer route since it must generate full commands to docker. */
   static completeServerSelect = {
     ...ServersService.defaultServerSelect,
     ports: {
@@ -171,15 +172,22 @@ class ServersService {
       dockerRun.join(" "),
     ];
 
+    const responseServer = (
+      Object.keys(
+        ServersService.defaultServerSelect
+      ) as (keyof typeof ServersService.defaultServerSelect)[]
+    ).reduce((a, b) => {
+      return { ...a, [b]: server[b] };
+    }, {});
     if (server.isInResponseChain) {
       // This service may be torn down by the update.
       // To avoid errors, respond before executing the update and use an exterior, ephemeral container
       // to perform the update.
-      await ephemeralContainerRun(req, res, commands, server);
+      await ephemeralContainerRun(req, res, commands, responseServer);
     } else {
       // The operation is safe and should not require an ephemeral container. Respond after execution of commands.
       await exec(commands.join(";"));
-      res.json(server);
+      res.json(responseServer);
     }
   }
 
@@ -218,18 +226,6 @@ class ServersService {
       .findUniqueOrThrow({
         where: { id: String(id) },
         select: ServersService.defaultServerSelect,
-      })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
-    res.json(server);
-  }
-
-  /* GET complete server by id. */
-  async getCompleteServerById(req: Request, res: Response) {
-    const { id } = req.params;
-    const server = await this.prisma.server
-      .findUniqueOrThrow({
-        where: { id: String(id) },
-        select: ServersService.completeServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
     res.json(server);

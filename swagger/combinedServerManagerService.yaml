@@ -96,22 +96,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
-  /servers/{serverId}/complete:
-    get:
-      tags:
-        - servers
-      summary: Get a complete Server by id
-      description: A complete Server will have all related resources hydrated on to the response.
-      operationId: getServerComplete
-      parameters:
-        - $ref: '#/components/parameters/serverIdInPath'
-      responses:
-        '200':
-          $ref: '#/components/responses/serverCompleteResponse'
-        '404':
-          $ref: '#/components/responses/serverNotFoundError'
-        '500':
-          $ref: '#/components/responses/internalServerError'
   /servers/{serverId}/restart:
     post:
       tags:
@@ -138,7 +122,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
-          $ref: '#/components/responses/serverCompleteResponse'
+          $ref: '#/components/responses/serverResponse'
         '404':
           $ref: '#/components/responses/serverNotFoundError'
         '500':
@@ -515,49 +499,6 @@ components:
           type: number
         protocol:
           type: string
-    volumeResponseSchema:
-      required:
-        - id
-        - hostPath
-        - containerPath
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        hostPath:
-          type: string
-        containerPath:
-          type: string
-    environmentVariableResponseSchema:
-      required:
-        - id
-        - name
-        - value
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        value:
-          type: string
-    fileResponseSchema:
-      required:
-        - id
-        - content
-        - name
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        content:
-          description: base64 encoded contents of the file.
-          type: string
-        name:
-          type: string
     portNotFoundErrorSchema:
       type: object
       properties:
@@ -576,6 +517,20 @@ components:
         number:
           type: number
         protocol:
+          type: string
+    volumeResponseSchema:
+      required:
+        - id
+        - hostPath
+        - containerPath
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        hostPath:
+          type: string
+        containerPath:
           type: string
     volumeNotFoundErrorSchema:
       type: object
@@ -596,6 +551,20 @@ components:
           type: string
         containerPath:
           type: string
+    environmentVariableResponseSchema:
+      required:
+        - id
+        - name
+        - value
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        value:
+          type: string
     environmentVariableNotFoundErrorSchema:
       type: object
       properties:
@@ -614,6 +583,21 @@ components:
         name:
           type: string
         value:
+          type: string
+    fileResponseSchema:
+      required:
+        - id
+        - content
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          description: base64 encoded contents of the file.
+          type: string
+        name:
           type: string
     fileNotFoundErrorSchema:
       type: object
@@ -662,37 +646,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/serverResponseSchema'
-    serverCompleteResponse:
-      description: Success
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/serverResponseSchema'
-              - type: object
-                properties:
-                  ports:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/portResponseSchema'
-              - type: object
-                properties:
-                  volumes:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/volumeResponseSchema'
-              - type: object
-                properties:
-                  environmentVariables:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/environmentVariableResponseSchema'
-              - type: object
-                properties:
-                  files:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/fileResponseSchema'
     portArrayResponse:
       description: Success
       content:

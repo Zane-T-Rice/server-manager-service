@@ -1,13 +1,7 @@
 import * as child_process from "child_process";
 import * as fs from "node:fs";
-import {
-  EnvironmentVariablesService,
-  FilesService,
-  PortsService,
-  ServersService,
-  VolumesService,
-} from "../../src/services";
-import { PrismaClient } from "@prisma/client";
+import { ServersService } from "../../src/services";
+import { PrismaClient, Server } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
 import { ephemeralContainerRun } from "../../src/utils";
@@ -49,9 +43,7 @@ describe("ServersService", () => {
   const mockServerRecord = {
     id: "serverid",
     ...body,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  } as Server;
   const req: Request = {
     body,
     query: {},
@@ -197,9 +189,7 @@ describe("ServersService", () => {
 
   describe("POST /:id/update", () => {
     const mockCompleteServerRecord = {
-      id: "90cfef3f-a0cd-49b6-ada9-7a3958502aad",
-      applicationName: "server-manager-service",
-      containerName: "server-manager-service",
+      ...mockServerRecord,
       isInResponseChain: false,
       isUpdatable: true,
       ports: [
@@ -277,7 +267,7 @@ describe("ServersService", () => {
       ).toHaveBeenNthCalledWith(
         2,
         expect.stringMatching(
-          /cd .*-.*-.*-.*-.* && docker build -t server-manager-service --no-cache --build-arg 'ENV=local' ./
+          /cd .*-.*-.*-.*-.* && docker build -t containerName --no-cache --build-arg 'ENV=local' ./
         ),
         expect.any(Function)
       );
@@ -293,7 +283,6 @@ describe("ServersService", () => {
       // Return a complete server
       jest
         .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        // @ts-expect-error to make testing easier
         .mockResolvedValue(mockCompleteServerRecord);
       await serversService.updateServer(req, res);
       updateBuildStepExpectations();
@@ -302,9 +291,9 @@ describe("ServersService", () => {
       ).toHaveBeenNthCalledWith(
         4,
         [
-          "docker stop server-manager-service",
-          "docker rm server-manager-service",
-          "docker run --name=server-manager-service -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' server-manager-service",
+          "docker stop containerName",
+          "docker rm containerName",
+          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' containerName",
         ].join(";"),
         expect.any(Function)
       );
@@ -317,7 +306,6 @@ describe("ServersService", () => {
       // Return a complete server
       jest
         .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        // @ts-expect-error to make testing easier
         .mockResolvedValue(mockCompleteServerRecordIsInResponseChain);
       await serversService.updateServer(req, res);
       updateBuildStepExpectations();
@@ -325,11 +313,11 @@ describe("ServersService", () => {
         req,
         res,
         [
-          "docker stop server-manager-service",
-          "docker rm server-manager-service",
-          "docker run --name=server-manager-service -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' server-manager-service",
+          "docker stop containerName",
+          "docker rm containerName",
+          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' containerName",
         ],
-        mockCompleteServerRecordIsInResponseChain
+        { ...mockServerRecord, isInResponseChain: true, isUpdatable: true }
       );
     });
     it("should handle any database errors", async () => {
@@ -441,72 +429,6 @@ describe("ServersService", () => {
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id },
         select: ServersService.defaultServerSelect,
-      });
-      expect(handleDatabaseErrors).toHaveBeenCalledWith(
-        expect.any(Error),
-        "server",
-        [mockServerRecord.id]
-      );
-      expect(res.json).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("GET /:id/complete", () => {
-    it("Should return complete server", async () => {
-      await serversService.getCompleteServerById(req, res);
-      expect(
-        serversService.prisma.server.findUniqueOrThrow
-      ).toHaveBeenCalledWith({
-        where: { id: mockServerRecord.id },
-        select: {
-          ...ServersService.defaultServerSelect,
-          ports: {
-            select: PortsService.defaultPortSelect,
-          },
-          volumes: {
-            select: VolumesService.defaultVolumeSelect,
-          },
-          environmentVariables: {
-            select:
-              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
-          },
-          files: {
-            select: FilesService.defaultFileSelect,
-          },
-        },
-      });
-      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
-    });
-    it("should handle any database errors", async () => {
-      expect.assertions(4);
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockRejectedValue(new Error());
-      try {
-        await serversService.getCompleteServerById(req, res);
-      } catch (e) {
-        expect(e).toBeInstanceOf(Error);
-      }
-      expect(
-        serversService.prisma.server.findUniqueOrThrow
-      ).toHaveBeenCalledWith({
-        where: { id: mockServerRecord.id },
-        select: {
-          ...ServersService.defaultServerSelect,
-          ports: {
-            select: PortsService.defaultPortSelect,
-          },
-          volumes: {
-            select: VolumesService.defaultVolumeSelect,
-          },
-          environmentVariables: {
-            select:
-              EnvironmentVariablesService.defaultEnvironmentVariableSelect,
-          },
-          files: {
-            select: FilesService.defaultFileSelect,
-          },
-        },
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),

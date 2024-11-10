@@ -94,22 +94,6 @@ paths:
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
-  /servers/{serverId}/complete:
-    get:
-      tags:
-        - servers
-      summary: Get a complete Server by id
-      description: A complete Server will have all related resources hydrated on to the response.
-      operationId: getServerComplete
-      parameters:
-        - $ref: "./common/serverIdInPath.yaml"
-      responses:
-        "200":
-          $ref: "./servers/serverCompleteResponse.yaml"
-        "404":
-          $ref: "./servers/errors/serverNotFoundError.yaml"
-        "500":
-          $ref: "./common/errors/internalServerError.yaml"
   /servers/{serverId}/restart:
     post:
       tags:
@@ -136,7 +120,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./servers/serverCompleteResponse.yaml"
+          $ref: "./servers/serverResponse.yaml"
         "404":
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
