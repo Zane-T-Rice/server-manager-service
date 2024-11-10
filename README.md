@@ -165,5 +165,4 @@ ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
 - Make restart policy configurable (and optional)
 - Input validation in controllers.
 - Probaby add integration tests. Right now it is all unit tests.
-- Creating a port for a non-existent server is 500 instead of 404.
 - Docker with non-root user (mostly so the files it generates are not owned by root).
