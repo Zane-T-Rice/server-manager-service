@@ -12,7 +12,9 @@ export function isServerMiddleware(prisma: PrismaClient) {
           id: id,
         },
       })
+      .then(() => {
+        next();
+      })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
-    next();
   };
 }
