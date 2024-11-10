@@ -6,7 +6,7 @@ const exec = promisify(exec2);
 
 export function buildEphemeralContainerRun(commands: string[]) {
   const ephemeralContainerName = `ephemeral-${randomUUID()}`;
-  const ephemeralContainerRun = `docker run --name=${ephemeralContainerName} -d --rm -v /var/run/docker.sock:/var/run/docker.sock -t alpine sh -c "apk add docker; addgroup \${USER} docker; ${commands.join(";")}"`;
+  const ephemeralContainerRun = `docker run --name=${ephemeralContainerName} -d --rm -v /var/run/docker.sock:/var/run/docker.sock -t alpine sh -c \\'apk add docker; addgroup \${USER} docker; ${commands.join(";")};\\'`;
   return ephemeralContainerRun;
 }
 
