@@ -18,6 +18,7 @@
     "express": "^4.20.0",
     "http-errors": "~1.6.3",
     "pino-http": "^10.3.0",
+    "shell-escape": "^0.2.0",
     "swagger-ui-dist": "^5.17.14",
     "uuid": "^11.0.2"
   },
@@ -32,6 +33,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.8.1",
+    "@types/shell-escape": "^0.2.3",
     "@types/swagger-ui-dist": "^3.30.5",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",

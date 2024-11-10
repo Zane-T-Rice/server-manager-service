@@ -10,6 +10,7 @@ import { PortsService } from "./portsService";
 import { PrismaClient } from "@prisma/client";
 import { promisify } from "util";
 import { randomUUID } from "crypto";
+import shellEscape from "shell-escape";
 import { VolumesService } from "./volumesService";
 const exec = promisify(exec2);
 
@@ -81,7 +82,9 @@ class ServersService {
     // did not find a server above and handleDatabaseErrors is guaranteed
     // to throw.
     const server = dbServer!;
-    const commands = [`docker restart '${server.containerName}'`];
+    const commands = [
+      ["docker", "restart", shellEscape([server.containerName])].join(" "),
+    ];
     if (server.isInResponseChain) {
       // This service may be torn down by the restart.
       // To avoid errors, respond before executing the restart and use an exterior, ephemeral container
@@ -115,26 +118,34 @@ class ServersService {
 
     const dockerBuild: string[] = [
       `cd ${temporaryDirectoryName} &&`,
-      `docker build -t '${server.containerName}' --no-cache`,
+      `docker build -t ${shellEscape([server.containerName])} --no-cache`,
     ];
     server.environmentVariables.forEach((variable) => {
-      dockerBuild.push(`--build-arg '${variable.name}=${variable.value}'`);
+      dockerBuild.push(
+        `--build-arg ${shellEscape([`${variable.name}=${variable.value}`])}`
+      );
     });
     dockerBuild.push(".");
 
     const dockerRun: string[] = [
-      `docker run --name='${server.containerName}' -d --restart always --network=server-manager-service-network`,
+      `docker run --name=${shellEscape([server.containerName])} -d --restart always --network=server-manager-service-network`,
     ];
     server.ports.forEach((port) => {
-      dockerRun.push(`-p '${port.number}:${port.number}/${port.protocol}'`);
+      dockerRun.push(
+        `-p ${shellEscape([`${port.number}:${port.number}/${port.protocol}`])}`
+      );
     });
     server.volumes.forEach((volume) => {
-      dockerRun.push(`-v '${volume.hostPath}:${volume.containerPath}'`);
+      dockerRun.push(
+        `-v ${shellEscape([`${volume.hostPath}:${volume.containerPath}`])}`
+      );
     });
     server.environmentVariables.forEach((variable) => {
-      dockerRun.push(`--env '${variable.name}=${variable.value}'`);
+      dockerRun.push(
+        `--env ${shellEscape([`${variable.name}=${variable.value}`])}`
+      );
     });
-    dockerRun.push(`'${server.containerName}'`);
+    dockerRun.push(shellEscape([server.containerName]));
 
     try {
       // Write out the Dockerfile and any other files this server has configured
@@ -155,8 +166,8 @@ class ServersService {
     }
 
     const commands = [
-      `docker stop ${server.containerName}`,
-      `docker rm ${server.containerName}`,
+      `docker stop ${shellEscape([server.containerName])}`,
+      `docker rm ${shellEscape([server.containerName])}`,
       dockerRun.join(" "),
     ];
 

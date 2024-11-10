@@ -45,7 +45,7 @@ describe("ephemeralContainerRun", () => {
     );
     expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.stringMatching(
-        /docker run --name=ephemeral-.*-.*-.*-.*-.* -d --rm -v \/var\/run\/docker.sock:\/var\/run\/docker.sock -t alpine sh -c \\'apk add docker; addgroup \${USER} docker; this;is;another;command;\\'/
+        /docker run --name=ephemeral-.*-.*-.*-.*-.* -d --rm -v \/var\/run\/docker.sock:\/var\/run\/docker.sock -t alpine sh -c 'apk add docker; addgroup \${USER} docker; this;is;another;command'/
       ),
       expect.any(Function)
     );
