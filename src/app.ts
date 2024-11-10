@@ -8,14 +8,15 @@ import {
   serversRouter,
   volumesRouter,
 } from "./routes";
-import { appErrorHandler } from "./middlewares/appErrorHandler";
+import { appErrorHandler } from "./middlewares";
+import { errorHandler } from "./middlewares";
 import express, { NextFunction, Request, Response } from "express";
-import { NotAuthorizedError } from "./errors/notAuthorizedError";
+import { isServerMiddleware } from "./middlewares/isServerMiddleware";
+import { NotAuthorizedError } from "./errors";
 import path from "path";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { errorHandler } from "./middlewares";
 dotenv.config();
 
 const prisma = new PrismaClient();
@@ -59,6 +60,7 @@ app.use((req, res, next) => {
 app.use(
   pino({
     level: process.env.LOG_LEVEL || "info",
+    redact: [`req.headers["authorization-key"]`],
   })
 );
 
@@ -90,6 +92,9 @@ app.use(
     next();
   })
 );
+
+// For routes that have a server id in the params, make sure the server is real.
+app.use("/servers/:id", errorHandler(isServerMiddleware(prisma)));
 
 // REST APis
 app.use("/servers", serversRouter);

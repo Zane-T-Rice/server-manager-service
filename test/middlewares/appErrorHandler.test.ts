@@ -1,6 +1,6 @@
 import { InternalServerError, NotFoundError } from "../../src/errors";
-import { NotAuthorizedError } from "../../src/errors/notAuthorizedError";
-import { appErrorHandler } from "../../src/middlewares/appErrorHandler";
+import { NotAuthorizedError } from "../../src/errors";
+import { appErrorHandler } from "../../src/middlewares";
 import { Request, Response, NextFunction } from "express";
 
 describe("appErrorHandler", () => {
