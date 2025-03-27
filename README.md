@@ -51,6 +51,8 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 
 These commands are safe to repeat.
 
+If you want to use these APIs from client-side javascript from a browser, then you will also need to set the WEBSITE_DOMAIN environment variable using --env just like the other environment variables.
+
 ```sh
 (
   cp docker/deployment/Dockerfile .
@@ -100,6 +102,8 @@ This is only required if you want to work on the code or look at the code withou
 This service is designed to be run in a docker container and these instructions assume you wish to follow that design.
 
 These commands can be repeated to build a new container with any new changes.
+
+If you want to use these APIs from client-side javascript from a browser, then you will also need to set the WEBSITE_DOMAIN environment variable using --env just like the other environment variables.
 
 ```sh
 (
