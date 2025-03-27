@@ -111,7 +111,7 @@ These commands can be repeated to build a new container with any new changes.
   docker run --name=server-manager-service -d \
   -p 3000:3000/udp \
   -p 3000:3000/tcp \
-  -v /path/to/server-manager-service/prisma:/server-manager-service/prisma \
+  -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   --network=server-manager-service-network \

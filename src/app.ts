@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
+import cors from "cors";
 import {
   environmentVariablesRouter,
   filesRouter,
@@ -21,6 +22,14 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 const app = express();
+
+// Support broswer clients which do preflight checks for any fetch
+// to a url that does not match the origin.
+app.use(
+  cors({
+    origin: process.env.WEBSITE_DOMAIN,
+  })
+);
 
 // Swagger
 // Use a workaround for swagger-ui-dist not being able to set custom swagger URL
