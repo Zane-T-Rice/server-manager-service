@@ -1,6 +1,8 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
+import { appErrorHandler } from "./middlewares";
+import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
 import {
   environmentVariablesRouter,
@@ -9,25 +11,42 @@ import {
   serversRouter,
   volumesRouter,
 } from "./routes";
-import { appErrorHandler } from "./middlewares";
 import { errorHandler } from "./middlewares";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import { isServerMiddleware } from "./middlewares/isServerMiddleware";
-import { NotAuthorizedError } from "./errors";
 import path from "path";
+import { Permissions } from "./constants/permissions";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
+
 dotenv.config();
 
 const prisma = new PrismaClient();
 const app = express();
+
+// Logger
+app.use(
+  pino({
+    level: process.env.LOG_LEVEL || "info",
+    redact: [`req.headers["authorization"]`],
+  })
+);
 
 // Support broswer clients which do preflight checks for any fetch
 // to a url that does not match the origin.
 app.use(
   cors({
     origin: process.env.WEBSITE_DOMAIN,
+  })
+);
+
+// Verify incoming Bearer token.
+app.use(
+  auth({
+    audience: process.env.HOST,
+    issuerBaseURL: process.env.ISSUER,
+    tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
   })
 );
 
@@ -65,14 +84,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Logger
-app.use(
-  pino({
-    level: process.env.LOG_LEVEL || "info",
-    redact: [`req.headers["authorization-key"]`],
-  })
-);
-
 // Parse the request.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -83,27 +94,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Before routing to the REST APIs, authorize the request.
-app.use(
-  errorHandler(async (req: Request, res: Response, next: NextFunction) => {
-    await prisma.authorizationKey
-      .findUniqueOrThrow({
-        where: {
-          owner_value: {
-            owner: String(req.headers["owner"]),
-            value: String(req.headers["authorization-key"]),
-          },
-        },
-      })
-      .catch(() => {
-        throw new NotAuthorizedError();
-      });
-    next();
-  })
-);
-
 // For routes that have a server id in the params, make sure the server is real.
-app.use("/servers/:id", errorHandler(isServerMiddleware(prisma)));
+app.use(
+  "/servers/:id",
+  requiredScopes(Permissions.READ),
+  errorHandler(isServerMiddleware(prisma))
+);
 
 // REST APis
 app.use("/servers", serversRouter);
