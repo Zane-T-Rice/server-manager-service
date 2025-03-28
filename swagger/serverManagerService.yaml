@@ -434,6 +434,6 @@ components:
       bearerFormat: JWT
       in: header
       name: authorization
-# Apply the API key globally to all operations
+# Apply the ApiBearerAuth globally to all operations
 security:
   - ApiBearerAuth: []
