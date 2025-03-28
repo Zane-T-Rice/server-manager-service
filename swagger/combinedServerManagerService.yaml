@@ -7,8 +7,7 @@ servers:
   - url: /server-manager-service
   - url: /
 security:
-  - ApiKeyAuth: []
-  - Owner: []
+  - ApiBearerAuth: []
 tags:
   - name: servers
     description: The root of managing and configuring your Servers
@@ -430,14 +429,12 @@ paths:
           $ref: '#/components/responses/fileNotFoundError'
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
+    ApiBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
       in: header
-      name: authorization-key
-    Owner:
-      type: apiKey
-      in: header
-      name: owner
+      name: authorization
   schemas:
     serverResponseSchema:
       required:

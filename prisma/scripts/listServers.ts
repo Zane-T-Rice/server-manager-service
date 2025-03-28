@@ -4,10 +4,10 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-prisma.authorizationKey
+prisma.server
   .findMany()
-  .then((keys) => {
-    console.log(keys);
+  .then((servers) => {
+    console.log(servers);
   })
   .catch((e) => {
     console.error(e);

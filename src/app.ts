@@ -41,15 +41,6 @@ app.use(
   })
 );
 
-// Verify incoming Bearer token.
-app.use(
-  auth({
-    audience: process.env.HOST,
-    issuerBaseURL: process.env.ISSUER,
-    tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
-  })
-);
-
 // Swagger
 // Use a workaround for swagger-ui-dist not being able to set custom swagger URL
 // The swaggerPath accounts for running using ts-node (start:dev) versus tsc (start).
@@ -64,12 +55,21 @@ const indexContent = fs
   .toString()
   .replace(
     /https:\/\/petstore.swagger.io\/.*\/swagger.(json|yaml)/,
-    `${process.env.SWAGGER_HOST_AND_PORT}/swagger-files/serverManagerService.yaml`
+    `${process.env.HOST}/swagger-files/serverManagerService.yaml`
   );
 app.get(`${swaggerRoutePath}/swagger-initializer.js`, (req, res) => {
   res.send(indexContent);
 });
 app.use(swaggerRoutePath, express.static(swaggerUIFSPath));
+
+// Verify incoming Bearer token.
+app.use(
+  auth({
+    audience: process.env.HOST,
+    issuerBaseURL: process.env.ISSUER,
+    tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
+  })
+);
 
 // This makes it very clear which logs are related to the same request.
 // Allow the caller to set this header to increase tracability across

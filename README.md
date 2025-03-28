@@ -33,14 +33,14 @@ docker network create \
 
 ### Quick Notes
 
-Many of the steps involve running npx to interact with prisma. On most distros this will probably work as written. On NixOS you can use the provided shell.nix to perform the exact same commands.
+Many of the steps involve running npx to interact with prisma. On most distros this will probably work as written.
+At this time, the best way to interact with prisma commands on NixOS is to connect to the Docker container running
+this service, because NixOS and prisma just do not agree it seems. Once you connect to the container, then you can
+use prisma normally as the container is setup to run in alpine linux.
 
 ```sh
 # On most distros
 npx prisma studio
-
-# On NixOS
-nix-shell --run "npx prisma studio"
 ```
 
 The npx commands require the DATABASE_URL environment variable is set. You can either set it on the command line before each command `DATABASE_URL="file:./db/dev.db" npx prisma studio` or in a .env file.
@@ -51,7 +51,11 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 
 These commands are safe to repeat.
 
-If you want to use these APIs from client-side javascript from a browser, then you will also need to set the WEBSITE_DOMAIN environment variable using --env just like the other environment variables.
+WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
+ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
+
+The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
+permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
 
 ```sh
 (
@@ -63,25 +67,15 @@ If you want to use these APIs from client-side javascript from a browser, then y
   docker run --name=server-manager-service -d \
   -p 3000:3000/udp \
   -p 3000:3000/tcp \
-  -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
+  -v /path/to/server-manager-service/prisma:/server-manager-service/prisma \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   --network server-manager-service-network \
-  --env LOG_LEVEL="info" --env SWAGGER_HOST_AND_PORT="PUT_YOUR_DEPLOYMENT_HOST_IP" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
+  --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
   server-manager-service
 )
-```
-
-After the service is started the first time you will need to create an authorization key for your users. This must be done by directly connecting with the database, there is no route for managing authorization keys.
-
-You can either use prisma studio and insert the record through the GUI or you can use the prisma/scripts/addAuthorizationKey.ts script after editing the script with the owner and value you want the key to have.
-
-```sh
-# Using the prisma studio GUI
-npx prisma studio
-
-# Using the prisma/scripts/addAuthorizationKey.ts script
-npx ts-node prisma/scripts/addAuthorizationKey.ts
 ```
 
 ### How to Install
@@ -103,7 +97,11 @@ This service is designed to be run in a docker container and these instructions 
 
 These commands can be repeated to build a new container with any new changes.
 
-If you want to use these APIs from client-side javascript from a browser, then you will also need to set the WEBSITE_DOMAIN environment variable using --env just like the other environment variables.
+WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
+ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
+
+The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
+permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
 
 ```sh
 (
@@ -115,11 +113,14 @@ If you want to use these APIs from client-side javascript from a browser, then y
   docker run --name=server-manager-service -d \
   -p 3000:3000/udp \
   -p 3000:3000/tcp \
-  -v /path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db \
+  -v /path/to/server-manager-service/prisma:/server-manager-service/prisma \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart unless-stopped \
   --network=server-manager-service-network \
-  --env LOG_LEVEL="trace" --env SWAGGER_HOST_AND_PORT="localhost:3000" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
+  --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
+  --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
+
   server-manager-service
 )
 ```
@@ -152,7 +153,7 @@ You can directy view and interact with the database in many ways. Prisma offers 
 npx prisma studio
 
 # Running an ad-hoc script that interfaces with prisma.
-npx ts-node prisma/scripts/listAuthorizationKeys.ts
+npx ts-node prisma/scripts/listServers.ts
 ```
 
 The database files will be created in server-manager-service/prisma/db.
