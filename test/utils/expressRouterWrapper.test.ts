@@ -1,7 +1,11 @@
+import { requiredScopes } from "express-oauth2-jwt-bearer";
 import { ExpressRouterWrapper } from "../../src/utils";
 import { errorHandler } from "../../src/middlewares";
 jest.mock("../../src/middlewares", () => {
   return { errorHandler: jest.fn().mockReturnValue(true) };
+});
+jest.mock("express-oauth2-jwt-bearer", () => {
+  return { requiredScopes: jest.fn().mockReturnValue(true) };
 });
 
 describe("expressRouterWrapper", () => {
@@ -34,9 +38,10 @@ describe("expressRouterWrapper", () => {
     `should call express router $verb with errorHandler wrapper`,
     async ({ spy, route }) => {
       // @ts-expect-error to make testing easier
-      await expressRouterWrapper[route](path, routeFunction);
+      await expressRouterWrapper[route](path, routeFunction, "read:servers");
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
-      expect(spy).toHaveBeenCalledWith(path, true);
+      expect(requiredScopes).toHaveBeenCalledWith("read:servers");
+      expect(spy).toHaveBeenCalledWith(path, true, true);
     }
   );
 });
