@@ -34,12 +34,15 @@ docker network create \
 ### Quick Notes
 
 Many of the steps involve running npx to interact with prisma. On most distros this will probably work as written.
-At this time, the best way to interact with prisma commands on NixOS is to connect to the Docker container running
-this service, because NixOS and prisma just do not agree it seems. Once you connect to the container, then you can
-use prisma normally as the container is setup to run in alpine linux.
+On NixOS, you will want to use the provided shell.nix to set some environment variables and then this should work
+properly.
 
 ```sh
 # On most distros
+npx prisma studio
+
+# On NixOS
+nix-shell .
 npx prisma studio
 ```
 
@@ -93,9 +96,7 @@ This is only required if you want to work on the code or look at the code withou
 
 **Make sure to update the /path/to.**
 
-This service is designed to be run in a docker container and these instructions assume you wish to follow that design.
-
-These commands can be repeated to build a new container with any new changes.
+You can run the service locally directly or inside of a Docker container.
 
 WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
@@ -104,6 +105,14 @@ The service needs a user to have the "read:servers write:servers reboot:servers 
 permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
 
 ```sh
+# The environment variables that are needed are in the below Docker command prefixed by the --env flags.
+# You can run the service by simply setting the environment variables in a .env file and then running
+npm run start:dev
+
+# If you want to use a Docker container instead, you can do the following.
+# These commands will let you run the service locally in a docker container.
+# Running these commands again will rebuild the container with any changes
+# since the last time the commands were run.
 (
   cp docker/development/Dockerfile .
   cp docker/development/start-server-manager-service-server.sh .
@@ -120,7 +129,6 @@ permissions (like just having read:servers) does work. (If you are in Auth0, mak
   --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
   --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
-
   server-manager-service
 )
 ```

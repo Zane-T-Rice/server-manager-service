@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node build/src/app.js",
-    "start:dev": "ts-node src/app.ts | pino-pretty",
+    "start:dev": "npx nodemon -x 'ts-node src/app.ts | pino-pretty' -w './src' -e 'ts'",
     "lint": "npx eslint src; npx eslint test;",
     "test": "rm -rf build && npm run build && jest --coverage --verbose --passWithNoTests --rootDir build",
     "migrate": "npx prisma migrate deploy",

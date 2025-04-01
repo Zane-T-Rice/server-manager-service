@@ -1,6 +1,6 @@
 enum ErrorMessageNames {
   internalServerError = "InternalServerError",
-  notAuthorizedError = "NotAuthorizedError",
+  notAuthorizedError = "UnauthorizedError",
   notFoundError = "NotFoundError",
 }
 
