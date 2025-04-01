@@ -1,0 +1,8 @@
+type: object
+properties:
+  description:
+    type: string
+    example: "UnauthorizedError"
+  message:
+    type: string
+    example: "Requester is not authorized."
