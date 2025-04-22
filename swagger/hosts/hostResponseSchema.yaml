@@ -1,0 +1,14 @@
+required:
+  - id
+  - name
+  - url
+type: object
+nullable: true
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+  url:
+    type: string

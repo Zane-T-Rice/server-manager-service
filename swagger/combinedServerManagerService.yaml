@@ -494,11 +494,28 @@ components:
       in: header
       name: authorization
   schemas:
+    hostResponseSchema:
+      required:
+        - id
+        - name
+        - url
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
     serverResponseSchema:
       required:
         - id
         - applicationName
         - containerName
+        - isUpdatable
+        - isInResponseChain
       type: object
       properties:
         id:
@@ -510,6 +527,11 @@ components:
           type: string
         isUpdatable:
           type: boolean
+        isInResponseChain:
+          type: boolean
+        host:
+          anyOf:
+            - $ref: '#/components/schemas/hostResponseSchema'
     notAuthorizedErrorSchema:
       type: object
       properties:
@@ -549,6 +571,10 @@ components:
           type: string
         isUpdatable:
           type: boolean
+        isInResponseChain:
+          type: boolean
+        hostId:
+          type: string
     portResponseSchema:
       required:
         - id

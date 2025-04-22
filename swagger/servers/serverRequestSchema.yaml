@@ -9,3 +9,7 @@ properties:
     type: string
   isUpdatable:
     type: boolean
+  isInResponseChain:
+    type: boolean
+  hostId:
+    type: string
