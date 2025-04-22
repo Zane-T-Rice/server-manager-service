@@ -5,20 +5,17 @@ class NotFoundError extends Error {
   name = ErrorMessageNames.notFoundError;
 
   constructor(resource: string, ids: string[]) {
+    super();
     if (ids.length > 1) {
-      super(
-        formatMessage(ErrorMessages.multipleNotFoundError, {
-          resource,
-          ids: ids.join(","),
-        })
-      );
+      this.message = formatMessage(ErrorMessages.multipleNotFoundError, {
+        resource,
+        ids: ids.join(","),
+      });
     } else {
-      super(
-        formatMessage(ErrorMessages.singleNotFoundError, {
-          resource,
-          id: ids[0],
-        })
-      );
+      this.message = formatMessage(ErrorMessages.singleNotFoundError, {
+        resource,
+        id: ids[0],
+      });
     }
   }
 }
