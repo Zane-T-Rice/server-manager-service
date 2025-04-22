@@ -40,6 +40,19 @@ describe("isServerMiddleware", () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
+  it("should call next if id is not part of request body", async () => {
+    prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
+      {} as unknown as Server
+    );
+    await isServerMiddleware(prisma as unknown as PrismaClient)(
+      { params: {} } as unknown as Request,
+      {} as Response,
+      next
+    );
+    expect(prisma.server.findUniqueOrThrow).not.toHaveBeenCalledWith();
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
   it("should call handleDatabaseErrors if server does not exist", async () => {
     prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
     await isServerMiddleware(prisma as unknown as PrismaClient)(

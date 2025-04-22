@@ -56,6 +56,7 @@ These commands are safe to repeat.
 
 WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
+AUDIENCE is the API Audience.
 
 The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
 permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
@@ -76,7 +77,7 @@ permissions (like just having read:servers) does work. (If you are in Auth0, mak
   --network server-manager-service-network \
   --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
+  --env AUDIENCE="" --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
   server-manager-service
 )
 ```
@@ -100,6 +101,7 @@ You can run the service locally directly or inside of a Docker container.
 
 WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
+AUDIENCE is the API Audience.
 
 The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
 permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
@@ -128,7 +130,7 @@ npm run start:dev
   --network=server-manager-service-network \
   --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
+  --env AUDIENCE="" --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
   server-manager-service
 )
 ```
@@ -163,6 +165,15 @@ npx prisma studio
 # Running an ad-hoc script that interfaces with prisma.
 npx ts-node prisma/scripts/listServers.ts
 ```
+
+There is a script to seed a development database with a couple Host and Server records.
+
+```sh
+# Seed development database.
+npx ts-node prisma/scripts/seedServers.ts
+```
+
+Right now, there are no routes for adding or removing Host records, so you have to do that manually with the `addHost.s` and `deleteHost.ts` scripts - or any script you want really. This is sort of fine for now because I only expect to have one or two hosts for a while.
 
 The database files will be created in server-manager-service/prisma/db.
 If you want to keep the db folder safe outside of the repo, then move the db folder to the new location and make a symlink to the the db folder's new home.

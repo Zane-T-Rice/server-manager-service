@@ -4,8 +4,9 @@ import * as swaggerUI from "swagger-ui-dist";
 import {
   appErrorHandler,
   errorHandler,
+  isHostMiddleware,
   isServerMiddleware,
-  // proxyMiddleware,
+  proxyMiddleware,
 } from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
@@ -93,11 +94,11 @@ app.use(
 // Proxy to correct host for routes that need host affinity.
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
-// app.use(
-//   `(${Routes.PROXY})?/servers/:id/(update|restart)`,
-//   requiredScopes(Permissions.READ)
-//   errorHandler(proxyMiddleware(prisma))
-// );
+app.use(
+  `(${Routes.PROXY})?/servers/:id/(update|restart)`,
+  requiredScopes(Permissions.READ),
+  errorHandler(proxyMiddleware(prisma))
+);
 
 // Parse the request.
 app.use(express.json());
@@ -113,10 +114,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// For routes that have a server id in the params, make sure the server is real.
+// For routes that set a host, make sure the host is real.
+// For routes that require a server, make sure the server is real.
 app.use(
-  "/servers/:id",
+  "/servers(/:id)?",
   requiredScopes(Permissions.READ),
+  errorHandler(isHostMiddleware(prisma)),
   errorHandler(isServerMiddleware(prisma))
 );
 
