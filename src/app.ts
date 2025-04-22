@@ -20,18 +20,33 @@ import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { proxyMiddleware } from "./middlewares/proxyMiddleware";
-import { skipRouteOnProxyMiddleware } from "./middlewares/skipRouteOnProxyMiddleware";
 
 dotenv.config();
 
 const prisma = new PrismaClient();
 const app = express();
 
+// This makes it very clear which logs are related to the same request.
+// Allow the caller to set this header to increase tracability across
+// services.
+app.use((req, res, next) => {
+  req.headers["server-manager-service-trace-id"] =
+    req.headers["server-manager-service-trace-id"] ?? randomUUID();
+  res.appendHeader(
+    "server-manager-service-trace-id",
+    req.headers["server-manager-service-trace-id"]
+  );
+  next();
+});
+
 // Logger
 app.use(
   pino({
     level: process.env.LOG_LEVEL || "info",
     redact: [`req.headers["authorization"]`],
+    customReceivedMessage: function () {
+      return "request received";
+    },
   })
 );
 
@@ -73,19 +88,6 @@ app.use(
   })
 );
 
-// This makes it very clear which logs are related to the same request.
-// Allow the caller to set this header to increase tracability across
-// services.
-app.use((req, res, next) => {
-  req.headers["server-manager-service-trace-id"] =
-    req.headers["server-manager-service-trace-id"] ?? randomUUID();
-  res.appendHeader(
-    "server-manager-service-trace-id",
-    req.headers["server-manager-service-trace-id"]
-  );
-  next();
-});
-
 // Proxy to correct host for routes that need host affinity.
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
@@ -102,7 +104,7 @@ app.use(express.urlencoded({ extended: false }));
 // Log the request body now that it has been successfully parsed.
 // Rewrite request url to strip off any leading /proxy.
 app.use((req, res, next) => {
-  req.log.info(req.body);
+  req.log.info(req.body, "request body");
   req.url = req.originalUrl.startsWith(Routes.PROXY)
     ? req.originalUrl.substring(Routes.PROXY.length)
     : req.originalUrl;
@@ -112,17 +114,16 @@ app.use((req, res, next) => {
 // For routes that have a server id in the params, make sure the server is real.
 app.use(
   "/servers/:id",
-  skipRouteOnProxyMiddleware,
   requiredScopes(Permissions.READ),
   errorHandler(isServerMiddleware(prisma))
 );
 
 // REST APIs
-app.use("/servers", skipRouteOnProxyMiddleware, serversRouter);
-app.use("/servers", skipRouteOnProxyMiddleware, portsRouter);
-app.use("/servers", skipRouteOnProxyMiddleware, environmentVariablesRouter);
-app.use("/servers", skipRouteOnProxyMiddleware, volumesRouter);
-app.use("/servers", skipRouteOnProxyMiddleware, filesRouter);
+app.use("/servers", serversRouter);
+app.use("/servers", portsRouter);
+app.use("/servers", environmentVariablesRouter);
+app.use("/servers", volumesRouter);
+app.use("/servers", filesRouter);
 
 // error handler
 app.use(appErrorHandler);

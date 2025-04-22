@@ -2,9 +2,11 @@ import { ErrorMessageNames, ErrorMessages } from "../constants";
 
 class InternalServerError implements Error {
   name = ErrorMessageNames.internalServerError;
-  message = ErrorMessages.internalServerError;
+  message: string = ErrorMessages.internalServerError;
 
-  constructor() {}
+  constructor(message?: string) {
+    this.message = message ?? ErrorMessages.internalServerError;
+  }
 }
 
 export { InternalServerError };

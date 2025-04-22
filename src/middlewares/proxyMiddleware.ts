@@ -4,6 +4,7 @@ import proxy from "express-http-proxy";
 import { ErrorMessages, Routes } from "../constants";
 import { formatMessage } from "../utils";
 import { BadRequestError } from "../errors/badRequestError";
+import { InternalServerError } from "../errors";
 
 // Proxy to the host of the server acted upon if it is different than the current host.
 export function proxyMiddleware(prisma: PrismaClient) {
@@ -33,20 +34,33 @@ export function proxyMiddleware(prisma: PrismaClient) {
     // prevents infinite proxy recursion.
     if (req.originalUrl.startsWith(Routes.PROXY)) {
       throw new BadRequestError(
-        formatMessage(ErrorMessages.proxyHostMismatch, { serverId: id })
+        formatMessage(ErrorMessages.proxyHostMismatch, {
+          serverId: id,
+          serverHostUrl: server.host.url,
+          hostUrl: process.env.HOST,
+        })
       );
     }
 
-    // Set didProxy so that future routes know not to handle this request.
-    res.locals.didProxy = true;
-
     await proxy(server.host.url, {
       memoizeHost: false,
-      proxyReqPathResolver: function () {
+      proxyReqPathResolver: () => {
         // Add Routes.PROXY to indicate the request has been proxied to the correct host.
         // This, along with the check above, prevents infinite proxy recursion.
         return Routes.PROXY + req.originalUrl;
       },
-    })(req, res, next);
+      proxyErrorHandler: (err) => {
+        if (err.code === "ECONNREFUSED") {
+          next(
+            new InternalServerError(
+              formatMessage(ErrorMessages.hostDown, {
+                serverId: id,
+                serverHostUrl: server.host?.url,
+              })
+            )
+          );
+        } else next(err);
+      },
+    })(req, res, () => next("router"));
   };
 }

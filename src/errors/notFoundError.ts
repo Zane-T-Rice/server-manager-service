@@ -2,7 +2,7 @@ import { ErrorMessageNames, ErrorMessages } from "../constants";
 import { formatMessage } from "../utils";
 
 class NotFoundError implements Error {
-  name: string = ErrorMessageNames.notFoundError;
+  name = ErrorMessageNames.notFoundError;
   message: string = "";
 
   constructor(resource: string, ids: string[]) {

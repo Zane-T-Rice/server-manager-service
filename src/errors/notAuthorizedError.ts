@@ -1,7 +1,7 @@
 import { ErrorMessageNames, ErrorMessages } from "../constants";
 
 class NotAuthorizedError implements Error {
-  name: string = ErrorMessageNames.notAuthorizedError;
+  name = ErrorMessageNames.notAuthorizedError;
   message: string = "";
 
   constructor() {
