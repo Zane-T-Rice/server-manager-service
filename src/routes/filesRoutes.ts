@@ -28,7 +28,7 @@ wrappedRouter.get(
   Permissions.READ
 );
 
-/* PATCH a new File. */
+/* PATCH an existing File. */
 wrappedRouter.patch(
   "/:serverId/files/:id",
   FilesController.instance.patchFile,

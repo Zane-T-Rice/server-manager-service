@@ -61,7 +61,7 @@ class FilesService {
     res.json(file);
   }
 
-  /* PATCH a new file. */
+  /* PATCH an existing file. */
   async patchFile(req: Request, res: Response) {
     const { id, serverId } = req.params;
     const { content, name } = req.body;

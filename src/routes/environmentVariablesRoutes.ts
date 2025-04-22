@@ -28,7 +28,7 @@ wrappedRouter.get(
   Permissions.READ
 );
 
-/* PATCH a new environment variable. */
+/* PATCH an existing environment variable. */
 wrappedRouter.patch(
   "/:serverId/environmentVariables/:id",
   EnvironmentVariablesController.instance.patchEnvironmentVariable,

@@ -26,7 +26,7 @@ class PortsController {
     await PortsService.instance.getPortById(req, res);
   }
 
-  /* PATCH a new port. */
+  /* PATCH an existing port. */
   async patchPort(req: Request, res: Response) {
     await PortsService.instance.patchPort(req, res);
   }

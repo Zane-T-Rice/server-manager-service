@@ -61,7 +61,7 @@ class VolumesService {
     res.json(volume);
   }
 
-  /* PATCH a new volume. */
+  /* PATCH an existing volume. */
   async patchVolume(req: Request, res: Response) {
     const { id, serverId } = req.params;
     const { hostPath, containerPath } = req.body;

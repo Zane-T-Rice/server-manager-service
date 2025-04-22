@@ -26,7 +26,7 @@ class FilesController {
     await FilesService.instance.getFileById(req, res);
   }
 
-  /* PATCH a new File. */
+  /* PATCH an existing File. */
   async patchFile(req: Request, res: Response) {
     await FilesService.instance.patchFile(req, res);
   }

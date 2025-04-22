@@ -36,7 +36,7 @@ class EnvironmentVariablesController {
     );
   }
 
-  /* PATCH a new environment variable. */
+  /* PATCH an existing environment variable. */
   async patchEnvironmentVariable(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.patchEnvironmentVariable(
       req,

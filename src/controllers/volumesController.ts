@@ -26,7 +26,7 @@ class VolumesController {
     await VolumesService.instance.getVolumeById(req, res);
   }
 
-  /* PATCH a new volume. */
+  /* PATCH an existing volume. */
   async patchVolume(req: Request, res: Response) {
     await VolumesService.instance.patchVolume(req, res);
   }

@@ -61,7 +61,7 @@ class PortsService {
     res.json(port);
   }
 
-  /* PATCH a new port. */
+  /* PATCH an existing port. */
   async patchPort(req: Request, res: Response) {
     const { id, serverId } = req.params;
     const { number, protocol } = req.body;

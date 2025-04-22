@@ -36,7 +36,7 @@ class ServersController {
     await ServersService.instance.getServerById(req, res);
   }
 
-  /* PATCH a new server. */
+  /* PATCH an existing server. */
   async patchServer(req: Request, res: Response) {
     await ServersService.instance.patchServer(req, res);
   }

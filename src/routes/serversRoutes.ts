@@ -38,7 +38,7 @@ wrappedRouter.get(
   Permissions.READ
 );
 
-/* PATCH a new server. */
+/* PATCH an existing server. */
 wrappedRouter.patch(
   "/:id",
   ServersController.instance.patchServer,

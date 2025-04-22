@@ -243,7 +243,7 @@ class ServersService {
     res.json(server);
   }
 
-  /* PATCH a new server. */
+  /* PATCH an existing server. */
   async patchServer(req: Request, res: Response) {
     const { id } = req.params;
     const {

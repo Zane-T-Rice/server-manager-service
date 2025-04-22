@@ -28,7 +28,7 @@ wrappedRouter.get(
   Permissions.READ
 );
 
-/* PATCH a new port. */
+/* PATCH an existing port. */
 wrappedRouter.patch(
   "/:serverId/ports/:id",
   PortsController.instance.patchPort,

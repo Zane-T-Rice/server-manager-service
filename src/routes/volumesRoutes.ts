@@ -28,7 +28,7 @@ wrappedRouter.get(
   Permissions.READ
 );
 
-/* PATCH a new volume. */
+/* PATCH an existing volume. */
 wrappedRouter.patch(
   "/:serverId/volumes/:id",
   VolumesController.instance.patchVolume,

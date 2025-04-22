@@ -64,7 +64,7 @@ class EnvironmentVariablesService {
     res.json(environmentVariable);
   }
 
-  /* PATCH a new environment variable. */
+  /* PATCH an existing environment variable. */
   async patchEnvironmentVariable(req: Request, res: Response) {
     const { id, serverId } = req.params;
     const { name, value } = req.body;
