@@ -4,7 +4,8 @@ class NotAuthorizedError extends Error {
   name = ErrorMessageNames.notAuthorizedError;
 
   constructor() {
-    super(ErrorMessages.notAuthorizedError);
+    super();
+    this.message = ErrorMessages.notAuthorizedError;
   }
 }
 

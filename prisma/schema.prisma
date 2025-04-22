@@ -18,7 +18,7 @@ model Server {
   isInResponseChain Boolean @default(false)
   isUpdatable Boolean @default(false)
   hostId String
-  host Host @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  host Host @relation(fields: [hostId], references: [id], onDelete: Restrict)
   ports Port[]
   volumes Volume[]
   environmentVariables EnvironmentVariable[]

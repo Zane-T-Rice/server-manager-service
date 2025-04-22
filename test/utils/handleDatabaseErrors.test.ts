@@ -1,5 +1,9 @@
 import { handleDatabaseErrors } from "../../src/utils";
-import { InternalServerError, NotFoundError } from "../../src/errors";
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from "../../src/errors";
 import { Prisma } from "@prisma/client";
 
 describe("handleDatabaseErrors", () => {
@@ -17,6 +21,19 @@ describe("handleDatabaseErrors", () => {
         ids
       )
     ).toThrow(new NotFoundError(resource, ids));
+  });
+
+  it("throws BadRequestError for PrismaClientValidationError", () => {
+    const message = "Argument `containerName` is missing.";
+    expect(() =>
+      handleDatabaseErrors(
+        new Prisma.PrismaClientValidationError(message, {
+          clientVersion: "version",
+        }),
+        resource,
+        ids
+      )
+    ).toThrow(new BadRequestError(message));
   });
 
   it("throws InternalServerError for other Prisma codes", () => {

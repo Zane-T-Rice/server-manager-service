@@ -42,6 +42,12 @@ describe("expressRouterWrapper", () => {
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
       expect(requiredScopes).toHaveBeenCalledWith("read:servers");
       expect(spy).toHaveBeenCalledWith(path, true, true);
+
+      // @ts-expect-error to make testing easier
+      await expressRouterWrapper[route](path, [routeFunction], "read:servers");
+      expect(errorHandler).toHaveBeenCalledWith(routeFunction);
+      expect(requiredScopes).toHaveBeenCalledWith("read:servers");
+      expect(spy).toHaveBeenCalledWith(path, true, true);
     }
   );
 });

@@ -4,7 +4,6 @@ import * as swaggerUI from "swagger-ui-dist";
 import {
   appErrorHandler,
   errorHandler,
-  isHostMiddleware,
   isServerMiddleware,
   proxyMiddleware,
 } from "./middlewares";
@@ -114,12 +113,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// For routes that set a host, make sure the host is real.
 // For routes that require a server, make sure the server is real.
 app.use(
-  "/servers(/:id)?",
+  "/servers/:id",
   requiredScopes(Permissions.READ),
-  errorHandler(isHostMiddleware(prisma)),
   errorHandler(isServerMiddleware(prisma))
 );
 

@@ -4,7 +4,8 @@ class InternalServerError extends Error {
   name = ErrorMessageNames.internalServerError;
 
   constructor(message?: string) {
-    super(message ?? ErrorMessages.internalServerError);
+    super();
+    this.message = message ?? ErrorMessages.internalServerError;
   }
 }
 

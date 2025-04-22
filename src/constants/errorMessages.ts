@@ -6,6 +6,7 @@ enum ErrorMessages {
   proxyHostMismatch = "The host for server with id {serverId} is {serverHostUrl} which resolves to a real host, but does not exactly match the existing host's url {hostUrl}.",
   serverDoesNotHaveAHost = "The server with id {serverId} does not have a host configured.",
   hostDown = "The host {serverHostUrl} for server with id {serverId} appears to be down at this time.",
+  theArgumentIsRequired = "Argument `{argument}` is missing.",
 }
 
 export { ErrorMessages };
