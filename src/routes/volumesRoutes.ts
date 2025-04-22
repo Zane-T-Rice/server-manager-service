@@ -1,5 +1,5 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { Permissions } from "../constants/permissions";
+import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 import { VolumesController } from "../controllers";
 

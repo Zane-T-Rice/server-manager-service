@@ -1,5 +1,5 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { Permissions } from "../constants/permissions";
+import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 import { ServersController } from "../controllers";
 
@@ -21,7 +21,7 @@ wrappedRouter.post(
   Permissions.REBOOT
 );
 
-/* POST restart an existing server. */
+/* POST update an existing server. */
 wrappedRouter.post(
   "/:id/update",
   ServersController.instance.updateServer,

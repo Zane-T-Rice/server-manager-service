@@ -24,6 +24,7 @@ class ServersService {
     containerName: true,
     isInResponseChain: true,
     isUpdatable: true,
+    hostUrl: true,
   };
 
   /* Used by the updateServer route since it must generate full commands to docker. */
@@ -53,8 +54,13 @@ class ServersService {
 
   /* POST a new server. */
   async createServer(req: Request, res: Response) {
-    const { applicationName, containerName, isInResponseChain, isUpdatable } =
-      req.body;
+    const {
+      applicationName,
+      containerName,
+      isInResponseChain,
+      isUpdatable,
+      hostUrl,
+    } = req.body;
     const server = await this.prisma.server
       .create({
         data: {
@@ -62,6 +68,7 @@ class ServersService {
           containerName,
           isInResponseChain,
           isUpdatable,
+          hostUrl,
         },
         select: ServersService.defaultServerSelect,
       })
@@ -78,6 +85,7 @@ class ServersService {
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
+    req.log.trace(dbServer);
     // Makes typescript accept that server is not null.
     // Really it can never be because Prisma would throw if it
     // did not find a server above and handleDatabaseErrors is guaranteed
@@ -234,8 +242,13 @@ class ServersService {
   /* PATCH a new server. */
   async patchServer(req: Request, res: Response) {
     const { id } = req.params;
-    const { applicationName, containerName, isInResponseChain, isUpdatable } =
-      req.body;
+    const {
+      applicationName,
+      containerName,
+      isInResponseChain,
+      isUpdatable,
+      hostUrl,
+    } = req.body;
     const server = await this.prisma.server
       .update({
         where: { id: String(id) },
@@ -244,6 +257,7 @@ class ServersService {
           containerName,
           isInResponseChain,
           isUpdatable,
+          hostUrl,
         },
         select: ServersService.defaultServerSelect,
       })

@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -16,6 +17,7 @@ model Server {
   containerName String
   isInResponseChain Boolean @default(false)
   isUpdatable Boolean @default(false)
+  hostUrl String @default("FIX_ME")
   ports Port[]
   volumes Volume[]
   environmentVariables EnvironmentVariable[]

@@ -1,6 +1,6 @@
 import { EnvironmentVariablesController } from "../controllers";
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { Permissions } from "../constants/permissions";
+import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

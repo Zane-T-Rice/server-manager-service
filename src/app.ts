@@ -12,13 +12,15 @@ import {
   volumesRouter,
 } from "./routes";
 import { errorHandler } from "./middlewares";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { isServerMiddleware } from "./middlewares/isServerMiddleware";
 import path from "path";
-import { Permissions } from "./constants/permissions";
+import { Permissions } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
+import { proxyMiddleware } from "./middlewares/proxyMiddleware";
+import { skipRouteOnProxyMiddleware } from "./middlewares/skipRouteOnProxyMiddleware";
 
 dotenv.config();
 
@@ -65,7 +67,7 @@ app.use(swaggerRoutePath, express.static(swaggerUIFSPath));
 // Verify incoming Bearer token.
 app.use(
   auth({
-    audience: process.env.HOST,
+    audience: process.env.AUDIENCE,
     issuerBaseURL: process.env.ISSUER,
     tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
   })
@@ -84,6 +86,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Proxy to correct host for routes that need host affinity.
+app.use(
+  // ["/servers/:id/update", "/servers/:id/restart"],
+  ["/proxy/servers/:id/update", "/proxy/servers/:id/restart"],
+  requiredScopes(Permissions.READ),
+  errorHandler(proxyMiddleware(prisma))
+);
+
+app.use("/proxy", (req: Request, res: Response, next: NextFunction) => {
+  req.url = req.originalUrl.substring(6); // Cut off /proxy
+  next();
+});
+
 // Parse the request.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -97,16 +112,17 @@ app.use((req, res, next) => {
 // For routes that have a server id in the params, make sure the server is real.
 app.use(
   "/servers/:id",
+  skipRouteOnProxyMiddleware,
   requiredScopes(Permissions.READ),
   errorHandler(isServerMiddleware(prisma))
 );
 
 // REST APis
-app.use("/servers", serversRouter);
-app.use("/servers", portsRouter);
-app.use("/servers", environmentVariablesRouter);
-app.use("/servers", volumesRouter);
-app.use("/servers", filesRouter);
+app.use("/servers", skipRouteOnProxyMiddleware, serversRouter);
+app.use("/servers", skipRouteOnProxyMiddleware, portsRouter);
+app.use("/servers", skipRouteOnProxyMiddleware, environmentVariablesRouter);
+app.use("/servers", skipRouteOnProxyMiddleware, volumesRouter);
+app.use("/servers", skipRouteOnProxyMiddleware, filesRouter);
 
 // error handler
 app.use(appErrorHandler);
