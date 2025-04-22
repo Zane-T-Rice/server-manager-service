@@ -179,3 +179,6 @@ ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
 - Input validation in controllers.
 - Probaby add integration tests. Right now it is all unit tests.
 - Docker with non-root user (mostly so the files it generates are not owned by root).
+- Delete server should stop/delete any related containers before removing the server record.
+- Have a stop server route.
+- Update/Restart should possibly lock the server record until they complete.

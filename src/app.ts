@@ -12,10 +12,10 @@ import {
   volumesRouter,
 } from "./routes";
 import { errorHandler } from "./middlewares";
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import { isServerMiddleware } from "./middlewares/isServerMiddleware";
 import path from "path";
-import { Permissions } from "./constants";
+import { Permissions, Routes } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
@@ -87,17 +87,13 @@ app.use((req, res, next) => {
 });
 
 // Proxy to correct host for routes that need host affinity.
+// For paths beginning with Routes.PROXY, this host must be the correct host
+// or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
-  // ["/servers/:id/update", "/servers/:id/restart"],
-  ["/proxy/servers/:id/update", "/proxy/servers/:id/restart"],
+  `(${Routes.PROXY})?/servers/:id/(update|restart)`,
   requiredScopes(Permissions.READ),
   errorHandler(proxyMiddleware(prisma))
 );
-
-app.use("/proxy", (req: Request, res: Response, next: NextFunction) => {
-  req.url = req.originalUrl.substring(6); // Cut off /proxy
-  next();
-});
 
 // Parse the request.
 app.use(express.json());
@@ -106,19 +102,24 @@ app.use(express.urlencoded({ extended: false }));
 // Log the request body now that it has been successfully parsed.
 app.use((req, res, next) => {
   req.log.info(req.body);
+  req.log.trace(`Request URL ` + req.url);
   next();
 });
 
 // For routes that have a server id in the params, make sure the server is real.
 app.use(
-  "/servers/:id",
+  `(${Routes.PROXY})?/servers/:id`,
   skipRouteOnProxyMiddleware,
   requiredScopes(Permissions.READ),
   errorHandler(isServerMiddleware(prisma))
 );
 
-// REST APis
-app.use("/servers", skipRouteOnProxyMiddleware, serversRouter);
+// REST APIs
+app.use(
+  `(${Routes.PROXY})?/servers`,
+  skipRouteOnProxyMiddleware,
+  serversRouter
+);
 app.use("/servers", skipRouteOnProxyMiddleware, portsRouter);
 app.use("/servers", skipRouteOnProxyMiddleware, environmentVariablesRouter);
 app.use("/servers", skipRouteOnProxyMiddleware, volumesRouter);

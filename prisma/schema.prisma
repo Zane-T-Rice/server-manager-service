@@ -17,7 +17,8 @@ model Server {
   containerName String
   isInResponseChain Boolean @default(false)
   isUpdatable Boolean @default(false)
-  hostUrl String @default("FIX_ME")
+  hostId String?
+  host Host? @relation(fields: [hostId], references: [id], onDelete: Cascade)
   ports Port[]
   volumes Volume[]
   environmentVariables EnvironmentVariable[]
@@ -64,4 +65,11 @@ model File {
   content String // The content of the file as a plain string.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Host {
+  id String @id @default(uuid())
+  url String
+  name String
+  servers Server[]
 }

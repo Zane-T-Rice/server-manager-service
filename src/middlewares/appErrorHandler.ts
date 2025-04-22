@@ -9,7 +9,9 @@ function appErrorHandler(
   next: NextFunction
 ) {
   req.log.error(err);
-  if (err.name === ErrorMessageNames.notFoundError) {
+  if (err.name === ErrorMessageNames.badRequestError) {
+    res.status(400).json(err);
+  } else if (err.name === ErrorMessageNames.notFoundError) {
     res.status(404).json(err);
   } else if (err.name === ErrorMessageNames.internalServerError) {
     res.status(500).json(err);

@@ -5,7 +5,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 prisma.server
-  .findMany()
+  .findMany({ include: { host: true } })
   .then((servers) => {
     console.log(servers);
   })

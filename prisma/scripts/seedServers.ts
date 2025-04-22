@@ -4,20 +4,31 @@ import * as dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { ServersService } from "../../src/services/serversService";
 import { FilesService } from "../../src/services/filesService";
-import { File, Server } from "../../node_modules/prisma/prisma-client";
+import { File, Host, Server } from "../../node_modules/prisma/prisma-client";
 dotenv.config();
 
 type CastServer = Server & { files: File[] };
 type PartialServer = Partial<Server & { files: Partial<File>[] }>;
+type CastHost = Host;
+type PartialHost = Partial<Host>;
 
 const prisma = new PrismaClient();
+const hosts: PartialHost[] = [
+  {
+    url: "http://localhost:3000",
+    name: "HOST 1",
+  },
+  {
+    url: "http://localhost:3200",
+    name: "HOST 2",
+  },
+];
 const servers: PartialServer[] = [
   {
     applicationName: "min-app",
     containerName: "min-container",
     isInResponseChain: false,
     isUpdatable: true,
-    hostUrl: "http://localhost:3000",
     files: [
       {
         name: "Dockerfile",
@@ -35,7 +46,6 @@ const servers: PartialServer[] = [
     containerName: "min-container-2",
     isInResponseChain: false,
     isUpdatable: true,
-    hostUrl: "http://localhost:3200",
     files: [
       {
         name: "Dockerfile",
@@ -51,13 +61,27 @@ const servers: PartialServer[] = [
 ];
 
 const seed = async () => {
+  const dbHosts = await Promise.all(
+    hosts.map(async (host) => {
+      const { url, name } = host as CastHost;
+      return await prisma.host.create({
+        data: {
+          url,
+          name,
+        },
+        select: { id: true, url: true, name: true },
+      });
+    })
+  );
+  servers[0].hostId = dbHosts[0].id;
+  servers[1].hostId = dbHosts[1].id;
   const promises = servers.map(async (server) => {
     const {
       applicationName,
       containerName,
       isInResponseChain,
       isUpdatable,
-      hostUrl,
+      hostId,
       files,
     } = server as CastServer;
     const dbServer = await prisma.server.create({
@@ -66,7 +90,7 @@ const seed = async () => {
         containerName,
         isInResponseChain,
         isUpdatable,
-        hostUrl,
+        hostId,
       },
       select: ServersService.defaultServerSelect,
     });

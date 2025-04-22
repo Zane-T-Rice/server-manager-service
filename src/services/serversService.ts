@@ -24,7 +24,12 @@ class ServersService {
     containerName: true,
     isInResponseChain: true,
     isUpdatable: true,
-    hostUrl: true,
+    host: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
   };
 
   /* Used by the updateServer route since it must generate full commands to docker. */
@@ -59,7 +64,7 @@ class ServersService {
       containerName,
       isInResponseChain,
       isUpdatable,
-      hostUrl,
+      hostId,
     } = req.body;
     const server = await this.prisma.server
       .create({
@@ -68,7 +73,7 @@ class ServersService {
           containerName,
           isInResponseChain,
           isUpdatable,
-          hostUrl,
+          hostId,
         },
         select: ServersService.defaultServerSelect,
       })
@@ -247,7 +252,7 @@ class ServersService {
       containerName,
       isInResponseChain,
       isUpdatable,
-      hostUrl,
+      hostId,
     } = req.body;
     const server = await this.prisma.server
       .update({
@@ -257,7 +262,7 @@ class ServersService {
           containerName,
           isInResponseChain,
           isUpdatable,
-          hostUrl,
+          hostId,
         },
         select: ServersService.defaultServerSelect,
       })
