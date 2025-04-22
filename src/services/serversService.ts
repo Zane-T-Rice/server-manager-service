@@ -24,12 +24,7 @@ class ServersService {
     containerName: true,
     isInResponseChain: true,
     isUpdatable: true,
-    host: {
-      select: {
-        id: true,
-        name: true,
-      },
-    },
+    hostId: true,
   };
 
   /* Used by the updateServer route since it must generate full commands to docker. */
