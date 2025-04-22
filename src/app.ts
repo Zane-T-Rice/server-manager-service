@@ -95,8 +95,8 @@ app.use(
 // or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
   `(${Routes.PROXY})?/servers/:id/(update|restart)`,
-  requiredScopes(Permissions.READ),
-  errorHandler(proxyMiddleware(prisma))
+  requiredScopes(Permissions.READ)
+  // errorHandler(proxyMiddleware(prisma))
 );
 
 // Parse the request.
