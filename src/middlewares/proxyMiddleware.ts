@@ -17,14 +17,12 @@ export function proxyMiddleware(prisma: PrismaClient) {
     // Do not proxy if the server does not exist. This error state is handled gracefully later.
     // Do not proxy if this is the matching host.
     if (!server || (server.host && server.host.url === process.env.HOST)) {
-      req.log.trace("proxyMiddleware: SKIPPING PROXYING");
       next();
       return;
     }
 
     // Throw an error if the host is not set on the server.
     if (!server.host) {
-      req.log.trace("proxyMiddleware: NO HOST CONFIGURED");
       throw new BadRequestError(
         formatMessage(ErrorMessages.serverDoesNotHaveAHost, { serverId: id })
       );
@@ -34,15 +32,10 @@ export function proxyMiddleware(prisma: PrismaClient) {
     // This, combined with adding Routes.PROXY when a proxy call is made,
     // prevents infinite proxy recursion.
     if (req.originalUrl.startsWith(Routes.PROXY)) {
-      req.log.trace(
-        "proxyMiddleware: NOT PROXYING DUE TO THIS BEING A PROXY CALL ALREADY"
-      );
       throw new BadRequestError(
         formatMessage(ErrorMessages.proxyHostMismatch, { serverId: id })
       );
     }
-
-    req.log.trace("proxyMiddleware: PROXYING");
 
     // Set didProxy so that future routes know not to handle this request.
     res.locals.didProxy = true;

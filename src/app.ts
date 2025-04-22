@@ -100,26 +100,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Log the request body now that it has been successfully parsed.
+// Rewrite request url to strip off any leading /proxy.
 app.use((req, res, next) => {
   req.log.info(req.body);
-  req.log.trace(`Request URL ` + req.url);
+  req.url = req.originalUrl.startsWith(Routes.PROXY)
+    ? req.originalUrl.substring(Routes.PROXY.length)
+    : req.originalUrl;
   next();
 });
 
 // For routes that have a server id in the params, make sure the server is real.
 app.use(
-  `(${Routes.PROXY})?/servers/:id`,
+  "/servers/:id",
   skipRouteOnProxyMiddleware,
   requiredScopes(Permissions.READ),
   errorHandler(isServerMiddleware(prisma))
 );
 
 // REST APIs
-app.use(
-  `(${Routes.PROXY})?/servers`,
-  skipRouteOnProxyMiddleware,
-  serversRouter
-);
+app.use("/servers", skipRouteOnProxyMiddleware, serversRouter);
 app.use("/servers", skipRouteOnProxyMiddleware, portsRouter);
 app.use("/servers", skipRouteOnProxyMiddleware, environmentVariablesRouter);
 app.use("/servers", skipRouteOnProxyMiddleware, volumesRouter);

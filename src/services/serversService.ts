@@ -90,7 +90,6 @@ class ServersService {
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [id]));
-    req.log.trace(dbServer);
     // Makes typescript accept that server is not null.
     // Really it can never be because Prisma would throw if it
     // did not find a server above and handleDatabaseErrors is guaranteed
