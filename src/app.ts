@@ -5,7 +5,7 @@ import {
   appErrorHandler,
   errorHandler,
   isServerMiddleware,
-  proxyMiddleware,
+  // proxyMiddleware,
 } from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
