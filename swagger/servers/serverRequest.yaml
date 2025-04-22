@@ -1,4 +1,4 @@
-description: Create a new server
+description: Create a new Server
 content:
   application/json:
     schema:

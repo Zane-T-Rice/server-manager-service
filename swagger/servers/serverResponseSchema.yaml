@@ -17,6 +17,6 @@ properties:
     type: boolean
   isInResponseChain:
     type: boolean
-  host:
-    anyOf:
-      - $ref: "../hosts/hostResponseSchema.yaml"
+  hostId:
+    type: string
+    format: uuid

@@ -27,7 +27,7 @@ paths:
     post:
       tags:
         - servers
-      summary: Create a new server
+      summary: Create a new Server
       operationId: createServer
       requestBody:
         $ref: '#/components/requestBodies/serverRequest'
@@ -48,7 +48,7 @@ paths:
           name: isUpdatable
           schema:
             type: boolean
-          description: filter results based on if a server is updatable or not
+          description: filter results based on if a Server is updatable or not
       responses:
         '200':
           $ref: '#/components/responses/serverArrayResponse'
@@ -83,7 +83,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/serverRequest'
+        allOf:
+          - $ref: ./servers/serverRequest.yaml
+          - description: Patch a Server
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -96,7 +98,7 @@ paths:
     delete:
       tags:
         - servers
-      summary: Delete a server by id
+      summary: Delete a Server by id
       operationId: deleteServer
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
@@ -131,7 +133,7 @@ paths:
       tags:
         - servers
       summary: Update a Server by id
-      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a server, use the PATCH /servers/{serverId} route instead.
+      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
       operationId: updateServer
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
@@ -204,7 +206,9 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/portRequest'
+        allOf:
+          - $ref: ./ports/portRequest.yaml
+          - description: Patch a Port
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -289,7 +293,9 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/volumeRequest'
+        allOf:
+          - $ref: ./volumes/volumeRequest.yaml
+          - description: Patch a Volume
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -374,7 +380,9 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/environmentVariableRequest'
+        allOf:
+          - $ref: ./environmentVariables/environmentVariableRequest.yaml
+          - description: Patch an EnvironmentVariable
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -460,7 +468,9 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/fileRequest'
+        allOf:
+          - $ref: ./files/fileRequest.yaml
+          - description: Patch a File
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'
@@ -494,21 +504,6 @@ components:
       in: header
       name: authorization
   schemas:
-    hostResponseSchema:
-      required:
-        - id
-        - name
-        - url
-      type: object
-      nullable: true
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        url:
-          type: string
     serverResponseSchema:
       required:
         - id
@@ -529,9 +524,9 @@ components:
           type: boolean
         isInResponseChain:
           type: boolean
-        host:
-          anyOf:
-            - $ref: '#/components/schemas/hostResponseSchema'
+        hostId:
+          type: string
+          format: uuid
     notAuthorizedErrorSchema:
       type: object
       properties:
@@ -824,7 +819,7 @@ components:
             $ref: '#/components/schemas/fileResponseSchema'
   requestBodies:
     serverRequest:
-      description: Create a new server
+      description: Create a new Server
       content:
         application/json:
           schema:

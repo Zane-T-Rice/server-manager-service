@@ -26,7 +26,7 @@ paths:
     post:
       tags:
         - servers
-      summary: Create a new server
+      summary: Create a new Server
       operationId: createServer
       requestBody:
         $ref: "./servers/serverRequest.yaml"
@@ -47,7 +47,7 @@ paths:
           name: isUpdatable
           schema:
             type: boolean
-          description: filter results based on if a server is updatable or not
+          description: filter results based on if a Server is updatable or not
       responses:
         "200":
           $ref: "./servers/serverArrayResponse.yaml"
@@ -82,7 +82,9 @@ paths:
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        $ref: "./servers/serverRequest.yaml"
+        allOf:
+          - $ref: "./servers/serverRequest.yaml"
+          - description: Patch a Server
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -95,7 +97,7 @@ paths:
     delete:
       tags:
         - servers
-      summary: Delete a server by id
+      summary: Delete a Server by id
       operationId: deleteServer
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
@@ -130,7 +132,7 @@ paths:
       tags:
         - servers
       summary: Update a Server by id
-      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a server, use the PATCH /servers/{serverId} route instead.
+      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
       operationId: updateServer
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
@@ -203,7 +205,9 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       requestBody:
-        $ref: "./ports/portRequest.yaml"
+        allOf:
+          - $ref: "./ports/portRequest.yaml"
+          - description: Patch a Port
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -288,7 +292,9 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       requestBody:
-        $ref: "./volumes/volumeRequest.yaml"
+        allOf:
+          - $ref: "./volumes/volumeRequest.yaml"
+          - description: Patch a Volume
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -373,7 +379,9 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       requestBody:
-        $ref: "./environmentVariables/environmentVariableRequest.yaml"
+        allOf:
+          - $ref: "./environmentVariables/environmentVariableRequest.yaml"
+          - description: Patch an EnvironmentVariable
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -459,7 +467,9 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       requestBody:
-        $ref: "./files/fileRequest.yaml"
+        allOf:
+          - $ref: "./files/fileRequest.yaml"
+          - description: Patch a File
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"
