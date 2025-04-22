@@ -558,6 +558,7 @@ components:
       required:
         - applicationName
         - containerName
+        - hostId
       type: object
       properties:
         applicationName:
