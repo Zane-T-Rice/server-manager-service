@@ -3,8 +3,33 @@ import { PrismaClient } from "@prisma/client";
 import proxy from "express-http-proxy";
 import { ErrorMessages, Routes } from "../constants";
 import { formatMessage } from "../utils";
-import { BadRequestError } from "../errors/badRequestError";
-import { InternalServerError } from "../errors";
+import { BadRequestError, InternalServerError } from "../errors";
+
+export function proxyReqPathResolver(req: Request) {
+  // Add Routes.PROXY to indicate the request has been proxied to the correct host.
+  // This, along with the check above, prevents infinite proxy recursion.
+  return Routes.PROXY + req.originalUrl;
+}
+
+export function proxyErrorHandler(
+  next: NextFunction,
+  serverId: string,
+  serverHostUrl: string | undefined
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function (err: any) {
+    if (err.code === "ECONNREFUSED") {
+      next(
+        new InternalServerError(
+          formatMessage(ErrorMessages.hostDown, {
+            serverId,
+            serverHostUrl,
+          })
+        )
+      );
+    } else next(err);
+  };
+}
 
 // Proxy to the host of the server acted upon if it is different than the current host.
 export function proxyMiddleware(prisma: PrismaClient) {
@@ -44,23 +69,8 @@ export function proxyMiddleware(prisma: PrismaClient) {
 
     await proxy(server.host.url, {
       memoizeHost: false,
-      proxyReqPathResolver: () => {
-        // Add Routes.PROXY to indicate the request has been proxied to the correct host.
-        // This, along with the check above, prevents infinite proxy recursion.
-        return Routes.PROXY + req.originalUrl;
-      },
-      proxyErrorHandler: (err) => {
-        if (err.code === "ECONNREFUSED") {
-          next(
-            new InternalServerError(
-              formatMessage(ErrorMessages.hostDown, {
-                serverId: id,
-                serverHostUrl: server.host?.url,
-              })
-            )
-          );
-        } else next(err);
-      },
+      proxyReqPathResolver,
+      proxyErrorHandler: proxyErrorHandler(next, id, server.host.url),
     })(req, res, () => next("router"));
   };
 }

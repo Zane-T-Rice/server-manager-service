@@ -1,4 +1,8 @@
-import { InternalServerError, NotFoundError } from "../../src/errors";
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from "../../src/errors";
 import { NotAuthorizedError } from "../../src/errors";
 import { appErrorHandler } from "../../src/middlewares";
 import { Request, Response, NextFunction } from "express";
@@ -17,6 +21,14 @@ describe("appErrorHandler", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("should set 400 status and return BadRequestError", () => {
+    const notFoundError = new BadRequestError("bad request");
+    appErrorHandler(notFoundError, reqMock, resMock, nextMock);
+
+    expect(resMock.status).toHaveBeenCalledWith(400);
+    expect(resMock.json).toHaveBeenCalledWith(notFoundError);
   });
 
   it("should set 404 status and return NotFoundError", () => {

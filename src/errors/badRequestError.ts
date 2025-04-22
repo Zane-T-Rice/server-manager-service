@@ -1,11 +1,10 @@
 import { ErrorMessageNames } from "../constants";
 
-class BadRequestError implements Error {
+class BadRequestError extends Error {
   name = ErrorMessageNames.badRequestError;
-  message: string = "";
 
   constructor(message: string) {
-    this.message = message;
+    super(message);
   }
 }
 

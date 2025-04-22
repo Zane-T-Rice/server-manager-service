@@ -1,7 +1,12 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as swaggerUI from "swagger-ui-dist";
-import { appErrorHandler } from "./middlewares";
+import {
+  appErrorHandler,
+  errorHandler,
+  isServerMiddleware,
+  proxyMiddleware,
+} from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
 import {
@@ -11,15 +16,12 @@ import {
   serversRouter,
   volumesRouter,
 } from "./routes";
-import { errorHandler } from "./middlewares";
 import express from "express";
-import { isServerMiddleware } from "./middlewares/isServerMiddleware";
 import path from "path";
 import { Permissions, Routes } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { proxyMiddleware } from "./middlewares/proxyMiddleware";
 
 dotenv.config();
 

@@ -1,11 +1,10 @@
 import { ErrorMessageNames, ErrorMessages } from "../constants";
 
-class InternalServerError implements Error {
+class InternalServerError extends Error {
   name = ErrorMessageNames.internalServerError;
-  message: string = ErrorMessages.internalServerError;
 
   constructor(message?: string) {
-    this.message = message ?? ErrorMessages.internalServerError;
+    super(message ?? ErrorMessages.internalServerError);
   }
 }
 

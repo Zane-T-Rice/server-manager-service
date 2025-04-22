@@ -1,11 +1,10 @@
 import { ErrorMessageNames, ErrorMessages } from "../constants";
 
-class NotAuthorizedError implements Error {
+class NotAuthorizedError extends Error {
   name = ErrorMessageNames.notAuthorizedError;
-  message: string = "";
 
   constructor() {
-    this.message = ErrorMessages.notAuthorizedError;
+    super(ErrorMessages.notAuthorizedError);
   }
 }
 
