@@ -93,11 +93,11 @@ app.use(
 // Proxy to correct host for routes that need host affinity.
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
-app.use(
-  `(${Routes.PROXY})?/servers/:id/(update|restart)`,
-  requiredScopes(Permissions.READ)
-  // errorHandler(proxyMiddleware(prisma))
-);
+// app.use(
+//   `(${Routes.PROXY})?/servers/:id/(update|restart)`,
+//   requiredScopes(Permissions.READ)
+//   errorHandler(proxyMiddleware(prisma))
+// );
 
 // Parse the request.
 app.use(express.json());
