@@ -5,10 +5,12 @@ import { ErrorMessages, Routes } from "../constants";
 import { formatMessage } from "../utils";
 import { BadRequestError, InternalServerError } from "../errors";
 
-export function proxyReqPathResolver(req: Request) {
-  // Add Routes.PROXY to indicate the request has been proxied to the correct host.
-  // This, along with the check above, prevents infinite proxy recursion.
-  return Routes.PROXY + req.originalUrl;
+export function proxyReqPathResolver(hostPath: string) {
+  return function (req: Request) {
+    // Add Routes.PROXY to indicate the request has been proxied to the correct host.
+    // This, along with the check above, prevents infinite proxy recursion.
+    return hostPath + Routes.PROXY + req.originalUrl;
+  };
 }
 
 export function proxyErrorHandler(
@@ -67,9 +69,10 @@ export function proxyMiddleware(prisma: PrismaClient) {
       );
     }
 
-    await proxy(server.host.url, {
+    const url = new URL(server.host.url);
+    await proxy(url.origin, {
       memoizeHost: false,
-      proxyReqPathResolver,
+      proxyReqPathResolver: proxyReqPathResolver(url.pathname),
       proxyErrorHandler: proxyErrorHandler(next, id, server.host.url),
     })(req, res, () => next("router"));
   };

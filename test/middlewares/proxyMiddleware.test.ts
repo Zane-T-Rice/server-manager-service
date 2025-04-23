@@ -121,7 +121,7 @@ describe("proxyMiddleware", () => {
   });
 
   it(`should return response from proxy call if host does not match and req.originalUrl does not start with ${Routes.PROXY}`, async () => {
-    const nonMatchingUrl = "url-does-not-match-host";
+    const nonMatchingUrl = "http://localhost:3000";
     prisma.server.findUnique.mockResolvedValueOnce({
       id: serverId,
       host: { url: nonMatchingUrl },
@@ -144,11 +144,12 @@ describe("proxyMiddleware", () => {
 
   describe("proxyReqPathResolver", () => {
     it(`should prepend originalUrl with ${Routes.PROXY}`, () => {
+      const hostPath = "/host-path";
       const originalUrl = `/server/${serverId}/update`;
-      const newUrl = proxyReqPathResolver({
+      const newUrl = proxyReqPathResolver(hostPath)({
         originalUrl,
       } as unknown as Request);
-      expect(newUrl).toEqual(Routes.PROXY + originalUrl);
+      expect(newUrl).toEqual(hostPath + Routes.PROXY + originalUrl);
     });
   });
 
