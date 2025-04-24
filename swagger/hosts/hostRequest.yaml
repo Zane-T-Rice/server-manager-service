@@ -1,0 +1,5 @@
+description: Create a new volume
+content:
+  application/json:
+    schema:
+      $ref: "./hostRequestSchema.yaml"

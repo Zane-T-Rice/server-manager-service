@@ -9,6 +9,8 @@ servers:
 security:
   - ApiBearerAuth: []
 tags:
+  - name: hosts
+    description: The Hosts where Servers live
   - name: servers
     description: The root of managing and configuring your Servers
   - name: ports
@@ -23,12 +25,94 @@ externalDocs:
   description: GitHub
   url: https://github.com/Zane-T-Rice/server-manager-service
 paths:
-  /servers:
+  /hosts:
+    post:
+      tags:
+        - hosts
+      summary: Create a new host
+      operationId: createhost
+      requestBody:
+        $ref: '#/components/requestBodies/hostRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/hostResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    get:
+      tags:
+        - hosts
+      summary: Get hosts of Server
+      operationId: gethosts
+      responses:
+        '200':
+          $ref: '#/components/responses/hostArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/hostNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /hosts/{hostId}:
+    get:
+      tags:
+        - hosts
+      summary: Get a host by id
+      operationId: gethost
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/hostResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/hostNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    patch:
+      tags:
+        - hosts
+      summary: Update a host by id
+      operationId: patchhost
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+      requestBody:
+        allOf:
+          - $ref: ./hosts/hostRequest.yaml
+          - description: Patch a host
+      responses:
+        '200':
+          $ref: '#/components/responses/hostResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/hostNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - hosts
+      summary: Delete a host by id
+      operationId: deletehost
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/hostResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/hostNotFoundError'
+  /hosts/{hostId}/servers:
     post:
       tags:
         - servers
       summary: Create a new Server
       operationId: createServer
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/serverRequest'
       responses:
@@ -44,6 +128,7 @@ paths:
       summary: Get all Servers
       operationId: getServers
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - in: query
           name: isUpdatable
           schema:
@@ -58,13 +143,14 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}:
+  /hosts/{hostId}/servers/{serverId}:
     get:
       tags:
         - servers
       summary: Get a Server by id
       operationId: getServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -81,6 +167,7 @@ paths:
       summary: Patch a Server by id
       operationId: patchServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         allOf:
@@ -101,6 +188,7 @@ paths:
       summary: Delete a Server by id
       operationId: deleteServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -111,13 +199,14 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/restart:
+  /hosts/{hostId}/servers/{serverId}/restart:
     post:
       tags:
         - servers
       summary: Restart a Server by id
       operationId: restartServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -128,7 +217,7 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/update:
+  /hosts/{hostId}/servers/{serverId}/update:
     post:
       tags:
         - servers
@@ -136,6 +225,7 @@ paths:
       description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
       operationId: updateServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -146,13 +236,14 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/ports:
+  /hosts/{hostId}/servers/{serverId}/ports:
     post:
       tags:
         - ports
       summary: Create a new port
       operationId: createPort
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/portRequest'
@@ -169,6 +260,7 @@ paths:
       summary: Get Ports of Server
       operationId: getPorts
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -179,13 +271,14 @@ paths:
           $ref: '#/components/responses/portNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/ports/{portId}:
+  /hosts/{hostId}/servers/{serverId}/ports/{portId}:
     get:
       tags:
         - ports
       summary: Get a Port by id
       operationId: getPort
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       responses:
@@ -203,6 +296,7 @@ paths:
       summary: Update a Port by id
       operationId: patchPort
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       requestBody:
@@ -224,6 +318,7 @@ paths:
       summary: Delete a port by id
       operationId: deletePort
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       responses:
@@ -233,13 +328,14 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/portNotFoundError'
-  /servers/{serverId}/volumes:
+  /hosts/{hostId}/servers/{serverId}/volumes:
     post:
       tags:
         - volumes
       summary: Create a new volume
       operationId: createVolume
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/volumeRequest'
@@ -256,6 +352,7 @@ paths:
       summary: Get Volumes of Server
       operationId: getVolumes
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -266,13 +363,14 @@ paths:
           $ref: '#/components/responses/volumeNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/volumes/{volumeId}:
+  /hosts/{hostId}/servers/{serverId}/volumes/{volumeId}:
     get:
       tags:
         - volumes
       summary: Get a Volume by id
       operationId: getVolume
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       responses:
@@ -290,6 +388,7 @@ paths:
       summary: Update a Volume by id
       operationId: patchVolume
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       requestBody:
@@ -311,6 +410,7 @@ paths:
       summary: Delete a Volume by id
       operationId: deleteVolume
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       responses:
@@ -320,13 +420,14 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/volumeNotFoundError'
-  /servers/{serverId}/environmentVariables:
+  /hosts/{hostId}/servers/{serverId}/environmentVariables:
     post:
       tags:
         - environmentVariables
       summary: Create a new environmentVariable
       operationId: createEnvironmentVariable
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/environmentVariableRequest'
@@ -343,6 +444,7 @@ paths:
       summary: Get EnvironmentVariables of Server
       operationId: getEnvironmentVariables
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -353,13 +455,14 @@ paths:
           $ref: '#/components/responses/environmentVariableNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/environmentVariables/{environmentVariableId}:
+  /hosts/{hostId}/servers/{serverId}/environmentVariables/{environmentVariableId}:
     get:
       tags:
         - environmentVariables
       summary: Get a EnvironmentVariable by id
       operationId: getEnvironmentVariable
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       responses:
@@ -377,6 +480,7 @@ paths:
       summary: Update a EnvironmentVariable by id
       operationId: patchEnvironmentVariable
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       requestBody:
@@ -398,6 +502,7 @@ paths:
       summary: Delete a EnvironmentVariable by id
       operationId: deleteEnvironmentVariable
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       responses:
@@ -407,7 +512,7 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/environmentVariableNotFoundError'
-  /servers/{serverId}/files:
+  /hosts/{hostId}/servers/{serverId}/files:
     post:
       tags:
         - files
@@ -415,6 +520,7 @@ paths:
       description: This takes a base64 encoded file. An easy way to base64 encode a file with node is Buffer.from(fs.readFileSync('filename').toString()).toString('base64').
       operationId: createFile
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
         $ref: '#/components/requestBodies/fileRequest'
@@ -431,6 +537,7 @@ paths:
       summary: Get Files of Server
       operationId: getFiles
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -441,13 +548,14 @@ paths:
           $ref: '#/components/responses/fileNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /servers/{serverId}/files/{fileId}:
+  /hosts/{hostId}/servers/{serverId}/files/{fileId}:
     get:
       tags:
         - files
       summary: Get a File by id
       operationId: getFile
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       responses:
@@ -465,6 +573,7 @@ paths:
       summary: Update a File by id
       operationId: patchFile
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       requestBody:
@@ -486,6 +595,7 @@ paths:
       summary: Delete a File by id
       operationId: deleteFile
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       responses:
@@ -504,6 +614,58 @@ components:
       in: header
       name: authorization
   schemas:
+    hostResponseSchema:
+      required:
+        - id
+        - name
+        - url
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+    notAuthorizedErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: UnauthorizedError
+        message:
+          type: string
+          example: Requester is not authorized.
+    hostNotFoundErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: NotFoundError
+        message:
+          type: string
+          example: The Host with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
+    internalServerErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: InternalServerError
+        message:
+          type: string
+          example: Your request cannot be processed at this time. The server may be having a bad day.
+    hostRequestSchema:
+      required:
+        - name
+        - url
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
     serverResponseSchema:
       required:
         - id
@@ -527,15 +689,6 @@ components:
         hostId:
           type: string
           format: uuid
-    notAuthorizedErrorSchema:
-      type: object
-      properties:
-        description:
-          type: string
-          example: UnauthorizedError
-        message:
-          type: string
-          example: Requester is not authorized.
     serverNotFoundErrorSchema:
       type: object
       properties:
@@ -545,15 +698,6 @@ components:
         message:
           type: string
           example: The server with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
-    internalServerErrorSchema:
-      type: object
-      properties:
-        description:
-          type: string
-          example: InternalServerError
-        message:
-          type: string
-          example: Your request cannot be processed at this time. The server may be having a bad day.
     serverRequestSchema:
       required:
         - applicationName
@@ -706,6 +850,38 @@ components:
         name:
           type: string
   responses:
+    hostArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/hostResponseSchema'
+    notAuthorizedError:
+      description: Unauthorized Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/notAuthorizedErrorSchema'
+    hostNotFoundError:
+      description: The Host could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/hostNotFoundErrorSchema'
+    internalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/internalServerErrorSchema'
+    hostResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/hostResponseSchema'
     serverArrayResponse:
       description: Success
       content:
@@ -714,24 +890,12 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/serverResponseSchema'
-    notAuthorizedError:
-      description: Unauthorized Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/notAuthorizedErrorSchema'
     serverNotFoundError:
       description: The Server could not be found.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/serverNotFoundErrorSchema'
-    internalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/internalServerErrorSchema'
     serverResponse:
       description: Success
       content:
@@ -819,6 +983,12 @@ components:
           schema:
             $ref: '#/components/schemas/fileResponseSchema'
   requestBodies:
+    hostRequest:
+      description: Create a new volume
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/hostRequestSchema'
     serverRequest:
       description: Create a new Server
       content:
@@ -850,6 +1020,14 @@ components:
           schema:
             $ref: '#/components/schemas/fileRequestSchema'
   parameters:
+    hostIdInPath:
+      description: id of the Host
+      name: hostId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     serverIdInPath:
       description: id of the Server
       name: serverId

@@ -1,0 +1,5 @@
+description: "The Host could not be found."
+content:
+  application/json:
+    schema:
+      $ref: "./hostNotFoundErrorSchema.yaml"

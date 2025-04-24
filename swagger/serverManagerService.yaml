@@ -8,6 +8,8 @@ externalDocs:
   description: GitHub
   url: https://github.com/Zane-T-Rice/server-manager-service
 tags:
+  - name: hosts
+    description: The Hosts where Servers live
   - name: servers
     description: The root of managing and configuring your Servers
   - name: ports
@@ -22,12 +24,94 @@ servers:
   - url: /server-manager-service
   - url: /
 paths:
-  /servers:
+  /hosts:
+    post:
+      tags:
+        - hosts
+      summary: Create a new host
+      operationId: createhost
+      requestBody:
+        $ref: "./hosts/hostRequest.yaml"
+      responses:
+        "200":
+          $ref: "./hosts/hostResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - hosts
+      summary: Get hosts of Server
+      operationId: gethosts
+      responses:
+        "200":
+          $ref: "./hosts/hostArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./hosts/errors/hostNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /hosts/{hostId}:
+    get:
+      tags:
+        - hosts
+      summary: Get a host by id
+      operationId: gethost
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./hosts/hostResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./hosts/errors/hostNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    patch:
+      tags:
+        - hosts
+      summary: Update a host by id
+      operationId: patchhost
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+      requestBody:
+        allOf:
+          - $ref: "./hosts/hostRequest.yaml"
+          - description: Patch a host
+      responses:
+        "200":
+          $ref: "./hosts/hostResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./hosts/errors/hostNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - hosts
+      summary: Delete a host by id
+      operationId: deletehost
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./hosts/hostResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./hosts/errors/hostNotFoundError.yaml"
+  /hosts/{hostId}/servers:
     post:
       tags:
         - servers
       summary: Create a new Server
       operationId: createServer
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
       requestBody:
         $ref: "./servers/serverRequest.yaml"
       responses:
@@ -43,6 +127,7 @@ paths:
       summary: Get all Servers
       operationId: getServers
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - in: query
           name: isUpdatable
           schema:
@@ -57,13 +142,14 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}:
+  /hosts/{hostId}/servers/{serverId}:
     get:
       tags:
         - servers
       summary: Get a Server by id
       operationId: getServer
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -80,6 +166,7 @@ paths:
       summary: Patch a Server by id
       operationId: patchServer
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         allOf:
@@ -100,6 +187,7 @@ paths:
       summary: Delete a Server by id
       operationId: deleteServer
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -110,13 +198,14 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/restart:
+  /hosts/{hostId}/servers/{serverId}/restart:
     post:
       tags:
         - servers
       summary: Restart a Server by id
       operationId: restartServer
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -127,7 +216,7 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/update:
+  /hosts/{hostId}/servers/{serverId}/update:
     post:
       tags:
         - servers
@@ -135,6 +224,7 @@ paths:
       description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
       operationId: updateServer
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -145,13 +235,14 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/ports:
+  /hosts/{hostId}/servers/{serverId}/ports:
     post:
       tags:
         - ports
       summary: Create a new port
       operationId: createPort
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./ports/portRequest.yaml"
@@ -168,6 +259,7 @@ paths:
       summary: Get Ports of Server
       operationId: getPorts
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -178,13 +270,14 @@ paths:
           $ref: "./ports/errors/portNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/ports/{portId}:
+  /hosts/{hostId}/servers/{serverId}/ports/{portId}:
     get:
       tags:
         - ports
       summary: Get a Port by id
       operationId: getPort
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       responses:
@@ -202,6 +295,7 @@ paths:
       summary: Update a Port by id
       operationId: patchPort
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       requestBody:
@@ -223,6 +317,7 @@ paths:
       summary: Delete a port by id
       operationId: deletePort
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       responses:
@@ -232,13 +327,14 @@ paths:
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
           $ref: "./ports/errors/portNotFoundError.yaml"
-  /servers/{serverId}/volumes:
+  /hosts/{hostId}/servers/{serverId}/volumes:
     post:
       tags:
         - volumes
       summary: Create a new volume
       operationId: createVolume
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./volumes/volumeRequest.yaml"
@@ -255,6 +351,7 @@ paths:
       summary: Get Volumes of Server
       operationId: getVolumes
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -265,13 +362,14 @@ paths:
           $ref: "./volumes/errors/volumeNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/volumes/{volumeId}:
+  /hosts/{hostId}/servers/{serverId}/volumes/{volumeId}:
     get:
       tags:
         - volumes
       summary: Get a Volume by id
       operationId: getVolume
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       responses:
@@ -289,6 +387,7 @@ paths:
       summary: Update a Volume by id
       operationId: patchVolume
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       requestBody:
@@ -310,6 +409,7 @@ paths:
       summary: Delete a Volume by id
       operationId: deleteVolume
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       responses:
@@ -319,13 +419,14 @@ paths:
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
           $ref: "./volumes/errors/volumeNotFoundError.yaml"
-  /servers/{serverId}/environmentVariables:
+  /hosts/{hostId}/servers/{serverId}/environmentVariables:
     post:
       tags:
         - environmentVariables
       summary: Create a new environmentVariable
       operationId: createEnvironmentVariable
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./environmentVariables/environmentVariableRequest.yaml"
@@ -342,6 +443,7 @@ paths:
       summary: Get EnvironmentVariables of Server
       operationId: getEnvironmentVariables
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -352,13 +454,14 @@ paths:
           $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/environmentVariables/{environmentVariableId}:
+  /hosts/{hostId}/servers/{serverId}/environmentVariables/{environmentVariableId}:
     get:
       tags:
         - environmentVariables
       summary: Get a EnvironmentVariable by id
       operationId: getEnvironmentVariable
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       responses:
@@ -376,6 +479,7 @@ paths:
       summary: Update a EnvironmentVariable by id
       operationId: patchEnvironmentVariable
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       requestBody:
@@ -397,6 +501,7 @@ paths:
       summary: Delete a EnvironmentVariable by id
       operationId: deleteEnvironmentVariable
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       responses:
@@ -406,7 +511,7 @@ paths:
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
           $ref: "./environmentVariables/errors/environmentVariableNotFoundError.yaml"
-  /servers/{serverId}/files:
+  /hosts/{hostId}/servers/{serverId}/files:
     post:
       tags:
         - files
@@ -414,6 +519,7 @@ paths:
       description: This takes a base64 encoded file. An easy way to base64 encode a file with node is Buffer.from(fs.readFileSync('filename').toString()).toString('base64').
       operationId: createFile
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
         $ref: "./files/fileRequest.yaml"
@@ -430,6 +536,7 @@ paths:
       summary: Get Files of Server
       operationId: getFiles
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -440,13 +547,14 @@ paths:
           $ref: "./files/errors/fileNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /servers/{serverId}/files/{fileId}:
+  /hosts/{hostId}/servers/{serverId}/files/{fileId}:
     get:
       tags:
         - files
       summary: Get a File by id
       operationId: getFile
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       responses:
@@ -464,6 +572,7 @@ paths:
       summary: Update a File by id
       operationId: patchFile
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       requestBody:
@@ -485,6 +594,7 @@ paths:
       summary: Delete a File by id
       operationId: deleteFile
       parameters:
+        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       responses:
