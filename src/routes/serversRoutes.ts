@@ -17,14 +17,14 @@ wrappedRouter.post(
 
 /* POST restart an existing server. */
 wrappedRouter.post(
-  "/:id/restart",
+  "/:serverId/restart",
   ServersController.instance.restartServer,
   Permissions.REBOOT
 );
 
 /* POST update an existing server. */
 wrappedRouter.post(
-  "/:id/update",
+  "/:serverId/update",
   ServersController.instance.updateServer,
   Permissions.UPDATE
 );
@@ -34,21 +34,21 @@ wrappedRouter.get("/", ServersController.instance.getServers, Permissions.READ);
 
 /* GET server by id. */
 wrappedRouter.get(
-  "/:id",
+  "/:serverId",
   ServersController.instance.getServerById,
   Permissions.READ
 );
 
 /* PATCH an existing server. */
 wrappedRouter.patch(
-  "/:id",
+  "/:serverId",
   [isHostMiddleware(prisma, false), ServersController.instance.patchServer],
   Permissions.WRITE
 );
 
 /* DELETE an existing server. */
 wrappedRouter.delete(
-  "/:id",
+  "/:serverId",
   ServersController.instance.deleteServer,
   Permissions.WRITE
 );

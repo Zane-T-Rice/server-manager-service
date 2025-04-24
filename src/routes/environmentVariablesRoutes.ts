@@ -9,35 +9,35 @@ new EnvironmentVariablesController(prisma); // Initialize EnvironmentVariablesCo
 
 /* POST a new environment variable. */
 wrappedRouter.post(
-  "/:serverId/environmentVariables",
+  "/",
   EnvironmentVariablesController.instance.createEnvironmentVariable,
   Permissions.WRITE
 );
 
 /* GET all environment variables. */
 wrappedRouter.get(
-  "/:serverId/environmentVariables",
+  "/",
   EnvironmentVariablesController.instance.getEnvironmentVariables,
   Permissions.READ
 );
 
 /* GET environment variable by id. */
 wrappedRouter.get(
-  "/:serverId/environmentVariables/:id",
+  "/:environmentVariableId",
   EnvironmentVariablesController.instance.getEnvironmentVariableById,
   Permissions.READ
 );
 
 /* PATCH an existing environment variable. */
 wrappedRouter.patch(
-  "/:serverId/environmentVariables/:id",
+  "/:environmentVariableId",
   EnvironmentVariablesController.instance.patchEnvironmentVariable,
   Permissions.WRITE
 );
 
 /* DELETE an existing environment variable. */
 wrappedRouter.delete(
-  "/:serverId/environmentVariables/:id",
+  "/:environmentVariableId",
   EnvironmentVariablesController.instance.deleteEnvironmentVariable,
   Permissions.WRITE
 );

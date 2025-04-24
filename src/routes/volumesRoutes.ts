@@ -9,35 +9,31 @@ new VolumesController(prisma); // Initialize volumesController singleton
 
 /* POST a new volume. */
 wrappedRouter.post(
-  "/:serverId/volumes",
+  "/",
   VolumesController.instance.createVolume,
   Permissions.WRITE
 );
 
 /* GET all volumes. */
-wrappedRouter.get(
-  "/:serverId/volumes",
-  VolumesController.instance.getVolumes,
-  Permissions.READ
-);
+wrappedRouter.get("/", VolumesController.instance.getVolumes, Permissions.READ);
 
 /* GET volume by id. */
 wrappedRouter.get(
-  "/:serverId/volumes/:id",
+  "/:volumeId",
   VolumesController.instance.getVolumeById,
   Permissions.READ
 );
 
 /* PATCH an existing volume. */
 wrappedRouter.patch(
-  "/:serverId/volumes/:id",
+  "/:volumeId",
   VolumesController.instance.patchVolume,
   Permissions.WRITE
 );
 
 /* DELETE an existing volume. */
 wrappedRouter.delete(
-  "/:serverId/volumes/:id",
+  "/:volumeId",
   VolumesController.instance.deleteVolume,
   Permissions.WRITE
 );

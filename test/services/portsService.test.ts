@@ -37,7 +37,7 @@ describe("PortsService", () => {
     body,
     // In some routes, the port id is not used, but the code
     // should be able to handle that anyways.
-    params: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+    params: { portId: mockPortRecord.id, serverId: mockPortRecord.serverId },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   const portsService = new PortsService();

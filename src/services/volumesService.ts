@@ -51,42 +51,42 @@ class VolumesService {
 
   /* GET volume by id. */
   async getVolumeById(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { volumeId, serverId } = req.params;
     const volume = await this.prisma.volume
       .findUniqueOrThrow({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(volumeId), serverId: String(serverId) },
         select: VolumesService.defaultVolumeSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "volume", [id]));
+      .catch((e) => handleDatabaseErrors(e, "volume", [volumeId]));
     res.json(volume);
   }
 
   /* PATCH an existing volume. */
   async patchVolume(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { volumeId, serverId } = req.params;
     const { hostPath, containerPath } = req.body;
     const volume = await this.prisma.volume
       .update({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(volumeId), serverId: String(serverId) },
         data: {
           hostPath,
           containerPath,
         },
         select: VolumesService.defaultVolumeSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "volume", [id]));
+      .catch((e) => handleDatabaseErrors(e, "volume", [volumeId]));
     res.json(volume);
   }
 
   /* DELETE an existing volume. */
   async deleteVolume(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { volumeId, serverId } = req.params;
     const volume = await this.prisma.volume
       .delete({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(volumeId), serverId: String(serverId) },
         select: VolumesService.defaultVolumeSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "volume", [id]));
+      .catch((e) => handleDatabaseErrors(e, "volume", [volumeId]));
     res.json(volume);
   }
 }

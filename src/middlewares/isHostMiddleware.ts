@@ -7,13 +7,15 @@ import { ErrorMessages } from "../constants";
 // Verify a Host exists for a given hostId or throw.
 export function isHostMiddleware(prisma: PrismaClient, required: boolean) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    const { hostId } = req.body;
+    const { hostId: hostIdBody } = req.body;
+    const { hostId: hostIdParams } = req.params;
+    const hostId = hostIdParams || hostIdBody;
 
     if (!isNil(hostId))
       await prisma.host
-        .findUniqueOrThrow({ where: { id: `${hostId}` } })
+        .findUniqueOrThrow({ where: { id: String(hostId) } })
         .then(() => next())
-        .catch((e) => handleDatabaseErrors(e, "host", [`${hostId}`]));
+        .catch((e) => handleDatabaseErrors(e, "host", [String(hostId)]));
     else if (required)
       throw new BadRequestError(
         formatMessage(ErrorMessages.theArgumentIsRequired, {

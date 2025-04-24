@@ -18,7 +18,7 @@ describe("ephemeralContainerRun", () => {
   const req: Request = {
     body,
     query: {},
-    params: { id: mockServerRecord.id },
+    params: { serverId: mockServerRecord.id },
     log: {
       info: jest.fn(),
       flush: jest.fn(),

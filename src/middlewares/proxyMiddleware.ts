@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import proxy from "express-http-proxy";
 import { ErrorMessages, Routes } from "../constants";
-import { formatMessage } from "../utils";
+import { formatMessage, handleDatabaseErrors } from "../utils";
 import { BadRequestError, InternalServerError } from "../errors";
 
 export function proxyReqPathResolver(hostPath: string) {
@@ -36,24 +36,20 @@ export function proxyErrorHandler(
 // Proxy to the host of the server acted upon if it is different than the current host.
 export function proxyMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
-    const server = await prisma.server.findUnique({
-      where: { id: id },
-      select: { host: { select: { url: true } } },
-    });
+    const { serverId } = req.params;
+    const server = await prisma.server
+      .findUniqueOrThrow({
+        where: {
+          id: String(serverId),
+        },
+        select: { host: { select: { url: true } } },
+      })
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
 
-    // Do not proxy if the server does not exist. This error state is handled gracefully later.
     // Do not proxy if this is the matching host.
-    if (!server || (server.host && server.host.url === process.env.HOST)) {
+    if (server.host.url === process.env.HOST) {
       next();
       return;
-    }
-
-    // Throw an error if the host is not set on the server.
-    if (!server.host) {
-      throw new BadRequestError(
-        formatMessage(ErrorMessages.serverDoesNotHaveAHost, { serverId: id })
-      );
     }
 
     // Throw an error if this was a Routes.PROXY request.
@@ -62,7 +58,7 @@ export function proxyMiddleware(prisma: PrismaClient) {
     if (req.originalUrl.startsWith(Routes.PROXY)) {
       throw new BadRequestError(
         formatMessage(ErrorMessages.proxyHostMismatch, {
-          serverId: id,
+          serverId,
           serverHostUrl: server.host.url,
           hostUrl: process.env.HOST,
         })
@@ -73,7 +69,7 @@ export function proxyMiddleware(prisma: PrismaClient) {
     await proxy(url.origin, {
       memoizeHost: false,
       proxyReqPathResolver: proxyReqPathResolver(url.pathname),
-      proxyErrorHandler: proxyErrorHandler(next, id, server.host.url),
+      proxyErrorHandler: proxyErrorHandler(next, serverId, server.host.url),
     })(req, res, () => next("router"));
   };
 }

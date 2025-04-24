@@ -47,7 +47,7 @@ describe("ServersService", () => {
   const req: Request = {
     body,
     query: {},
-    params: { id: mockServerRecord.id },
+    params: { serverId: mockServerRecord.id },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   const serversService = new ServersService();

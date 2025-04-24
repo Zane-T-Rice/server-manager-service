@@ -38,7 +38,7 @@ describe("EnvironmentVariablesService", () => {
     // In some routes, the environmentVariable id is not used, but the code
     // should be able to handle that anyways.
     params: {
-      id: mockEnvironmentVariableRecord.id,
+      environmentVariableId: mockEnvironmentVariableRecord.id,
       serverId: mockEnvironmentVariableRecord.serverId,
     },
   } as unknown as Request;

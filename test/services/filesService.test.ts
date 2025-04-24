@@ -38,7 +38,7 @@ describe("FilesService", () => {
     // In some routes, the file id is not used, but the code
     // should be able to handle that anyways.
     params: {
-      id: mockFileRecord.id,
+      fileId: mockFileRecord.id,
       serverId: mockFileRecord.serverId,
     },
   } as unknown as Request;

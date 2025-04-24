@@ -8,36 +8,28 @@ const wrappedRouter = new ExpressRouterWrapper();
 new PortsController(prisma); // Initialize PortsController singleton
 
 /* POST a new port. */
-wrappedRouter.post(
-  "/:serverId/ports",
-  PortsController.instance.createPort,
-  Permissions.WRITE
-);
+wrappedRouter.post("/", PortsController.instance.createPort, Permissions.WRITE);
 
 /* GET all ports. */
-wrappedRouter.get(
-  "/:serverId/ports",
-  PortsController.instance.getPorts,
-  Permissions.READ
-);
+wrappedRouter.get("/", PortsController.instance.getPorts, Permissions.READ);
 
 /* GET port by id. */
 wrappedRouter.get(
-  "/:serverId/ports/:id",
+  "/:portId",
   PortsController.instance.getPortById,
   Permissions.READ
 );
 
 /* PATCH an existing port. */
 wrappedRouter.patch(
-  "/:serverId/ports/:id",
+  "/:portId",
   PortsController.instance.patchPort,
   Permissions.WRITE
 );
 
 /* DELETE an existing port. */
 wrappedRouter.delete(
-  "/:serverId/ports/:id",
+  "/:portId",
   PortsController.instance.deletePort,
   Permissions.WRITE
 );

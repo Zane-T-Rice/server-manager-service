@@ -8,36 +8,28 @@ const wrappedRouter = new ExpressRouterWrapper();
 new FilesController(prisma); // Initialize FilesController singleton
 
 /* POST a new File. */
-wrappedRouter.post(
-  "/:serverId/files",
-  FilesController.instance.createFile,
-  Permissions.WRITE
-);
+wrappedRouter.post("/", FilesController.instance.createFile, Permissions.WRITE);
 
 /* GET all Files. */
-wrappedRouter.get(
-  "/:serverId/files",
-  FilesController.instance.getFiles,
-  Permissions.READ
-);
+wrappedRouter.get("/", FilesController.instance.getFiles, Permissions.READ);
 
 /* GET File by id. */
 wrappedRouter.get(
-  "/:serverId/files/:id",
+  "/:fileId",
   FilesController.instance.getFileById,
   Permissions.READ
 );
 
 /* PATCH an existing File. */
 wrappedRouter.patch(
-  "/:serverId/files/:id",
+  "/:fileId",
   FilesController.instance.patchFile,
   Permissions.WRITE
 );
 
 /* DELETE an existing File. */
 wrappedRouter.delete(
-  "/:serverId/files/:id",
+  "/:fileId",
   FilesController.instance.deleteFile,
   Permissions.WRITE
 );

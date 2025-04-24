@@ -51,42 +51,42 @@ class FilesService {
 
   /* GET file by id. */
   async getFileById(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { fileId, serverId } = req.params;
     const file = await this.prisma.file
       .findUniqueOrThrow({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(fileId), serverId: String(serverId) },
         select: FilesService.defaultFileSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "file", [id]));
+      .catch((e) => handleDatabaseErrors(e, "file", [fileId]));
     res.json(file);
   }
 
   /* PATCH an existing file. */
   async patchFile(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { fileId, serverId } = req.params;
     const { content, name } = req.body;
     const file = await this.prisma.file
       .update({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(fileId), serverId: String(serverId) },
         data: {
           content,
           name,
         },
         select: FilesService.defaultFileSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "file", [id]));
+      .catch((e) => handleDatabaseErrors(e, "file", [fileId]));
     res.json(file);
   }
 
   /* DELETE an existing file. */
   async deleteFile(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { fileId, serverId } = req.params;
     const file = await this.prisma.file
       .delete({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(fileId), serverId: String(serverId) },
         select: FilesService.defaultFileSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "file", [id]));
+      .catch((e) => handleDatabaseErrors(e, "file", [fileId]));
     res.json(file);
   }
 }

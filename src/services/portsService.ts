@@ -51,42 +51,42 @@ class PortsService {
 
   /* GET port by id. */
   async getPortById(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { portId, serverId } = req.params;
     const port = await this.prisma.port
       .findUniqueOrThrow({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(portId), serverId: String(serverId) },
         select: PortsService.defaultPortSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "port", [id]));
+      .catch((e) => handleDatabaseErrors(e, "port", [portId]));
     res.json(port);
   }
 
   /* PATCH an existing port. */
   async patchPort(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { portId, serverId } = req.params;
     const { number, protocol } = req.body;
     const port = await this.prisma.port
       .update({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(portId), serverId: String(serverId) },
         data: {
           number,
           protocol,
         },
         select: PortsService.defaultPortSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "port", [id]));
+      .catch((e) => handleDatabaseErrors(e, "port", [portId]));
     res.json(port);
   }
 
   /* DELETE an existing port. */
   async deletePort(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { portId, serverId } = req.params;
     const port = await this.prisma.port
       .delete({
-        where: { id: String(id), serverId: String(serverId) },
+        where: { id: String(portId), serverId: String(serverId) },
         select: PortsService.defaultPortSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "port", [id]));
+      .catch((e) => handleDatabaseErrors(e, "port", [portId]));
     res.json(port);
   }
 }

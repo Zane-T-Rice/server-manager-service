@@ -54,42 +54,57 @@ class EnvironmentVariablesService {
 
   /* GET environment variable by id. */
   async getEnvironmentVariableById(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { environmentVariableId, serverId } = req.params;
     const environmentVariable = await this.prisma.environmentVariable
       .findUniqueOrThrow({
-        where: { id: String(id), serverId: String(serverId) },
+        where: {
+          id: String(environmentVariableId),
+          serverId: String(serverId),
+        },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "environment variable", [id]));
+      .catch((e) =>
+        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+      );
     res.json(environmentVariable);
   }
 
   /* PATCH an existing environment variable. */
   async patchEnvironmentVariable(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { environmentVariableId, serverId } = req.params;
     const { name, value } = req.body;
     const environmentVariable = await this.prisma.environmentVariable
       .update({
-        where: { id: String(id), serverId: String(serverId) },
+        where: {
+          id: String(environmentVariableId),
+          serverId: String(serverId),
+        },
         data: {
           name,
           value,
         },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "environment variable", [id]));
+      .catch((e) =>
+        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+      );
     res.json(environmentVariable);
   }
 
   /* DELETE an existing environment variable. */
   async deleteEnvironmentVariable(req: Request, res: Response) {
-    const { id, serverId } = req.params;
+    const { environmentVariableId, serverId } = req.params;
     const environmentVariable = await this.prisma.environmentVariable
       .delete({
-        where: { id: String(id), serverId: String(serverId) },
+        where: {
+          id: String(environmentVariableId),
+          serverId: String(serverId),
+        },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "environment variable", [id]));
+      .catch((e) =>
+        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+      );
     res.json(environmentVariable);
   }
 }

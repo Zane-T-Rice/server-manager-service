@@ -4,13 +4,14 @@ import * as swaggerUI from "swagger-ui-dist";
 import {
   appErrorHandler,
   errorHandler,
+  isHostMiddleware,
   isServerMiddleware,
   proxyMiddleware,
 } from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
 import {
-  environmentVariablesRouter,
+  environmentVariablesRouter as evRouter,
   filesRouter,
   portsRouter,
   serversRouter,
@@ -90,11 +91,25 @@ app.use(
   })
 );
 
+// For routes that require a host, make sure the host is real.
+app.use(
+  `(${Routes.PROXY})?/hosts/:hostId`,
+  requiredScopes(Permissions.READ),
+  errorHandler(isHostMiddleware(prisma, true))
+);
+
+// For routes that require a server, make sure the server is real.
+app.use(
+  `(${Routes.PROXY})?(/hosts/:hostId)?/servers/:serverId`,
+  requiredScopes(Permissions.READ),
+  errorHandler(isServerMiddleware(prisma))
+);
+
 // Proxy to correct host for routes that need host affinity.
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
-  `(${Routes.PROXY})?/servers/:id/(update|restart)`,
+  `(${Routes.PROXY})?(/hosts/:hostId)?/servers/:serverId/(update|restart)`,
   requiredScopes(Permissions.READ),
   errorHandler(proxyMiddleware(prisma))
 );
@@ -113,19 +128,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// For routes that require a server, make sure the server is real.
-app.use(
-  "/servers/:id",
-  requiredScopes(Permissions.READ),
-  errorHandler(isServerMiddleware(prisma))
-);
-
 // REST APIs
-app.use("/servers", serversRouter);
-app.use("/servers", portsRouter);
-app.use("/servers", environmentVariablesRouter);
-app.use("/servers", volumesRouter);
-app.use("/servers", filesRouter);
+app.use("/hosts", serversRouter);
+app.use("(/hosts/:hostId)?/servers", serversRouter);
+app.use("(/hosts/:hostId)?/servers/:serverId/ports", portsRouter);
+app.use("(/hosts/:hostId)?/servers/:serverId/environmentVariables", evRouter);
+app.use("(/hosts/:hostId)?/servers/:serverId/volumes", volumesRouter);
+app.use("(/hosts/:hostId)?/servers/:serverId/files", filesRouter);
 
 // error handler
 app.use(appErrorHandler);

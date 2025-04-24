@@ -59,8 +59,11 @@ class ServersService {
       containerName,
       isInResponseChain,
       isUpdatable,
-      hostId,
+      hostId: hostIdBody,
     } = req.body;
+    const { hostId: hostIdParams } = req.params;
+    const hostId = hostIdParams || hostIdBody;
+
     const server = await this.prisma.server
       .create({
         data: {
@@ -78,13 +81,13 @@ class ServersService {
 
   /* POST restart an existing server. */
   async restartServer(req: Request, res: Response) {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const dbServer = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(id) },
+        where: { id: String(serverId) },
         select: ServersService.defaultServerSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
     // Makes typescript accept that server is not null.
     // Really it can never be because Prisma would throw if it
     // did not find a server above and handleDatabaseErrors is guaranteed
@@ -107,13 +110,13 @@ class ServersService {
 
   /* POST update an existing server. */
   async updateServer(req: Request, res: Response) {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const dbServer = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(id), isUpdatable: true },
+        where: { id: String(serverId), isUpdatable: true },
         select: ServersService.completeServerSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
 
     // Makes typescript accept that server is not null.
     // Really it can never be because Prisma would throw if it
@@ -228,29 +231,32 @@ class ServersService {
 
   /* GET server by id. */
   async getServerById(req: Request, res: Response) {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const server = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(id) },
+        where: { id: String(serverId) },
         select: ServersService.defaultServerSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
     res.json(server);
   }
 
   /* PATCH an existing server. */
   async patchServer(req: Request, res: Response) {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const {
       applicationName,
       containerName,
       isInResponseChain,
       isUpdatable,
-      hostId,
+      hostId: hostIdBody,
     } = req.body;
+    const { hostId: hostIdParams } = req.params;
+    const hostId = hostIdParams || hostIdBody;
+
     const server = await this.prisma.server
       .update({
-        where: { id: String(id) },
+        where: { id: String(serverId) },
         data: {
           applicationName,
           containerName,
@@ -260,21 +266,21 @@ class ServersService {
         },
         select: ServersService.defaultServerSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
     res.json(server);
   }
 
   /* DELETE an existing server. */
   async deleteServer(req: Request, res: Response) {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const server = await this.prisma.server
       .delete({
         where: {
-          id: String(id),
+          id: String(serverId),
         },
         select: ServersService.defaultServerSelect,
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [id]));
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
     res.json(server);
   }
 }

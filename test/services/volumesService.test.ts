@@ -38,7 +38,7 @@ describe("VolumesService", () => {
     // In some routes, the volume id is not used, but the code
     // should be able to handle that anyways.
     params: {
-      id: mockVolumeRecord.id,
+      volumeId: mockVolumeRecord.id,
       serverId: mockVolumeRecord.serverId,
     },
   } as unknown as Request;
