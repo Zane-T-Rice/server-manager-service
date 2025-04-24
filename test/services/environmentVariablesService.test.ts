@@ -24,12 +24,12 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("EnvironmentVariablesService", () => {
-  const commonParams = { serverId: "serverId" };
+  const params = { hostId: "hostId", serverId: "serverId" };
   const body = { name: "env-variable-name", value: "value-of-env-variable" };
   const mockEnvironmentVariableRecord = {
-    id: "environmentVariableid",
-    ...commonParams,
     ...body,
+    id: "environmentVariableid",
+    serverId: params.serverId,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -38,11 +38,20 @@ describe("EnvironmentVariablesService", () => {
     // In some routes, the environmentVariable id is not used, but the code
     // should be able to handle that anyways.
     params: {
+      hostId: params.hostId,
+      serverId: params.serverId,
       environmentVariableId: mockEnvironmentVariableRecord.id,
-      serverId: mockEnvironmentVariableRecord.serverId,
     },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
+  const where = {
+    id: mockEnvironmentVariableRecord.id,
+    server: { id: params.serverId, hostId: params.hostId },
+  };
+  const data = {
+    serverId: params.serverId,
+    ...body,
+  };
   const environmentVariablesService = new EnvironmentVariablesService();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,10 +101,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.create
       ).toHaveBeenCalledWith({
-        data: {
-          ...commonParams,
-          ...body,
-        },
+        data,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockEnvironmentVariableRecord);
@@ -113,10 +119,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.create
       ).toHaveBeenCalledWith({
-        data: {
-          ...body,
-          ...commonParams,
-        },
+        data,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -167,10 +170,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.findUniqueOrThrow
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockEnvironmentVariableRecord);
@@ -191,10 +191,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.findUniqueOrThrow
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -213,10 +210,7 @@ describe("EnvironmentVariablesService", () => {
         environmentVariablesService.prisma.environmentVariable.update
       ).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockEnvironmentVariableRecord);
@@ -235,10 +229,7 @@ describe("EnvironmentVariablesService", () => {
         environmentVariablesService.prisma.environmentVariable.update
       ).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -256,10 +247,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.delete
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockEnvironmentVariableRecord);
@@ -277,10 +265,7 @@ describe("EnvironmentVariablesService", () => {
       expect(
         environmentVariablesService.prisma.environmentVariable.delete
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockEnvironmentVariableRecord.id,
-          serverId: mockEnvironmentVariableRecord.serverId,
-        },
+        where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(

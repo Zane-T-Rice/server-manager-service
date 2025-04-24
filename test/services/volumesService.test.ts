@@ -24,12 +24,12 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("VolumesService", () => {
-  const commonParams = { serverId: "serverId" };
+  const params = { hostId: "hostId", serverId: "serverId" };
   const body = { hostPath: "/host/path", containerPath: "/container/Path" };
   const mockVolumeRecord = {
-    id: "volumeid",
-    ...commonParams,
     ...body,
+    id: "volumeid",
+    serverId: params.serverId,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -38,11 +38,20 @@ describe("VolumesService", () => {
     // In some routes, the volume id is not used, but the code
     // should be able to handle that anyways.
     params: {
+      hostId: params.hostId,
+      serverId: params.serverId,
       volumeId: mockVolumeRecord.id,
-      serverId: mockVolumeRecord.serverId,
     },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
+  const where = {
+    id: mockVolumeRecord.id,
+    server: { id: params.serverId, hostId: params.hostId },
+  };
+  const data = {
+    serverId: params.serverId,
+    ...body,
+  };
   const volumesService = new VolumesService();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,10 +92,7 @@ describe("VolumesService", () => {
     it("should create a new volume record and return the new record", async () => {
       await volumesService.createVolume(req, res);
       expect(volumesService.prisma.volume.create).toHaveBeenCalledWith({
-        data: {
-          ...commonParams,
-          ...body,
-        },
+        data,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockVolumeRecord);
@@ -102,10 +108,7 @@ describe("VolumesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(volumesService.prisma.volume.create).toHaveBeenCalledWith({
-        data: {
-          ...body,
-          ...commonParams,
-        },
+        data,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -149,10 +152,7 @@ describe("VolumesService", () => {
       expect(
         volumesService.prisma.volume.findUniqueOrThrow
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockVolumeRecord);
@@ -170,10 +170,7 @@ describe("VolumesService", () => {
       expect(
         volumesService.prisma.volume.findUniqueOrThrow
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -190,10 +187,7 @@ describe("VolumesService", () => {
       await volumesService.patchVolume(req, res);
       expect(volumesService.prisma.volume.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockVolumeRecord);
@@ -210,10 +204,7 @@ describe("VolumesService", () => {
       }
       expect(volumesService.prisma.volume.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -229,10 +220,7 @@ describe("VolumesService", () => {
     it("Should delete volume", async () => {
       await volumesService.deleteVolume(req, res);
       expect(volumesService.prisma.volume.delete).toHaveBeenCalledWith({
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockVolumeRecord);
@@ -248,10 +236,7 @@ describe("VolumesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(volumesService.prisma.volume.delete).toHaveBeenCalledWith({
-        where: {
-          id: mockVolumeRecord.id,
-          serverId: mockVolumeRecord.serverId,
-        },
+        where,
         select: VolumesService.defaultVolumeSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(

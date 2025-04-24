@@ -22,6 +22,7 @@ describe("proxyMiddleware", () => {
     },
   };
   let next = jest.fn();
+  const hostId = "hostId";
   const serverId = "serverid";
 
   beforeEach(() => {
@@ -46,7 +47,7 @@ describe("proxyMiddleware", () => {
     await expect(
       async () =>
         await proxyMiddleware(prisma as unknown as PrismaClient)(
-          { params: { serverId } } as unknown as Request,
+          { params: { hostId, serverId } } as unknown as Request,
           {} as Response,
           next
         )
@@ -65,12 +66,12 @@ describe("proxyMiddleware", () => {
       host: { url: process.env.HOST },
     });
     await proxyMiddleware(prisma as unknown as PrismaClient)(
-      { params: { serverId } } as unknown as Request,
+      { params: { hostId, serverId } } as unknown as Request,
       {} as Response,
       next
     );
     expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId },
+      where: { id: serverId, hostId },
       select: { host: { select: { url: true } } },
     });
     expect(next).toHaveBeenCalledTimes(1);
@@ -86,7 +87,7 @@ describe("proxyMiddleware", () => {
       async () =>
         await proxyMiddleware(prisma as unknown as PrismaClient)(
           {
-            params: { serverId },
+            params: { hostId, serverId },
             originalUrl: Routes.PROXY + `/server/${serverId}/update`,
           } as unknown as Request,
           {} as Response,
@@ -98,7 +99,7 @@ describe("proxyMiddleware", () => {
       )
     );
     expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId },
+      where: { id: serverId, hostId },
       select: { host: { select: { url: true } } },
     });
     expect(next).not.toHaveBeenCalled();
@@ -112,7 +113,7 @@ describe("proxyMiddleware", () => {
     });
     await proxyMiddleware(prisma as unknown as PrismaClient)(
       {
-        params: { serverId },
+        params: { hostId, serverId },
         originalUrl: `/server/${serverId}/update`,
       } as unknown as Request,
       {} as Response,

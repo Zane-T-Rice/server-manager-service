@@ -2,7 +2,6 @@ import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
 import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 import { ServersController } from "../controllers";
-import { isHostMiddleware } from "../middlewares";
 
 const prisma = new PrismaClient();
 const wrappedRouter = new ExpressRouterWrapper();
@@ -11,7 +10,7 @@ new ServersController(prisma); // Initialize ServersController singleton
 /* POST a new server. */
 wrappedRouter.post(
   "/",
-  [isHostMiddleware(prisma, true), ServersController.instance.createServer],
+  ServersController.instance.createServer,
   Permissions.WRITE
 );
 
@@ -42,7 +41,7 @@ wrappedRouter.get(
 /* PATCH an existing server. */
 wrappedRouter.patch(
   "/:serverId",
-  [isHostMiddleware(prisma, false), ServersController.instance.patchServer],
+  ServersController.instance.patchServer,
   Permissions.WRITE
 );
 

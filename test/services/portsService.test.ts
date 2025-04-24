@@ -24,12 +24,12 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("PortsService", () => {
-  const commonParams = { serverId: "serverId" };
+  const params = { hostId: "hostId", serverId: "serverId" };
   const body = { number: 80, protocol: "tcp" };
   const mockPortRecord = {
-    id: "portid",
-    ...commonParams,
     ...body,
+    id: "portid",
+    serverId: params.serverId,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -37,9 +37,21 @@ describe("PortsService", () => {
     body,
     // In some routes, the port id is not used, but the code
     // should be able to handle that anyways.
-    params: { portId: mockPortRecord.id, serverId: mockPortRecord.serverId },
+    params: {
+      hostId: params.hostId,
+      serverId: params.serverId,
+      portId: mockPortRecord.id,
+    },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
+  const where = {
+    id: mockPortRecord.id,
+    server: { id: params.serverId, hostId: params.hostId },
+  };
+  const data = {
+    serverId: params.serverId,
+    ...body,
+  };
   const portsService = new PortsService();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,10 +92,7 @@ describe("PortsService", () => {
     it("should create a new port record and return the new record", async () => {
       await portsService.createPort(req, res);
       expect(portsService.prisma.port.create).toHaveBeenCalledWith({
-        data: {
-          ...commonParams,
-          ...body,
-        },
+        data,
         select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
@@ -99,10 +108,7 @@ describe("PortsService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(portsService.prisma.port.create).toHaveBeenCalledWith({
-        data: {
-          ...body,
-          ...commonParams,
-        },
+        data,
         select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -144,7 +150,7 @@ describe("PortsService", () => {
     it("Should return port", async () => {
       await portsService.getPortById(req, res);
       expect(portsService.prisma.port.findUniqueOrThrow).toHaveBeenCalledWith({
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
@@ -160,7 +166,7 @@ describe("PortsService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(portsService.prisma.port.findUniqueOrThrow).toHaveBeenCalledWith({
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -177,7 +183,7 @@ describe("PortsService", () => {
       await portsService.patchPort(req, res);
       expect(portsService.prisma.port.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
@@ -194,7 +200,7 @@ describe("PortsService", () => {
       }
       expect(portsService.prisma.port.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -210,7 +216,7 @@ describe("PortsService", () => {
     it("Should delete port", async () => {
       await portsService.deletePort(req, res);
       expect(portsService.prisma.port.delete).toHaveBeenCalledWith({
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockPortRecord);
@@ -226,7 +232,7 @@ describe("PortsService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(portsService.prisma.port.delete).toHaveBeenCalledWith({
-        where: { id: mockPortRecord.id, serverId: mockPortRecord.serverId },
+        where,
         select: PortsService.defaultPortSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(

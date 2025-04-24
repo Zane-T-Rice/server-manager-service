@@ -24,12 +24,12 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("FilesService", () => {
-  const commonParams = { serverId: "serverId" };
-  const body = { content: "text in a file", name: "filename" };
+  const params = { hostId: "hostId", serverId: "serverId" };
+  const body = { name: "", content: "" };
   const mockFileRecord = {
-    id: "fileid",
-    ...commonParams,
     ...body,
+    id: "fileid",
+    serverId: params.serverId,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -38,11 +38,20 @@ describe("FilesService", () => {
     // In some routes, the file id is not used, but the code
     // should be able to handle that anyways.
     params: {
+      hostId: params.hostId,
+      serverId: params.serverId,
       fileId: mockFileRecord.id,
-      serverId: mockFileRecord.serverId,
     },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
+  const where = {
+    id: mockFileRecord.id,
+    server: { id: params.serverId, hostId: params.hostId },
+  };
+  const data = {
+    serverId: params.serverId,
+    ...body,
+  };
   const filesService = new FilesService();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,10 +92,7 @@ describe("FilesService", () => {
     it("should create a new file record and return the new record", async () => {
       await filesService.createFile(req, res);
       expect(filesService.prisma.file.create).toHaveBeenCalledWith({
-        data: {
-          ...commonParams,
-          ...body,
-        },
+        data,
         select: FilesService.defaultFileSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockFileRecord);
@@ -102,10 +108,7 @@ describe("FilesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(filesService.prisma.file.create).toHaveBeenCalledWith({
-        data: {
-          ...body,
-          ...commonParams,
-        },
+        data,
         select: FilesService.defaultFileSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -147,10 +150,7 @@ describe("FilesService", () => {
     it("Should return file", async () => {
       await filesService.getFileById(req, res);
       expect(filesService.prisma.file.findUniqueOrThrow).toHaveBeenCalledWith({
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockFileRecord);
@@ -166,10 +166,7 @@ describe("FilesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(filesService.prisma.file.findUniqueOrThrow).toHaveBeenCalledWith({
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -186,10 +183,7 @@ describe("FilesService", () => {
       await filesService.patchFile(req, res);
       expect(filesService.prisma.file.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockFileRecord);
@@ -206,10 +200,7 @@ describe("FilesService", () => {
       }
       expect(filesService.prisma.file.update).toHaveBeenCalledWith({
         data: { ...body },
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -225,10 +216,7 @@ describe("FilesService", () => {
     it("Should delete file", async () => {
       await filesService.deleteFile(req, res);
       expect(filesService.prisma.file.delete).toHaveBeenCalledWith({
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(res.json).toHaveBeenCalledWith(mockFileRecord);
@@ -244,10 +232,7 @@ describe("FilesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(filesService.prisma.file.delete).toHaveBeenCalledWith({
-        where: {
-          id: mockFileRecord.id,
-          serverId: mockFileRecord.serverId,
-        },
+        where,
         select: FilesService.defaultFileSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(

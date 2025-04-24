@@ -26,21 +26,6 @@ describe("isServerMiddleware", () => {
     next = jest.fn();
   });
 
-  it("should call next if server exists (no host enforced)", async () => {
-    prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
-      {} as unknown as Server
-    );
-    await isServerMiddleware(prisma as unknown as PrismaClient)(
-      { params: { serverId } } as unknown as Request,
-      {} as Response,
-      next
-    );
-    expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId },
-    });
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-
   it("should call next if server exists", async () => {
     prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
       {} as unknown as Server
