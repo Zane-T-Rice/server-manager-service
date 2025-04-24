@@ -42,10 +42,10 @@ class EnvironmentVariablesService {
 
   /* GET all environment variable. */
   async getEnvironmentVariables(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const environmentVariables = await this.prisma.environmentVariable
       .findMany({
-        where: { serverId: String(serverId) },
+        where: { server: { id: String(serverId), hostId: String(hostId) } },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "environment variable", []));
@@ -54,12 +54,12 @@ class EnvironmentVariablesService {
 
   /* GET environment variable by id. */
   async getEnvironmentVariableById(req: Request, res: Response) {
-    const { environmentVariableId, serverId } = req.params;
+    const { hostId, serverId, environmentVariableId } = req.params;
     const environmentVariable = await this.prisma.environmentVariable
       .findUniqueOrThrow({
         where: {
           id: String(environmentVariableId),
-          serverId: String(serverId),
+          server: { id: String(serverId), hostId: String(hostId) },
         },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
@@ -71,13 +71,16 @@ class EnvironmentVariablesService {
 
   /* PATCH an existing environment variable. */
   async patchEnvironmentVariable(req: Request, res: Response) {
-    const { environmentVariableId, serverId } = req.params;
+    const { hostId, serverId, environmentVariableId } = req.params;
     const { name, value } = req.body;
     const environmentVariable = await this.prisma.environmentVariable
       .update({
         where: {
           id: String(environmentVariableId),
-          serverId: String(serverId),
+          server: {
+            id: String(serverId),
+            hostId: String(hostId),
+          },
         },
         data: {
           name,
@@ -93,12 +96,15 @@ class EnvironmentVariablesService {
 
   /* DELETE an existing environment variable. */
   async deleteEnvironmentVariable(req: Request, res: Response) {
-    const { environmentVariableId, serverId } = req.params;
+    const { hostId, serverId, environmentVariableId } = req.params;
     const environmentVariable = await this.prisma.environmentVariable
       .delete({
         where: {
           id: String(environmentVariableId),
-          serverId: String(serverId),
+          server: {
+            id: String(serverId),
+            hostId: String(hostId),
+          },
         },
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })

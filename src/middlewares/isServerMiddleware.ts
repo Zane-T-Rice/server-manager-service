@@ -10,7 +10,7 @@ export function isServerMiddleware(prisma: PrismaClient) {
       .findUniqueOrThrow({
         where: {
           id: String(serverId),
-          hostId: hostId ? String(hostId) : undefined,
+          hostId: String(hostId),
         },
       })
       .then(() => next())

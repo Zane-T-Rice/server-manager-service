@@ -96,12 +96,12 @@ app.use(
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId`,
   requiredScopes(Permissions.READ),
-  errorHandler(isHostMiddleware(prisma, true))
+  errorHandler(isHostMiddleware(prisma))
 );
 
 // For routes that require a server, make sure the server is real.
 app.use(
-  `(${Routes.PROXY})?(/hosts/:hostId)?/servers/:serverId`,
+  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
   requiredScopes(Permissions.READ),
   errorHandler(isServerMiddleware(prisma))
 );
@@ -110,7 +110,7 @@ app.use(
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
-  `(${Routes.PROXY})?(/hosts/:hostId)?/servers/:serverId/(update|restart)`,
+  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|restart)`,
   requiredScopes(Permissions.READ),
   errorHandler(proxyMiddleware(prisma))
 );
@@ -131,11 +131,11 @@ app.use((req, res, next) => {
 
 // REST APIs
 app.use("/hosts", hostsRouter);
-app.use("(/hosts/:hostId)?/servers", serversRouter);
-app.use("(/hosts/:hostId)?/servers/:serverId/ports", portsRouter);
-app.use("(/hosts/:hostId)?/servers/:serverId/environmentVariables", evRouter);
-app.use("(/hosts/:hostId)?/servers/:serverId/volumes", volumesRouter);
-app.use("(/hosts/:hostId)?/servers/:serverId/files", filesRouter);
+app.use("/hosts/:hostId/servers", serversRouter);
+app.use("/hosts/:hostId/servers/:serverId/ports", portsRouter);
+app.use("/hosts/:hostId/servers/:serverId/environmentVariables", evRouter);
+app.use("/hosts/:hostId/servers/:serverId/volumes", volumesRouter);
+app.use("/hosts/:hostId/servers/:serverId/files", filesRouter);
 
 // error handler
 app.use(appErrorHandler);

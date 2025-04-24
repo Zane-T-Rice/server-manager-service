@@ -39,10 +39,10 @@ class PortsService {
 
   /* GET all ports. */
   async getPorts(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const ports = await this.prisma.port
       .findMany({
-        where: { serverId: String(serverId) },
+        where: { server: { id: String(serverId), hostId: String(hostId) } },
         select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", []));
@@ -51,10 +51,13 @@ class PortsService {
 
   /* GET port by id. */
   async getPortById(req: Request, res: Response) {
-    const { portId, serverId } = req.params;
+    const { hostId, serverId, portId } = req.params;
     const port = await this.prisma.port
       .findUniqueOrThrow({
-        where: { id: String(portId), serverId: String(serverId) },
+        where: {
+          id: String(portId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", [portId]));
@@ -63,11 +66,14 @@ class PortsService {
 
   /* PATCH an existing port. */
   async patchPort(req: Request, res: Response) {
-    const { portId, serverId } = req.params;
+    const { hostId, serverId, portId } = req.params;
     const { number, protocol } = req.body;
     const port = await this.prisma.port
       .update({
-        where: { id: String(portId), serverId: String(serverId) },
+        where: {
+          id: String(portId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         data: {
           number,
           protocol,
@@ -80,10 +86,13 @@ class PortsService {
 
   /* DELETE an existing port. */
   async deletePort(req: Request, res: Response) {
-    const { portId, serverId } = req.params;
+    const { hostId, serverId, portId } = req.params;
     const port = await this.prisma.port
       .delete({
-        where: { id: String(portId), serverId: String(serverId) },
+        where: {
+          id: String(portId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: PortsService.defaultPortSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "port", [portId]));

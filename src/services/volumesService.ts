@@ -39,10 +39,10 @@ class VolumesService {
 
   /* GET all volume. */
   async getVolumes(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const volumes = await this.prisma.volume
       .findMany({
-        where: { serverId: String(serverId) },
+        where: { server: { id: String(serverId), hostId: String(hostId) } },
         select: VolumesService.defaultVolumeSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "volume", []));
@@ -51,10 +51,13 @@ class VolumesService {
 
   /* GET volume by id. */
   async getVolumeById(req: Request, res: Response) {
-    const { volumeId, serverId } = req.params;
+    const { hostId, serverId, volumeId } = req.params;
     const volume = await this.prisma.volume
       .findUniqueOrThrow({
-        where: { id: String(volumeId), serverId: String(serverId) },
+        where: {
+          id: String(volumeId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: VolumesService.defaultVolumeSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "volume", [volumeId]));
@@ -63,11 +66,14 @@ class VolumesService {
 
   /* PATCH an existing volume. */
   async patchVolume(req: Request, res: Response) {
-    const { volumeId, serverId } = req.params;
+    const { hostId, serverId, volumeId } = req.params;
     const { hostPath, containerPath } = req.body;
     const volume = await this.prisma.volume
       .update({
-        where: { id: String(volumeId), serverId: String(serverId) },
+        where: {
+          id: String(volumeId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         data: {
           hostPath,
           containerPath,
@@ -80,10 +86,13 @@ class VolumesService {
 
   /* DELETE an existing volume. */
   async deleteVolume(req: Request, res: Response) {
-    const { volumeId, serverId } = req.params;
+    const { hostId, serverId, volumeId } = req.params;
     const volume = await this.prisma.volume
       .delete({
-        where: { id: String(volumeId), serverId: String(serverId) },
+        where: {
+          id: String(volumeId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: VolumesService.defaultVolumeSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "volume", [volumeId]));

@@ -24,7 +24,6 @@ class ServersService {
     containerName: true,
     isInResponseChain: true,
     isUpdatable: true,
-    hostId: true,
   };
 
   /* Used by the updateServer route since it must generate full commands to docker. */
@@ -54,15 +53,9 @@ class ServersService {
 
   /* POST a new server. */
   async createServer(req: Request, res: Response) {
-    const {
-      applicationName,
-      containerName,
-      isInResponseChain,
-      isUpdatable,
-      hostId: hostIdBody,
-    } = req.body;
-    const { hostId: hostIdParams } = req.params;
-    const hostId = hostIdParams || hostIdBody;
+    const { hostId } = req.params;
+    const { applicationName, containerName, isInResponseChain, isUpdatable } =
+      req.body;
 
     const server = await this.prisma.server
       .create({
@@ -81,10 +74,10 @@ class ServersService {
 
   /* POST restart an existing server. */
   async restartServer(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const dbServer = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(serverId) },
+        where: { id: String(serverId), hostId: String(hostId) },
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
@@ -110,10 +103,14 @@ class ServersService {
 
   /* POST update an existing server. */
   async updateServer(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const dbServer = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(serverId), isUpdatable: true },
+        where: {
+          id: String(serverId),
+          hostId: String(hostId),
+          isUpdatable: true,
+        },
         select: ServersService.completeServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
@@ -222,7 +219,7 @@ class ServersService {
     const isUpdatable = this.stringToBoolean(isUpdatableQuery as string);
     const query = {
       select: ServersService.defaultServerSelect,
-      where: { hostId: hostId ? String(hostId) : undefined, isUpdatable },
+      where: { hostId: String(hostId), isUpdatable },
     };
     const servers = await this.prisma.server
       .findMany(query)
@@ -232,10 +229,10 @@ class ServersService {
 
   /* GET server by id. */
   async getServerById(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const server = await this.prisma.server
       .findUniqueOrThrow({
-        where: { id: String(serverId) },
+        where: { id: String(serverId), hostId: String(hostId) },
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
@@ -244,20 +241,13 @@ class ServersService {
 
   /* PATCH an existing server. */
   async patchServer(req: Request, res: Response) {
-    const { serverId } = req.params;
-    const {
-      applicationName,
-      containerName,
-      isInResponseChain,
-      isUpdatable,
-      hostId: hostIdBody,
-    } = req.body;
-    const { hostId: hostIdParams } = req.params;
-    const hostId = hostIdParams || hostIdBody;
+    const { hostId, serverId } = req.params;
+    const { applicationName, containerName, isInResponseChain, isUpdatable } =
+      req.body;
 
     const server = await this.prisma.server
       .update({
-        where: { id: String(serverId) },
+        where: { id: String(serverId), hostId: String(hostId) },
         data: {
           applicationName,
           containerName,
@@ -273,11 +263,12 @@ class ServersService {
 
   /* DELETE an existing server. */
   async deleteServer(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const server = await this.prisma.server
       .delete({
         where: {
           id: String(serverId),
+          hostId: String(hostId),
         },
         select: ServersService.defaultServerSelect,
       })

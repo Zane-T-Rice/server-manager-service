@@ -36,11 +36,12 @@ export function proxyErrorHandler(
 // Proxy to the host of the server acted upon if it is different than the current host.
 export function proxyMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const server = await prisma.server
       .findUniqueOrThrow({
         where: {
           id: String(serverId),
+          hostId: String(hostId),
         },
         select: { host: { select: { url: true } } },
       })

@@ -39,10 +39,10 @@ class FilesService {
 
   /* GET all file. */
   async getFiles(req: Request, res: Response) {
-    const { serverId } = req.params;
+    const { hostId, serverId } = req.params;
     const files = await this.prisma.file
       .findMany({
-        where: { serverId: String(serverId) },
+        where: { server: { id: String(serverId), hostId: String(hostId) } },
         select: FilesService.defaultFileSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "file", []));
@@ -51,10 +51,13 @@ class FilesService {
 
   /* GET file by id. */
   async getFileById(req: Request, res: Response) {
-    const { fileId, serverId } = req.params;
+    const { hostId, serverId, fileId } = req.params;
     const file = await this.prisma.file
       .findUniqueOrThrow({
-        where: { id: String(fileId), serverId: String(serverId) },
+        where: {
+          id: String(fileId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: FilesService.defaultFileSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "file", [fileId]));
@@ -63,11 +66,14 @@ class FilesService {
 
   /* PATCH an existing file. */
   async patchFile(req: Request, res: Response) {
-    const { fileId, serverId } = req.params;
+    const { hostId, serverId, fileId } = req.params;
     const { content, name } = req.body;
     const file = await this.prisma.file
       .update({
-        where: { id: String(fileId), serverId: String(serverId) },
+        where: {
+          id: String(fileId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         data: {
           content,
           name,
@@ -80,10 +86,13 @@ class FilesService {
 
   /* DELETE an existing file. */
   async deleteFile(req: Request, res: Response) {
-    const { fileId, serverId } = req.params;
+    const { hostId, serverId, fileId } = req.params;
     const file = await this.prisma.file
       .delete({
-        where: { id: String(fileId), serverId: String(serverId) },
+        where: {
+          id: String(fileId),
+          server: { id: String(serverId), hostId: String(hostId) },
+        },
         select: FilesService.defaultFileSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "file", [fileId]));
