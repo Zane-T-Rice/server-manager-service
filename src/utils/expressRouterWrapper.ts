@@ -3,7 +3,7 @@ import { errorHandler } from "../middlewares";
 import { requiredScopes } from "express-oauth2-jwt-bearer";
 
 class ExpressRouterWrapper {
-  router: Router = express.Router();
+  router: Router = express.Router({ mergeParams: true });
 
   constructor() {}
 

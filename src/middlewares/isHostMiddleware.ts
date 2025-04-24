@@ -7,7 +7,7 @@ import { ErrorMessages } from "../constants";
 // Verify a Host exists for a given hostId or throw.
 export function isHostMiddleware(prisma: PrismaClient, required: boolean) {
   return async function (req: Request, res: Response, next: NextFunction) {
-    const { hostId: hostIdBody } = req.body;
+    const { hostId: hostIdBody } = req.body ?? {};
     const { hostId: hostIdParams } = req.params;
     const hostId = hostIdParams || hostIdBody;
 

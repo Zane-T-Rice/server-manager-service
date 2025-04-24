@@ -217,11 +217,12 @@ class ServersService {
 
   /* GET all servers. */
   async getServers(req: Request, res: Response) {
+    const { hostId } = req.params;
     const { isUpdatable: isUpdatableQuery } = req.query;
     const isUpdatable = this.stringToBoolean(isUpdatableQuery as string);
     const query = {
       select: ServersService.defaultServerSelect,
-      where: { isUpdatable },
+      where: { hostId: hostId ? String(hostId) : undefined, isUpdatable },
     };
     const servers = await this.prisma.server
       .findMany(query)

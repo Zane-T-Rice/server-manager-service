@@ -13,6 +13,7 @@ import cors from "cors";
 import {
   environmentVariablesRouter as evRouter,
   filesRouter,
+  hostsRouter,
   portsRouter,
   serversRouter,
   volumesRouter,
@@ -129,7 +130,7 @@ app.use((req, res, next) => {
 });
 
 // REST APIs
-app.use("/hosts", serversRouter);
+app.use("/hosts", hostsRouter);
 app.use("(/hosts/:hostId)?/servers", serversRouter);
 app.use("(/hosts/:hostId)?/servers/:serverId/ports", portsRouter);
 app.use("(/hosts/:hostId)?/servers/:serverId/environmentVariables", evRouter);
