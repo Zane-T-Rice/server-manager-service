@@ -1,0 +1,5 @@
+description: Update an existing volume
+content:
+  application/json:
+    schema:
+      $ref: "./volumeRequestSchema.yaml"

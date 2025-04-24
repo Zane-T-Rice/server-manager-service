@@ -1,0 +1,5 @@
+description: Update an existing EnvironmentVariable
+content:
+  application/json:
+    schema:
+      $ref: "./environmentVariableRequestSchema.yaml"

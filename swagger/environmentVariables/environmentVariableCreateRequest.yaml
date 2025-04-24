@@ -1,4 +1,4 @@
-description: Create a new environmentVariable
+description: Create a new EnvironmentVariable
 content:
   application/json:
     schema:

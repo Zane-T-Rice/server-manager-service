@@ -32,7 +32,7 @@ paths:
       summary: Create a new host
       operationId: createhost
       requestBody:
-        $ref: '#/components/requestBodies/hostRequest'
+        $ref: '#/components/requestBodies/hostCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/hostResponse'
@@ -79,7 +79,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
       requestBody:
-        - $ref: ./hosts/hostRequest.yaml
+        $ref: '#/components/requestBodies/hostPatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/hostResponse'
@@ -112,7 +112,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/serverRequest'
+        $ref: '#/components/requestBodies/serverCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -168,7 +168,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        - $ref: ./servers/serverRequest.yaml
+        $ref: '#/components/requestBodies/serverPatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -242,7 +242,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/portRequest'
+        $ref: '#/components/requestBodies/portCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -296,7 +296,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       requestBody:
-        - $ref: ./ports/portRequest.yaml
+        $ref: '#/components/requestBodies/portPatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -332,7 +332,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/volumeRequest'
+        $ref: '#/components/requestBodies/volumeCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -386,7 +386,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       requestBody:
-        - $ref: ./volumes/volumeRequest.yaml
+        $ref: '#/components/requestBodies/volumePatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -422,7 +422,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/environmentVariableRequest'
+        $ref: '#/components/requestBodies/environmentVariableCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -451,7 +451,7 @@ paths:
     get:
       tags:
         - environmentVariables
-      summary: Get a EnvironmentVariable by id
+      summary: Get an EnvironmentVariable by id
       operationId: getEnvironmentVariable
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
@@ -469,14 +469,14 @@ paths:
     patch:
       tags:
         - environmentVariables
-      summary: Update a EnvironmentVariable by id
+      summary: Update an EnvironmentVariable by id
       operationId: patchEnvironmentVariable
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       requestBody:
-        - $ref: ./environmentVariables/environmentVariableRequest.yaml
+        $ref: '#/components/requestBodies/environmentVariablePatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -489,7 +489,7 @@ paths:
     delete:
       tags:
         - environmentVariables
-      summary: Delete a EnvironmentVariable by id
+      summary: Delete an EnvironmentVariable by id
       operationId: deleteEnvironmentVariable
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
@@ -513,7 +513,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        $ref: '#/components/requestBodies/fileRequest'
+        $ref: '#/components/requestBodies/fileCreateRequest'
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'
@@ -567,7 +567,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       requestBody:
-        - $ref: ./files/fileRequest.yaml
+        $ref: '#/components/requestBodies/filePatchRequest'
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'
@@ -971,38 +971,74 @@ components:
           schema:
             $ref: '#/components/schemas/fileResponseSchema'
   requestBodies:
-    hostRequest:
-      description: Create a new volume
+    hostCreateRequest:
+      description: Create a new host
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/hostRequestSchema'
-    serverRequest:
+    hostPatchRequest:
+      description: Update an existing host
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/hostRequestSchema'
+    serverCreateRequest:
       description: Create a new Server
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/serverRequestSchema'
-    portRequest:
+    serverPatchRequest:
+      description: Update an existing Server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/serverRequestSchema'
+    portCreateRequest:
       description: Create a new port
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/portRequestSchema'
-    volumeRequest:
+    portPatchRequest:
+      description: Update an existing port
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/portRequestSchema'
+    volumeCreateRequest:
       description: Create a new volume
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/volumeRequestSchema'
-    environmentVariableRequest:
-      description: Create a new environmentVariable
+    volumePatchRequest:
+      description: Update an existing volume
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/volumeRequestSchema'
+    environmentVariableCreateRequest:
+      description: Create a new EnvironmentVariable
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/environmentVariableRequestSchema'
-    fileRequest:
+    environmentVariablePatchRequest:
+      description: Update an existing EnvironmentVariable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/environmentVariableRequestSchema'
+    fileCreateRequest:
       description: Create a new file
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/fileRequestSchema'
+    filePatchRequest:
+      description: Update an existing file
       content:
         application/json:
           schema:

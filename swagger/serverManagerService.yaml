@@ -31,7 +31,7 @@ paths:
       summary: Create a new host
       operationId: createhost
       requestBody:
-        $ref: "./hosts/hostRequest.yaml"
+        $ref: "./hosts/hostCreateRequest.yaml"
       responses:
         "200":
           $ref: "./hosts/hostResponse.yaml"
@@ -78,7 +78,7 @@ paths:
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
       requestBody:
-        - $ref: "./hosts/hostRequest.yaml"
+        $ref: "./hosts/hostPatchRequest.yaml"
       responses:
         "200":
           $ref: "./hosts/hostResponse.yaml"
@@ -111,7 +111,7 @@ paths:
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
       requestBody:
-        $ref: "./servers/serverRequest.yaml"
+        $ref: "./servers/serverCreateRequest.yaml"
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -167,7 +167,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        - $ref: "./servers/serverRequest.yaml"
+        $ref: "./servers/serverPatchRequest.yaml"
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -241,7 +241,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        $ref: "./ports/portRequest.yaml"
+        $ref: "./ports/portCreateRequest.yaml"
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -295,7 +295,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       requestBody:
-        - $ref: "./ports/portRequest.yaml"
+        $ref: "./ports/portPatchRequest.yaml"
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -331,7 +331,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        $ref: "./volumes/volumeRequest.yaml"
+        $ref: "./volumes/volumeCreateRequest.yaml"
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -385,7 +385,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       requestBody:
-        - $ref: "./volumes/volumeRequest.yaml"
+        $ref: "./volumes/volumePatchRequest.yaml"
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -421,7 +421,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        $ref: "./environmentVariables/environmentVariableRequest.yaml"
+        $ref: "./environmentVariables/environmentVariableCreateRequest.yaml"
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -450,7 +450,7 @@ paths:
     get:
       tags:
         - environmentVariables
-      summary: Get a EnvironmentVariable by id
+      summary: Get an EnvironmentVariable by id
       operationId: getEnvironmentVariable
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
@@ -468,14 +468,14 @@ paths:
     patch:
       tags:
         - environmentVariables
-      summary: Update a EnvironmentVariable by id
+      summary: Update an EnvironmentVariable by id
       operationId: patchEnvironmentVariable
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       requestBody:
-        - $ref: "./environmentVariables/environmentVariableRequest.yaml"
+        $ref: "./environmentVariables/environmentVariablePatchRequest.yaml"
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -488,7 +488,7 @@ paths:
     delete:
       tags:
         - environmentVariables
-      summary: Delete a EnvironmentVariable by id
+      summary: Delete an EnvironmentVariable by id
       operationId: deleteEnvironmentVariable
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
@@ -512,7 +512,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        $ref: "./files/fileRequest.yaml"
+        $ref: "./files/fileCreateRequest.yaml"
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"
@@ -566,7 +566,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       requestBody:
-        - $ref: "./files/fileRequest.yaml"
+        $ref: "./files/filePatchRequest.yaml"
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"

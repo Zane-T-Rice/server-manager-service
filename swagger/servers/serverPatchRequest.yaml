@@ -1,0 +1,5 @@
+description: Update an existing Server
+content:
+  application/json:
+    schema:
+      $ref: "./serverRequestSchema.yaml"

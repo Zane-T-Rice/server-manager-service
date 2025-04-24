@@ -1,0 +1,5 @@
+description: Update an existing port
+content:
+  application/json:
+    schema:
+      $ref: "./portRequestSchema.yaml"

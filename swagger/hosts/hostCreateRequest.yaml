@@ -1,4 +1,4 @@
-description: Create a new volume
+description: Create a new host
 content:
   application/json:
     schema:
