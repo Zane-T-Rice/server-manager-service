@@ -79,9 +79,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./hosts/hostRequest.yaml
-          - description: Patch a host
+        - $ref: ./hosts/hostRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/hostResponse'
@@ -170,9 +168,7 @@ paths:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./servers/serverRequest.yaml
-          - description: Patch a Server
+        - $ref: ./servers/serverRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/serverResponse'
@@ -300,9 +296,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/portIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./ports/portRequest.yaml
-          - description: Patch a Port
+        - $ref: ./ports/portRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/portResponse'
@@ -392,9 +386,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/volumeIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./volumes/volumeRequest.yaml
-          - description: Patch a Volume
+        - $ref: ./volumes/volumeRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/volumeResponse'
@@ -484,9 +476,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/environmentVariableIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./environmentVariables/environmentVariableRequest.yaml
-          - description: Patch an EnvironmentVariable
+        - $ref: ./environmentVariables/environmentVariableRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/environmentVariableResponse'
@@ -577,9 +567,7 @@ paths:
         - $ref: '#/components/parameters/serverIdInPath'
         - $ref: '#/components/parameters/fileIdInPath'
       requestBody:
-        allOf:
-          - $ref: ./files/fileRequest.yaml
-          - description: Patch a File
+        - $ref: ./files/fileRequest.yaml
       responses:
         '200':
           $ref: '#/components/responses/fileResponse'

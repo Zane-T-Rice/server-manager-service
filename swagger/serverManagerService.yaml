@@ -78,9 +78,7 @@ paths:
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./hosts/hostRequest.yaml"
-          - description: Patch a host
+        - $ref: "./hosts/hostRequest.yaml"
       responses:
         "200":
           $ref: "./hosts/hostResponse.yaml"
@@ -169,9 +167,7 @@ paths:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./servers/serverRequest.yaml"
-          - description: Patch a Server
+        - $ref: "./servers/serverRequest.yaml"
       responses:
         "200":
           $ref: "./servers/serverResponse.yaml"
@@ -299,9 +295,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/portIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./ports/portRequest.yaml"
-          - description: Patch a Port
+        - $ref: "./ports/portRequest.yaml"
       responses:
         "200":
           $ref: "./ports/portResponse.yaml"
@@ -391,9 +385,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/volumeIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./volumes/volumeRequest.yaml"
-          - description: Patch a Volume
+        - $ref: "./volumes/volumeRequest.yaml"
       responses:
         "200":
           $ref: "./volumes/volumeResponse.yaml"
@@ -483,9 +475,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/environmentVariableIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./environmentVariables/environmentVariableRequest.yaml"
-          - description: Patch an EnvironmentVariable
+        - $ref: "./environmentVariables/environmentVariableRequest.yaml"
       responses:
         "200":
           $ref: "./environmentVariables/environmentVariableResponse.yaml"
@@ -576,9 +566,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/fileIdInPath.yaml"
       requestBody:
-        allOf:
-          - $ref: "./files/fileRequest.yaml"
-          - description: Patch a File
+        - $ref: "./files/fileRequest.yaml"
       responses:
         "200":
           $ref: "./files/fileResponse.yaml"
