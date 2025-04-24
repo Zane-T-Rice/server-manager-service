@@ -15,6 +15,7 @@ describe("isServerMiddleware", () => {
   };
   let next = jest.fn();
   const serverId = "serverid";
+  const hostId = "hostId";
 
   beforeEach(() => {
     prisma = {
@@ -25,7 +26,7 @@ describe("isServerMiddleware", () => {
     next = jest.fn();
   });
 
-  it("should call next if server exists", async () => {
+  it("should call next if server exists (no host enforced)", async () => {
     prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
       {} as unknown as Server
     );
@@ -40,10 +41,25 @@ describe("isServerMiddleware", () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
+  it("should call next if server exists", async () => {
+    prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
+      {} as unknown as Server
+    );
+    await isServerMiddleware(prisma as unknown as PrismaClient)(
+      { params: { hostId, serverId } } as unknown as Request,
+      {} as Response,
+      next
+    );
+    expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: serverId, hostId },
+    });
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
   it("should call handleDatabaseErrors if server does not exist", async () => {
     prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
     await isServerMiddleware(prisma as unknown as PrismaClient)(
-      { params: { serverId } } as unknown as Request,
+      { params: { hostId, serverId } } as unknown as Request,
       {} as Response,
       next
     );

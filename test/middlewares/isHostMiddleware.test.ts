@@ -27,12 +27,27 @@ describe("isHostMiddleware", () => {
   });
 
   describe("hostId in body", () => {
-    it("should call next if host exists", async () => {
+    it("should call next if host exists (hostId in body instead of params)", async () => {
       prisma.host.findUniqueOrThrow.mockResolvedValueOnce(
         {} as unknown as Host
       );
       await isHostMiddleware(prisma as unknown as PrismaClient, false)(
         { params: {}, body: { hostId } } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(prisma.host.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: hostId },
+      });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call next if host exists", async () => {
+      prisma.host.findUniqueOrThrow.mockResolvedValueOnce(
+        {} as unknown as Host
+      );
+      await isHostMiddleware(prisma as unknown as PrismaClient, false)(
+        { params: { hostId } } as unknown as Request,
         {} as Response,
         next
       );

@@ -39,6 +39,7 @@ describe("ServersService", () => {
     containerName: "containerName",
     isInResponseChain: false,
     isUpdatable: false,
+    hostId: "hostId",
   };
   const mockServerRecord = {
     id: "serverid",
@@ -47,7 +48,7 @@ describe("ServersService", () => {
   const req: Request = {
     body,
     query: {},
-    params: { serverId: mockServerRecord.id },
+    params: { hostId: mockServerRecord.hostId, serverId: mockServerRecord.id },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   const serversService = new ServersService();
@@ -97,6 +98,16 @@ describe("ServersService", () => {
   describe("POST /", () => {
     it("should create a new server record and return the new record", async () => {
       await serversService.createServer(req, res);
+      expect(serversService.prisma.server.create).toHaveBeenCalledWith({
+        data: body,
+        select: ServersService.defaultServerSelect,
+      });
+      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+    });
+    it("should create a new server record and return the new record", async () => {
+      const newRequest = JSON.parse(JSON.stringify(req)) as unknown as Request;
+      delete newRequest.params.hostId;
+      await serversService.createServer(newRequest, res);
       expect(serversService.prisma.server.create).toHaveBeenCalledWith({
         data: body,
         select: ServersService.defaultServerSelect,
@@ -364,6 +375,13 @@ describe("ServersService", () => {
   });
 
   describe("GET /", () => {
+    it("Should return list of servers (no host enforced)", async () => {
+      const newRequest = JSON.parse(JSON.stringify(req)) as unknown as Request;
+      delete newRequest.params.hostId;
+      await serversService.getServers(newRequest, res);
+      expect(serversService.prisma.server.findMany).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
+    });
     it("Should return list of servers", async () => {
       await serversService.getServers(req, res);
       expect(serversService.prisma.server.findMany).toHaveBeenCalled();
@@ -379,7 +397,7 @@ describe("ServersService", () => {
       await serversService.getServers(isUpdatableRequest, res);
       expect(serversService.prisma.server.findMany).toHaveBeenCalledWith({
         select: ServersService.defaultServerSelect,
-        where: { isUpdatable: true },
+        where: { hostId: mockServerRecord.hostId, isUpdatable: true },
       });
       expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
     });
@@ -440,6 +458,17 @@ describe("ServersService", () => {
   });
 
   describe("PATCH /:id", () => {
+    it("Should patch server (no host enforced)", async () => {
+      const newRequest = JSON.parse(JSON.stringify(req)) as unknown as Request;
+      delete newRequest.params.hostId;
+      await serversService.patchServer(newRequest, res);
+      expect(serversService.prisma.server.update).toHaveBeenCalledWith({
+        data: { ...body },
+        where: { id: mockServerRecord.id },
+        select: ServersService.defaultServerSelect,
+      });
+      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+    });
     it("Should patch server", async () => {
       await serversService.patchServer(req, res);
       expect(serversService.prisma.server.update).toHaveBeenCalledWith({
