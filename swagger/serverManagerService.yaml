@@ -598,8 +598,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      in: header
-      name: authorization
 # Apply the ApiBearerAuth globally to all operations
 security:
   - ApiBearerAuth: []

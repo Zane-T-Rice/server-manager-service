@@ -599,8 +599,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      in: header
-      name: authorization
   schemas:
     hostResponseSchema:
       required:
