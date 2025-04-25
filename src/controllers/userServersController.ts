@@ -6,7 +6,7 @@ class UserServersController {
   static instance: UserServersController;
 
   constructor(prisma?: PrismaClient) {
-    new UserServersService(prisma); // Initialize ServersService singleton.
+    new UserServersService(prisma); // Initialize UserServersService singleton.
     UserServersController.instance = UserServersController.instance ?? this;
     return UserServersController.instance;
   }
