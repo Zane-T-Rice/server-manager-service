@@ -1,8 +1,6 @@
 enum Permissions {
-  WRITE = "write:servers",
-  READ = "read:servers",
-  REBOOT = "reboot:servers",
-  UPDATE = "update:servers",
+  ADMIN = "admin:servers",
+  USER = "user:servers",
 }
 
 export { Permissions };

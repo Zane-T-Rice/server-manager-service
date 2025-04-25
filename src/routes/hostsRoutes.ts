@@ -8,30 +8,30 @@ const wrappedRouter = new ExpressRouterWrapper();
 new HostsController(prisma); // Initialize hostsController singleton
 
 /* POST a new host. */
-wrappedRouter.post("/", HostsController.instance.createHost, Permissions.WRITE);
+wrappedRouter.post("/", HostsController.instance.createHost, Permissions.ADMIN);
 
 /* GET all hosts. */
-wrappedRouter.get("/", HostsController.instance.getHosts, Permissions.READ);
+wrappedRouter.get("/", HostsController.instance.getHosts, Permissions.ADMIN);
 
 /* GET host by id. */
 wrappedRouter.get(
   "/:hostId",
   HostsController.instance.getHostById,
-  Permissions.READ
+  Permissions.ADMIN
 );
 
 /* PATCH an existing host. */
 wrappedRouter.patch(
   "/:hostId",
   HostsController.instance.patchHost,
-  Permissions.WRITE
+  Permissions.ADMIN
 );
 
 /* DELETE an existing host. */
 wrappedRouter.delete(
   "/:hostId",
   HostsController.instance.deleteHost,
-  Permissions.WRITE
+  Permissions.ADMIN
 );
 
 const hostsRouter = wrappedRouter.router;

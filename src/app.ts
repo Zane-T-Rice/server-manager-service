@@ -95,14 +95,14 @@ app.use(
 // For routes that require a host, make sure the host is real.
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId`,
-  requiredScopes(Permissions.READ),
+  requiredScopes(Permissions.ADMIN),
   errorHandler(isHostMiddleware(prisma))
 );
 
 // For routes that require a server, make sure the server is real.
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
-  requiredScopes(Permissions.READ),
+  requiredScopes(Permissions.ADMIN),
   errorHandler(isServerMiddleware(prisma))
 );
 
@@ -111,7 +111,7 @@ app.use(
 // or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|restart)`,
-  requiredScopes(Permissions.READ),
+  requiredScopes(Permissions.ADMIN),
   errorHandler(proxyMiddleware(prisma))
 );
 

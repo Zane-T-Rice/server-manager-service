@@ -11,45 +11,49 @@ new ServersController(prisma); // Initialize ServersController singleton
 wrappedRouter.post(
   "/",
   ServersController.instance.createServer,
-  Permissions.WRITE
+  Permissions.ADMIN
 );
 
 /* POST restart an existing server. */
 wrappedRouter.post(
   "/:serverId/restart",
   ServersController.instance.restartServer,
-  Permissions.REBOOT
+  Permissions.ADMIN
 );
 
 /* POST update an existing server. */
 wrappedRouter.post(
   "/:serverId/update",
   ServersController.instance.updateServer,
-  Permissions.UPDATE
+  Permissions.ADMIN
 );
 
 /* GET all servers. */
-wrappedRouter.get("/", ServersController.instance.getServers, Permissions.READ);
+wrappedRouter.get(
+  "/",
+  ServersController.instance.getServers,
+  Permissions.ADMIN
+);
 
 /* GET server by id. */
 wrappedRouter.get(
   "/:serverId",
   ServersController.instance.getServerById,
-  Permissions.READ
+  Permissions.ADMIN
 );
 
 /* PATCH an existing server. */
 wrappedRouter.patch(
   "/:serverId",
   ServersController.instance.patchServer,
-  Permissions.WRITE
+  Permissions.ADMIN
 );
 
 /* DELETE an existing server. */
 wrappedRouter.delete(
   "/:serverId",
   ServersController.instance.deleteServer,
-  Permissions.WRITE
+  Permissions.ADMIN
 );
 
 const serversRouter = wrappedRouter.router;
