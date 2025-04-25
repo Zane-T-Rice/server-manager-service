@@ -92,12 +92,29 @@ class UserServersService {
     await ServersService.instance.stopServer(req, res);
   }
 
+  stringToBoolean(value: string | undefined | null): boolean | undefined {
+    let result;
+    if (value === undefined || value == null) {
+      result = undefined;
+    } else if (value.toLowerCase() === "true") {
+      result = true;
+    } else if (value.toLowerCase() === "false") {
+      result = false;
+    } else {
+      result = undefined;
+    }
+    return result;
+  }
+
   /* GET all servers available to this user. */
   async getServers(req: Request, res: Response) {
+    const { isUpdatable: isUpdatableQuery } = req.query;
+    const isUpdatable = this.stringToBoolean(isUpdatableQuery as string);
     const servers = await this.prisma.server
       .findMany({
         select: UserServersService.defaultServerSelect,
         where: {
+          isUpdatable,
           users: {
             some: {
               id: String(req.auth?.payload.sub),

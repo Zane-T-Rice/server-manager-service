@@ -191,6 +191,70 @@ describe("ServersService", () => {
     });
   });
 
+  describe("POST /:id/stop", () => {
+    it("Should stop server", async () => {
+      await serversService.stopServer(req, res);
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: { id: mockServerRecord.id, hostId },
+        select: ServersService.defaultServerSelect,
+      });
+      expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
+        `docker stop ${mockServerRecord.containerName}`,
+        expect.any(Function)
+      );
+    });
+    it("Should stop server using an ephemeral container", async () => {
+      const mockServerRecordIsInResponseChain = {
+        ...mockServerRecord,
+        isInResponseChain: true,
+      };
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValueOnce(mockServerRecordIsInResponseChain);
+      await serversService.stopServer(req, res);
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: {
+          id: mockServerRecordIsInResponseChain.id,
+          hostId,
+        },
+        select: ServersService.defaultServerSelect,
+      });
+      expect(ephemeralContainerRun).toHaveBeenCalledWith(
+        req,
+        res,
+        [`docker stop ${mockServerRecordIsInResponseChain.containerName}`],
+        mockServerRecordIsInResponseChain
+      );
+    });
+    it("should handle any database errors", async () => {
+      expect.assertions(4);
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockRejectedValue(new Error());
+      try {
+        await serversService.stopServer(req, res);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(
+        serversService.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: { id: mockServerRecord.id, hostId },
+        select: ServersService.defaultServerSelect,
+      });
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [mockServerRecord.id]
+      );
+      expect(ephemeralContainerRun).not.toHaveBeenCalled();
+    });
+  });
+
   describe("POST /:id/update", () => {
     const mockCompleteServerRecord = {
       ...mockServerRecord,
