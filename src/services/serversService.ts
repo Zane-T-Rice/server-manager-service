@@ -198,6 +198,35 @@ class ServersService {
     }
   }
 
+  /* POST stop an existing server. */
+  async stopServer(req: Request, res: Response) {
+    const { hostId, serverId } = req.params;
+    const dbServer = await this.prisma.server
+      .findUniqueOrThrow({
+        where: { id: String(serverId), hostId: String(hostId) },
+        select: ServersService.defaultServerSelect,
+      })
+      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
+    // Makes typescript accept that server is not null.
+    // Really it can never be because Prisma would throw if it
+    // did not find a server above and handleDatabaseErrors is guaranteed
+    // to throw.
+    const server = dbServer!;
+    const commands = [
+      ["docker", "stop", shellEscape([server.containerName])].join(" "),
+    ];
+    if (server.isInResponseChain) {
+      // This service may be torn down by the restart.
+      // To avoid errors, respond before executing the restart and use an exterior, ephemeral container
+      // to perform the restart.
+      await ephemeralContainerRun(req, res, commands, server);
+    } else {
+      // The operation is safe and should not require an ephemeral container. Respond after execution of commands.
+      await exec(commands.join(";"));
+      res.json(server);
+    }
+  }
+
   stringToBoolean(value: string | undefined | null): boolean | undefined {
     let result;
     if (value === undefined || value == null) {

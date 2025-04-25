@@ -37,15 +37,29 @@ export function proxyErrorHandler(
 export function proxyMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
     const { hostId, serverId } = req.params;
-    const server = await prisma.server
-      .findUniqueOrThrow({
-        where: {
-          id: String(serverId),
-          hostId: String(hostId),
-        },
-        select: { host: { select: { url: true } } },
-      })
-      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
+    const server = hostId
+      ? await prisma.server
+          .findUniqueOrThrow({
+            where: {
+              id: String(serverId),
+              hostId: String(hostId),
+            },
+            select: { host: { select: { url: true } } },
+          })
+          .catch((e) => handleDatabaseErrors(e, "server", [serverId]))
+      : await prisma.server
+          .findUniqueOrThrow({
+            where: {
+              id: String(serverId),
+              users: {
+                some: {
+                  id: String(req.auth?.payload.sub),
+                },
+              },
+            },
+            select: { host: { select: { url: true } } },
+          })
+          .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
 
     // Do not proxy if this is the matching host.
     if (server.host.url === process.env.HOST) {

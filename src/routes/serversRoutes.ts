@@ -1,5 +1,4 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 import { ServersController } from "../controllers";
 
@@ -8,53 +7,31 @@ const wrappedRouter = new ExpressRouterWrapper();
 new ServersController(prisma); // Initialize ServersController singleton
 
 /* POST a new server. */
-wrappedRouter.post(
-  "/",
-  ServersController.instance.createServer,
-  Permissions.ADMIN
-);
+wrappedRouter.post("/", ServersController.instance.createServer);
 
 /* POST restart an existing server. */
 wrappedRouter.post(
   "/:serverId/restart",
-  ServersController.instance.restartServer,
-  Permissions.ADMIN
+  ServersController.instance.restartServer
 );
 
 /* POST update an existing server. */
 wrappedRouter.post(
   "/:serverId/update",
-  ServersController.instance.updateServer,
-  Permissions.ADMIN
+  ServersController.instance.updateServer
 );
 
 /* GET all servers. */
-wrappedRouter.get(
-  "/",
-  ServersController.instance.getServers,
-  Permissions.ADMIN
-);
+wrappedRouter.get("/", ServersController.instance.getServers);
 
 /* GET server by id. */
-wrappedRouter.get(
-  "/:serverId",
-  ServersController.instance.getServerById,
-  Permissions.ADMIN
-);
+wrappedRouter.get("/:serverId", ServersController.instance.getServerById);
 
 /* PATCH an existing server. */
-wrappedRouter.patch(
-  "/:serverId",
-  ServersController.instance.patchServer,
-  Permissions.ADMIN
-);
+wrappedRouter.patch("/:serverId", ServersController.instance.patchServer);
 
 /* DELETE an existing server. */
-wrappedRouter.delete(
-  "/:serverId",
-  ServersController.instance.deleteServer,
-  Permissions.ADMIN
-);
+wrappedRouter.delete("/:serverId", ServersController.instance.deleteServer);
 
 const serversRouter = wrappedRouter.router;
 export { serversRouter, wrappedRouter as wrappedServersRouter };

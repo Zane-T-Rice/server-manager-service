@@ -7,6 +7,7 @@ enum ErrorMessages {
   serverDoesNotHaveAHost = "The server with id {serverId} does not have a host configured.",
   hostDown = "The host {serverHostUrl} for server with id {serverId} appears to be down at this time.",
   theArgumentIsRequired = "Argument `{argument}` is missing.",
+  serverOwnedByMultipleUsers = "Server with id {serverId} cannot be deleted because it is owned by multiple users.",
 }
 
 export { ErrorMessages };

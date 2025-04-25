@@ -6,14 +6,29 @@ import { PrismaClient } from "@prisma/client";
 export function isServerMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
     const { hostId, serverId } = req.params;
-    await prisma.server
-      .findUniqueOrThrow({
-        where: {
-          id: String(serverId),
-          hostId: String(hostId),
-        },
-      })
-      .then(() => next())
-      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
+    if (hostId)
+      await prisma.server
+        .findUniqueOrThrow({
+          where: {
+            id: String(serverId),
+            hostId: String(hostId),
+          },
+        })
+        .then(() => next())
+        .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
+    else
+      await prisma.server
+        .findUniqueOrThrow({
+          where: {
+            id: String(serverId),
+            users: {
+              some: {
+                id: String(req.auth?.payload.sub),
+              },
+            },
+          },
+        })
+        .then(() => next())
+        .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
   };
 }

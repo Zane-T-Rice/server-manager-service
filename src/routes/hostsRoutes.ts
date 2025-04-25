@@ -1,5 +1,4 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
-import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 import { HostsController } from "../controllers";
 
@@ -8,31 +7,19 @@ const wrappedRouter = new ExpressRouterWrapper();
 new HostsController(prisma); // Initialize hostsController singleton
 
 /* POST a new host. */
-wrappedRouter.post("/", HostsController.instance.createHost, Permissions.ADMIN);
+wrappedRouter.post("/", HostsController.instance.createHost);
 
 /* GET all hosts. */
-wrappedRouter.get("/", HostsController.instance.getHosts, Permissions.ADMIN);
+wrappedRouter.get("/", HostsController.instance.getHosts);
 
 /* GET host by id. */
-wrappedRouter.get(
-  "/:hostId",
-  HostsController.instance.getHostById,
-  Permissions.ADMIN
-);
+wrappedRouter.get("/:hostId", HostsController.instance.getHostById);
 
 /* PATCH an existing host. */
-wrappedRouter.patch(
-  "/:hostId",
-  HostsController.instance.patchHost,
-  Permissions.ADMIN
-);
+wrappedRouter.patch("/:hostId", HostsController.instance.patchHost);
 
 /* DELETE an existing host. */
-wrappedRouter.delete(
-  "/:hostId",
-  HostsController.instance.deleteHost,
-  Permissions.ADMIN
-);
+wrappedRouter.delete("/:hostId", HostsController.instance.deleteHost);
 
 const hostsRouter = wrappedRouter.router;
 export { hostsRouter, wrappedRouter as wrappedHostsRouter };

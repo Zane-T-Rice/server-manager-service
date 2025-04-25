@@ -16,6 +16,8 @@ import {
   hostsRouter,
   portsRouter,
   serversRouter,
+  userServerLinksRouter,
+  userServersRouter,
   volumesRouter,
 } from "./routes";
 import express from "express";
@@ -105,6 +107,11 @@ app.use(
   requiredScopes(Permissions.ADMIN),
   errorHandler(isServerMiddleware(prisma))
 );
+app.use(
+  `/users/servers/:serverId`,
+  requiredScopes(Permissions.USER),
+  errorHandler(isServerMiddleware(prisma))
+);
 
 // Proxy to correct host for routes that need host affinity.
 // For paths beginning with Routes.PROXY, this host must be the correct host
@@ -112,6 +119,11 @@ app.use(
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|restart)`,
   requiredScopes(Permissions.ADMIN),
+  errorHandler(proxyMiddleware(prisma))
+);
+app.use(
+  `(${Routes.PROXY})?/users/servers/:serverId/(update|restart)`,
+  requiredScopes(Permissions.USER),
   errorHandler(proxyMiddleware(prisma))
 );
 
@@ -129,13 +141,43 @@ app.use((req, res, next) => {
   next();
 });
 
-// REST APIs
-app.use("/hosts", hostsRouter);
-app.use("/hosts/:hostId/servers", serversRouter);
-app.use("/hosts/:hostId/servers/:serverId/ports", portsRouter);
-app.use("/hosts/:hostId/servers/:serverId/environmentVariables", evRouter);
-app.use("/hosts/:hostId/servers/:serverId/volumes", volumesRouter);
-app.use("/hosts/:hostId/servers/:serverId/files", filesRouter);
+// Admin Level REST APIs
+app.use("/hosts", requiredScopes(Permissions.ADMIN), hostsRouter);
+app.use(
+  "/hosts/:hostId/servers",
+  requiredScopes(Permissions.ADMIN),
+  serversRouter
+);
+app.use(
+  "/hosts/:hostId/servers/:serverId/ports",
+  requiredScopes(Permissions.ADMIN),
+  portsRouter
+);
+app.use(
+  "/hosts/:hostId/servers/:serverId/environmentVariables",
+  requiredScopes(Permissions.ADMIN),
+  evRouter
+);
+app.use(
+  "/hosts/:hostId/servers/:serverId/volumes",
+  requiredScopes(Permissions.ADMIN),
+  volumesRouter
+);
+app.use(
+  "/hosts/:hostId/servers/:serverId/files",
+  requiredScopes(Permissions.ADMIN),
+  filesRouter
+);
+
+// Admin Level REST APIs For Managing Server to User Links
+app.use(
+  "/hosts/:hostId/servers/:serverId/users",
+  requiredScopes(Permissions.ADMIN),
+  userServerLinksRouter
+);
+
+// User Level REST APIs
+app.use("/users/servers", requiredScopes(Permissions.USER), userServersRouter);
 
 // error handler
 app.use(appErrorHandler);

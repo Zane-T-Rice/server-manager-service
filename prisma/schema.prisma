@@ -11,6 +11,11 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
+model User {
+  id String @id // Auth0 user_id
+  servers Server[]
+}
+
 model Server {
   id String @id @default(uuid())
   applicationName String
@@ -25,6 +30,8 @@ model Server {
   files File[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  users User[]
 }
 
 model Port {

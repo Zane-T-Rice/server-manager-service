@@ -1,6 +1,5 @@
 import { ExpressRouterWrapper } from "../utils/expressRouterWrapper";
 import { FilesController } from "../controllers";
-import { Permissions } from "../constants";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -8,31 +7,19 @@ const wrappedRouter = new ExpressRouterWrapper();
 new FilesController(prisma); // Initialize FilesController singleton
 
 /* POST a new File. */
-wrappedRouter.post("/", FilesController.instance.createFile, Permissions.ADMIN);
+wrappedRouter.post("/", FilesController.instance.createFile);
 
 /* GET all Files. */
-wrappedRouter.get("/", FilesController.instance.getFiles, Permissions.ADMIN);
+wrappedRouter.get("/", FilesController.instance.getFiles);
 
 /* GET File by id. */
-wrappedRouter.get(
-  "/:fileId",
-  FilesController.instance.getFileById,
-  Permissions.ADMIN
-);
+wrappedRouter.get("/:fileId", FilesController.instance.getFileById);
 
 /* PATCH an existing File. */
-wrappedRouter.patch(
-  "/:fileId",
-  FilesController.instance.patchFile,
-  Permissions.ADMIN
-);
+wrappedRouter.patch("/:fileId", FilesController.instance.patchFile);
 
 /* DELETE an existing File. */
-wrappedRouter.delete(
-  "/:fileId",
-  FilesController.instance.deleteFile,
-  Permissions.ADMIN
-);
+wrappedRouter.delete("/:fileId", FilesController.instance.deleteFile);
 
 const filesRouter = wrappedRouter.router;
 export { filesRouter, wrappedRouter as wrappedFilesRouter };
