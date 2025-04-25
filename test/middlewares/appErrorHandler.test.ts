@@ -47,11 +47,11 @@ describe("appErrorHandler", () => {
     expect(resMock.json).toHaveBeenCalledWith(internalServerError);
   });
 
-  it("should set 401 status and return NotAuthorizedError", () => {
+  it("should set 403 status and return NotAuthorizedError", () => {
     const notAuthorizedError = new NotAuthorizedError();
     appErrorHandler(notAuthorizedError, reqMock, resMock, nextMock);
 
-    expect(resMock.status).toHaveBeenCalledWith(401);
+    expect(resMock.status).toHaveBeenCalledWith(403);
     expect(resMock.json).toHaveBeenCalledWith(notAuthorizedError);
   });
 

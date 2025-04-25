@@ -41,90 +41,202 @@ describe("proxyMiddleware", () => {
     );
   });
 
-  it("should call handleDatabaseErrors if server does not exist", async () => {
-    prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
+  describe("admin:servers", () => {
+    it("should call handleDatabaseErrors if server does not exist", async () => {
+      prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
 
-    await expect(
-      async () =>
-        await proxyMiddleware(prisma as unknown as PrismaClient)(
-          { params: { hostId, serverId } } as unknown as Request,
-          {} as Response,
-          next
+      await expect(
+        async () =>
+          await proxyMiddleware(prisma as unknown as PrismaClient)(
+            { params: { hostId, serverId } } as unknown as Request,
+            {} as Response,
+            next
+          )
+      ).rejects.toThrow();
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [serverId]
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should call next if server host url matches the host", async () => {
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: process.env.HOST },
+      });
+      await proxyMiddleware(prisma as unknown as PrismaClient)(
+        { params: { hostId, serverId } } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: serverId, hostId },
+        select: { host: { select: { url: true } } },
+      });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it(`should throw BadRequestError if host does not match and req.originalUrl starts with ${Routes.PROXY}`, async () => {
+      const nonMatchingUrl = "url-does-not-match-host";
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: nonMatchingUrl },
+      });
+      await expect(
+        async () =>
+          await proxyMiddleware(prisma as unknown as PrismaClient)(
+            {
+              params: { hostId, serverId },
+              originalUrl: Routes.PROXY + `/server/${serverId}/update`,
+            } as unknown as Request,
+            {} as Response,
+            next
+          )
+      ).rejects.toThrow(
+        new BadRequestError(
+          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`
         )
-    ).rejects.toThrow();
-    expect(handleDatabaseErrors).toHaveBeenCalledWith(
-      expect.any(Error),
-      "server",
-      [serverId]
-    );
-    expect(next).not.toHaveBeenCalled();
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: serverId, hostId },
+        select: { host: { select: { url: true } } },
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it(`should return response from proxy call if host does not match and req.originalUrl does not start with ${Routes.PROXY}`, async () => {
+      const nonMatchingUrl = "http://localhost:3000";
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: nonMatchingUrl },
+      });
+      await proxyMiddleware(prisma as unknown as PrismaClient)(
+        {
+          params: { hostId, serverId },
+          originalUrl: `/server/${serverId}/update`,
+        } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(proxy as jest.Mock).toHaveBeenCalledWith(nonMatchingUrl, {
+        memoizeHost: false,
+        proxyReqPathResolver: expect.any(Function),
+        proxyErrorHandler: expect.any(Function),
+      });
+      expect(next).toHaveBeenCalledWith("router");
+    });
   });
 
-  it("should call next if server host url matches the host", async () => {
-    prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
-      id: serverId,
-      host: { url: process.env.HOST },
-    });
-    await proxyMiddleware(prisma as unknown as PrismaClient)(
-      { params: { hostId, serverId } } as unknown as Request,
-      {} as Response,
-      next
-    );
-    expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId, hostId },
-      select: { host: { select: { url: true } } },
-    });
-    expect(next).toHaveBeenCalledTimes(1);
-  });
+  describe("user:servers", () => {
+    it("should call handleDatabaseErrors if server does not exist", async () => {
+      prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
 
-  it(`should throw BadRequestError if host does not match and req.originalUrl starts with ${Routes.PROXY}`, async () => {
-    const nonMatchingUrl = "url-does-not-match-host";
-    prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
-      id: serverId,
-      host: { url: nonMatchingUrl },
+      await expect(
+        async () =>
+          await proxyMiddleware(prisma as unknown as PrismaClient)(
+            {
+              params: { serverId },
+              auth: { payload: { sub: hostId } },
+            } as unknown as Request,
+            {} as Response,
+            next
+          )
+      ).rejects.toThrow();
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [serverId]
+      );
+      expect(next).not.toHaveBeenCalled();
     });
-    await expect(
-      async () =>
-        await proxyMiddleware(prisma as unknown as PrismaClient)(
-          {
-            params: { hostId, serverId },
-            originalUrl: Routes.PROXY + `/server/${serverId}/update`,
-          } as unknown as Request,
-          {} as Response,
-          next
+
+    it("should call next if server host url matches the host", async () => {
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: process.env.HOST },
+      });
+      await proxyMiddleware(prisma as unknown as PrismaClient)(
+        {
+          params: { serverId },
+          auth: { payload: { sub: hostId } },
+        } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: {
+          id: serverId,
+          users: {
+            some: {
+              id: hostId,
+            },
+          },
+        },
+        select: { host: { select: { url: true } } },
+      });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it(`should throw BadRequestError if host does not match and req.originalUrl starts with ${Routes.PROXY}`, async () => {
+      const nonMatchingUrl = "url-does-not-match-host";
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: nonMatchingUrl },
+      });
+      await expect(
+        async () =>
+          await proxyMiddleware(prisma as unknown as PrismaClient)(
+            {
+              params: { serverId },
+              auth: { payload: { sub: hostId } },
+              originalUrl: Routes.PROXY + `/server/${serverId}/update`,
+            } as unknown as Request,
+            {} as Response,
+            next
+          )
+      ).rejects.toThrow(
+        new BadRequestError(
+          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`
         )
-    ).rejects.toThrow(
-      new BadRequestError(
-        `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`
-      )
-    );
-    expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId, hostId },
-      select: { host: { select: { url: true } } },
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: {
+          id: serverId,
+          users: {
+            some: {
+              id: hostId,
+            },
+          },
+        },
+        select: { host: { select: { url: true } } },
+      });
+      expect(next).not.toHaveBeenCalled();
     });
-    expect(next).not.toHaveBeenCalled();
-  });
 
-  it(`should return response from proxy call if host does not match and req.originalUrl does not start with ${Routes.PROXY}`, async () => {
-    const nonMatchingUrl = "http://localhost:3000";
-    prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
-      id: serverId,
-      host: { url: nonMatchingUrl },
+    it(`should return response from proxy call if host does not match and req.originalUrl does not start with ${Routes.PROXY}`, async () => {
+      const nonMatchingUrl = "http://localhost:3000";
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce({
+        id: serverId,
+        host: { url: nonMatchingUrl },
+      });
+      await proxyMiddleware(prisma as unknown as PrismaClient)(
+        {
+          params: { serverId },
+          auth: { payload: { sub: hostId } },
+          originalUrl: `/server/${serverId}/update`,
+        } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(proxy as jest.Mock).toHaveBeenCalledWith(nonMatchingUrl, {
+        memoizeHost: false,
+        proxyReqPathResolver: expect.any(Function),
+        proxyErrorHandler: expect.any(Function),
+      });
+      expect(next).toHaveBeenCalledWith("router");
     });
-    await proxyMiddleware(prisma as unknown as PrismaClient)(
-      {
-        params: { hostId, serverId },
-        originalUrl: `/server/${serverId}/update`,
-      } as unknown as Request,
-      {} as Response,
-      next
-    );
-    expect(proxy as jest.Mock).toHaveBeenCalledWith(nonMatchingUrl, {
-      memoizeHost: false,
-      proxyReqPathResolver: expect.any(Function),
-      proxyErrorHandler: expect.any(Function),
-    });
-    expect(next).toHaveBeenCalledWith("router");
   });
 
   describe("proxyReqPathResolver", () => {

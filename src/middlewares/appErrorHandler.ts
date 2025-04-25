@@ -17,8 +17,6 @@ function appErrorHandler(
   ) {
     // This error originates from the OAuth JWT verification and scope checking.
     res.status(403).json(new NotAuthorizedError());
-  } else if (err.name === ErrorMessageNames.badRequestError) {
-    res.status(400).json(err);
   } else if (err.name === ErrorMessageNames.notFoundError) {
     res.status(404).json(err);
   } else if (err.name === ErrorMessageNames.internalServerError) {

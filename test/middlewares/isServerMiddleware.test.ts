@@ -26,33 +26,80 @@ describe("isServerMiddleware", () => {
     next = jest.fn();
   });
 
-  it("should call next if server exists", async () => {
-    prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
-      {} as unknown as Server
-    );
-    await isServerMiddleware(prisma as unknown as PrismaClient)(
-      { params: { hostId, serverId } } as unknown as Request,
-      {} as Response,
-      next
-    );
-    expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: serverId, hostId },
+  describe("admin:servers", () => {
+    it("should call next if server exists", async () => {
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
+        {} as unknown as Server
+      );
+      await isServerMiddleware(prisma as unknown as PrismaClient)(
+        { params: { hostId, serverId } } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: serverId, hostId },
+      });
+      expect(next).toHaveBeenCalledTimes(1);
     });
-    expect(next).toHaveBeenCalledTimes(1);
+
+    it("should call handleDatabaseErrors if server does not exist", async () => {
+      prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
+      await isServerMiddleware(prisma as unknown as PrismaClient)(
+        { params: { hostId, serverId } } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [serverId]
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
   });
 
-  it("should call handleDatabaseErrors if server does not exist", async () => {
-    prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
-    await isServerMiddleware(prisma as unknown as PrismaClient)(
-      { params: { hostId, serverId } } as unknown as Request,
-      {} as Response,
-      next
-    );
-    expect(handleDatabaseErrors).toHaveBeenCalledWith(
-      expect.any(Error),
-      "server",
-      [serverId]
-    );
-    expect(next).not.toHaveBeenCalled();
+  describe("user:servers", () => {
+    it("should call next if server exists", async () => {
+      prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
+        {} as unknown as Server
+      );
+      await isServerMiddleware(prisma as unknown as PrismaClient)(
+        {
+          params: { serverId },
+          auth: { payload: { sub: hostId } },
+        } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: {
+          id: serverId,
+          users: {
+            some: {
+              id: hostId,
+            },
+          },
+        },
+      });
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call handleDatabaseErrors if server does not exist", async () => {
+      prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
+      await isServerMiddleware(prisma as unknown as PrismaClient)(
+        {
+          params: { serverId },
+          auth: { payload: { sub: hostId } },
+        } as unknown as Request,
+        {} as Response,
+        next
+      );
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [serverId]
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
   });
 });
