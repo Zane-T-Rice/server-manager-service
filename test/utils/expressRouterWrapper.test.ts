@@ -1,12 +1,6 @@
-import { requiredScopes } from "express-oauth2-jwt-bearer";
 import { ExpressRouterWrapper } from "../../src/utils";
 import { errorHandler } from "../../src/middlewares";
-jest.mock("../../src/middlewares", () => {
-  return { errorHandler: jest.fn().mockReturnValue(true) };
-});
-jest.mock("express-oauth2-jwt-bearer", () => {
-  return { requiredScopes: jest.fn().mockReturnValue(true) };
-});
+jest.mock("../../src/middlewares/errorHandler");
 
 describe("expressRouterWrapper", () => {
   const path = "/";
@@ -23,6 +17,7 @@ describe("expressRouterWrapper", () => {
   const deleteSpy = jest
     .spyOn(expressRouterWrapper.router, "delete")
     .mockReturnValue(expressRouterWrapper.router);
+  (errorHandler as jest.Mock).mockImplementation(() => true);
   const routeFunction = jest.fn();
 
   beforeEach(() => {
@@ -38,16 +33,14 @@ describe("expressRouterWrapper", () => {
     `should call express router $verb with errorHandler wrapper`,
     async ({ spy, route }) => {
       // @ts-expect-error to make testing easier
-      await expressRouterWrapper[route](path, routeFunction, "read:servers");
+      await expressRouterWrapper[route](path, routeFunction);
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
-      expect(requiredScopes).toHaveBeenCalledWith("read:servers");
-      expect(spy).toHaveBeenCalledWith(path, true, true);
+      expect(spy).toHaveBeenCalledWith(path, true);
 
       // @ts-expect-error to make testing easier
-      await expressRouterWrapper[route](path, [routeFunction], "read:servers");
+      await expressRouterWrapper[route](path, [routeFunction]);
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
-      expect(requiredScopes).toHaveBeenCalledWith("read:servers");
-      expect(spy).toHaveBeenCalledWith(path, true, true);
+      expect(spy).toHaveBeenCalledWith(path, true);
     }
   );
 });
