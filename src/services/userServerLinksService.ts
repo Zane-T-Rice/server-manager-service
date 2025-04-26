@@ -51,6 +51,7 @@ class UserServerLinksService {
         },
       },
     });
+
     res.json({ userId, serverId });
   }
 
@@ -78,7 +79,7 @@ class UserServerLinksService {
           },
         },
       })
-      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
+      .catch((e) => handleDatabaseErrors(e, "user", [userId]));
     res.json({ userId, serverId });
   }
 }
