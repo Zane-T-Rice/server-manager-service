@@ -27,7 +27,6 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
   };
 });
 
-console.log("BRUH");
 describe("UserServerLinksService", () => {
   const hostId = "hostId";
   const serverId = "serverId";
@@ -40,32 +39,24 @@ describe("UserServerLinksService", () => {
     },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
-  console.log("BRUH 1");
   new UserServerLinksService();
-  console.log("BRUH 2");
   beforeEach(() => {
     jest.clearAllMocks();
 
-    console.log("BRUH 3");
     // None of these return values are check. The queries are run and throw an
     // error if something is wrong.
     jest
       .spyOn(UserServerLinksService.instance.prisma.server, "findUniqueOrThrow")
       .mockResolvedValue({ id: serverId } as Server);
-    console.log("BRUH 6");
     jest
       .spyOn(UserServerLinksService.instance.prisma.user, "upsert")
       .mockResolvedValue({ id: userId });
-    console.log("BRUH 7");
     jest
       .spyOn(UserServerLinksService.instance.prisma.user, "update")
       .mockResolvedValue({ id: userId });
-    console.log("BRUH 8");
   });
 
-  console.log("BRUH 4");
   it("should use passed in prisma client if no prisma client is set", () => {
-    console.log("BRUH 5");
     // @ts-expect-error to make testing easier
     UserServerLinksService.instance.prisma = undefined;
     const prisma = new PrismaClient();
