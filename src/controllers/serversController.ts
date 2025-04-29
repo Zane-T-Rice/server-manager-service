@@ -26,6 +26,11 @@ class ServersController {
     await ServersService.instance.updateServer(req, res);
   }
 
+  /* POST stop an existing server. */
+  async stopServer(req: Request, res: Response) {
+    await ServersService.instance.stopServer(req, res);
+  }
+
   /* GET all servers. */
   async getServers(req: Request, res: Response) {
     await ServersService.instance.getServers(req, res);

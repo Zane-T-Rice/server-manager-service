@@ -14,6 +14,7 @@ describe("ServersController", () => {
     createServer: jest.fn(),
     restartServer: jest.fn(),
     updateServer: jest.fn(),
+    stopServer: jest.fn(),
     getServers: jest.fn(),
     getServerById: jest.fn(),
     patchServer: jest.fn(),
@@ -53,6 +54,13 @@ describe("ServersController", () => {
         req,
         res
       );
+    });
+  });
+
+  describe("stopServer", () => {
+    it("should call stopServer in ServersService", async () => {
+      await serversController.stopServer(req, res);
+      expect(ServersService.instance.stopServer).toHaveBeenCalledWith(req, res);
     });
   });
 

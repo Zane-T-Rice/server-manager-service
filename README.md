@@ -55,11 +55,9 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 These commands are safe to repeat.
 
 WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
-ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
-AUDIENCE is the API Audience.
+ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
 
-The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
-permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
+The service uses the permissions "admin:servers" and "user:servers" to authorize users per route.
 
 ```sh
 (
@@ -98,13 +96,6 @@ This is only required if you want to work on the code or look at the code withou
 **Make sure to update the /path/to.**
 
 You can run the service locally directly or inside of a Docker container.
-
-WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
-ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. (I use Auth0.)
-AUDIENCE is the API Audience.
-
-The service needs a user to have the "read:servers write:servers reboot:servers update:servers" permissions to fully utilize it, but individual
-permissions (like just having read:servers) does work. (If you are in Auth0, make sure to turn on RBAC in the API settings.)
 
 ```sh
 # The environment variables that are needed are in the below Docker command prefixed by the --env flags.
@@ -173,15 +164,9 @@ There is a script to seed a development database with a couple Host and Server r
 npx ts-node prisma/scripts/seedServers.ts
 ```
 
-Right now, there are no routes for adding or removing Host records, so you have to do that manually with the `addHost.s` and `deleteHost.ts` scripts - or any script you want really. This is sort of fine for now because I only expect to have one or two hosts for a while.
+### Configuring Servers
 
-The database files will be created in server-manager-service/prisma/db.
-If you want to keep the db folder safe outside of the repo, then move the db folder to the new location and make a symlink to the the db folder's new home.
-
-```sh
-mv /path/to/server-manager-server/prisma/db /new/path/to/db
-ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
-```
+I think looking at the Prisma schema or using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any files that your Dockerfile or server need through the service or through volume mounts.
 
 ### To Do
 
@@ -191,5 +176,4 @@ ln -snf /new/path/to/db /path/to/server-manager-service/prisma/db
 - Probaby add integration tests. Right now it is all unit tests.
 - Docker with non-root user (mostly so the files it generates are not owned by root).
 - Delete server should stop/delete any related containers before removing the server record.
-- Have a stop server route.
 - Update/Restart should possibly lock the server record until they complete.

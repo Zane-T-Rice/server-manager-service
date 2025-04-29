@@ -21,6 +21,9 @@ wrappedRouter.post(
   ServersController.instance.updateServer
 );
 
+/* POST stop an existing server. */
+wrappedRouter.post("/:serverId/stop", ServersController.instance.stopServer);
+
 /* GET all servers. */
 wrappedRouter.get("/", ServersController.instance.getServers);
 
