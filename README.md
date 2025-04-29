@@ -8,20 +8,21 @@ The intent is to call docker commands based on information stored completely wit
 ```sh
 # Docker is required to run the application.
 docker --version
-Docker version 27.3.1, build v27.3.1
+Docker version 27.5.1, build v27.5.1
 
 # The rest of these are only required to write code.
 node --version
-v20.17.0
+v22.14.0
 
 # If you want to make pull requests you will also need redocly
 # Redocly is used to combine the Swagger spec in to a single file so that
 # it can be easily imported or used by more tools, such as Insomnia.
 redocly --version
-1.25.9
+1.34.2
 
 # The service currently depends on a docker bridge network with the name server-manager-service-network.
-# Here is an example of how to create such a network.
+# Here is an example of how to create such a network. Any docker container on this network can be
+# managed by server-manager-service.
 docker network create \
   --driver=bridge \
   --subnet=172.19.0.0/16 \
@@ -54,10 +55,9 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 
 These commands are safe to repeat.
 
-WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
-ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
-
-The service uses the permissions "admin:servers" and "user:servers" to authorize users per route.
+- WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
+- ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
+- The service uses the permissions "admin:servers" and "user:servers" to authorize users per route.
 
 ```sh
 (
@@ -95,7 +95,7 @@ This is only required if you want to work on the code or look at the code withou
 
 **Make sure to update the /path/to.**
 
-You can run the service locally directly or inside of a Docker container.
+You can run the service directly or inside of a Docker container.
 
 ```sh
 # The environment variables that are needed are in the below Docker command prefixed by the --env flags.
@@ -130,12 +130,7 @@ npm run start:dev
 
 To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see and interact with the APIs.
 Additionally, there is a combined Swagger spec at swagger/combinedServerManagerService.yaml which can be used with many tools including to be imported in to Insomnia.
-
-If your local database becomes a mess you can wipe it out with this command.
-
-```sh
-npx prisma migrate reset
-```
+You can also test by running the [front-end project](https://github.com/Zane-T-Rice/apps) locally and pointing it at the locally running service.
 
 ### File Ownership Issue
 
@@ -164,9 +159,15 @@ There is a script to seed a development database with a couple Host and Server r
 npx ts-node prisma/scripts/seedServers.ts
 ```
 
+If your local database becomes a mess you can wipe it out with this command.
+
+```sh
+npx prisma migrate reset
+```
+
 ### Configuring Servers
 
-I think looking at the Prisma schema or using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any files that your Dockerfile or server need through the service or through volume mounts.
+Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server during the `/start` and `/update` commands.
 
 ### To Do
 
