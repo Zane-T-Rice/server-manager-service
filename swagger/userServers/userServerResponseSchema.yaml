@@ -19,7 +19,10 @@ properties:
   ports:
     type: array
     items:
-      $ref: "../ports/portResponseSchema.yaml"
+      type: object
+      properties:
+        number:
+          type: number
   host:
     type: object
     properties:

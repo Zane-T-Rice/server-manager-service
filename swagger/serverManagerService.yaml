@@ -725,7 +725,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./userServers/userServerArrayResponse.yaml"
+          $ref: "./servers/serverArrayResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
@@ -742,7 +742,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./userServers/userServerArrayResponse.yaml"
+          $ref: "./servers/serverArrayResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
@@ -759,7 +759,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./userServers/userServerArrayResponse.yaml"
+          $ref: "./servers/serverArrayResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
@@ -777,7 +777,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./userServers/userServerArrayResponse.yaml"
+          $ref: "./servers/serverArrayResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
