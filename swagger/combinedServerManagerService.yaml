@@ -221,7 +221,6 @@ paths:
       operationId: stopServer
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
-        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -298,7 +297,7 @@ paths:
       tags:
         - userServerLinks
       summary: Delete a Link between a Server by id and a User by id
-      operationId: linkUserServer
+      operationId: unlinkUserServer
       parameters:
         - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
@@ -309,9 +308,13 @@ paths:
         '401':
           $ref: '#/components/responses/notAuthorizedError'
         '404':
-          anyOf:
-            - $ref: ./servers/errors/serverNotFoundError.yaml
-            - $ref: ./hosts/errors/hostNotFoundError.yaml
+          description: The Server could not be found.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/serverNotFoundErrorSchema'
+                  - $ref: '#/components/schemas/hostNotFoundErrorSchema'
         '500':
           $ref: '#/components/responses/internalServerError'
   /hosts/{hostId}/servers/{serverId}/ports:

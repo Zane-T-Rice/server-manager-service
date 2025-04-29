@@ -220,7 +220,6 @@ paths:
       operationId: stopServer
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
-        - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
@@ -297,7 +296,7 @@ paths:
       tags:
         - userServerLinks
       summary: Delete a Link between a Server by id and a User by id
-      operationId: linkUserServer
+      operationId: unlinkUserServer
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
@@ -308,9 +307,13 @@ paths:
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
-          anyOf:
-            - $ref: "./servers/errors/serverNotFoundError.yaml"
-            - $ref: "./hosts/errors/hostNotFoundError.yaml"
+          description: "The Server could not be found."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "./servers/errors/serverNotFoundErrorSchema.yaml"
+                  - $ref: "./hosts/errors/hostNotFoundErrorSchema.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
   /hosts/{hostId}/servers/{serverId}/ports:
