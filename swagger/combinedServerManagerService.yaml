@@ -202,6 +202,7 @@ paths:
       summary: Start a Server by id
       operationId: startServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
@@ -219,6 +220,8 @@ paths:
       summary: Stop a Server by id
       operationId: stopServer
       parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+        - $ref: '#/components/parameters/hostIdInPath'
         - $ref: '#/components/parameters/serverIdInPath'
       responses:
         '200':
