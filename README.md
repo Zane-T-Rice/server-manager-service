@@ -167,7 +167,7 @@ npx prisma migrate reset
 
 ### Configuring Servers
 
-Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server during the `/start` and `/update` commands.
+Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server during the `/start` and `/update` commands. The content field of a File is the base64 encoded string of the File.
 
 ### To Do
 

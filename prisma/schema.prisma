@@ -69,7 +69,7 @@ model File {
   serverId String // FK of server which owns this record.
   server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
   name String // The name of the file.
-  content String // The content of the file as a plain string.
+  content String // The content of the file as a base64 encoded string.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
