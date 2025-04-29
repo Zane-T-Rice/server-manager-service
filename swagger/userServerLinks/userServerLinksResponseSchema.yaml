@@ -1,0 +1,11 @@
+required:
+  - userId
+  - serverId
+type: object
+properties:
+  userId:
+    type: string
+    format: uuid
+  serverId:
+    type: string
+    format: uuid

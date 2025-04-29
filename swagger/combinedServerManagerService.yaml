@@ -195,6 +195,40 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
+  /hosts/{hostId}/servers/{serverId}/start:
+    post:
+      tags:
+        - servers
+      summary: Start a Server by id
+      operationId: startServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /hosts/{hostId}/servers/{serverId}/stop:
+    post:
+      tags:
+        - servers
+      summary: Stop a Server by id
+      operationId: stopServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/serverArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
   /hosts/{hostId}/servers/{serverId}/restart:
     post:
       tags:
@@ -230,6 +264,51 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /hosts/{hostId}/servers/{serverId}/users/{userId}:
+    post:
+      tags:
+        - userServerLinks
+      summary: Link a Server by id to a User by id
+      operationId: linkUserServer
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/userIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerLinksResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          description: The Server could not be found.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/serverNotFoundErrorSchema'
+                  - $ref: '#/components/schemas/hostNotFoundErrorSchema'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      tags:
+        - userServerLinks
+      summary: Delete a Link between a Server by id and a User by id
+      operationId: linkUserServer
+      parameters:
+        - $ref: '#/components/parameters/hostIdInPath'
+        - $ref: '#/components/parameters/serverIdInPath'
+        - $ref: '#/components/parameters/userIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerLinksResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          anyOf:
+            - $ref: ./servers/errors/serverNotFoundError.yaml
+            - $ref: ./hosts/errors/hostNotFoundError.yaml
         '500':
           $ref: '#/components/responses/internalServerError'
   /hosts/{hostId}/servers/{serverId}/ports:
@@ -593,6 +672,113 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/fileNotFoundError'
+  /users/servers:
+    get:
+      tags:
+        - userServers
+      summary: Get all Servers For This User
+      operationId: getUserServers
+      parameters:
+        - in: query
+          name: isUpdatable
+          schema:
+            type: boolean
+          description: filter results based on if a Server is updatable or not
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users/servers/{serverId}:
+    get:
+      tags:
+        - userServers
+      summary: Get a Server owned by this User by id
+      operationId: getUserServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users/servers/{serverId}/start:
+    post:
+      tags:
+        - userServers
+      summary: Start a Server owned by this user by id
+      operationId: startUserServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users/servers/{serverId}/stop:
+    post:
+      tags:
+        - userServers
+      summary: Stop a Server owned by this user by id
+      operationId: stopUserServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users/servers/{serverId}/restart:
+    post:
+      tags:
+        - userServers
+      summary: Restart a Server owned by this user by id
+      operationId: restartUserServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users/servers/{serverId}/update:
+    post:
+      tags:
+        - userServers
+      summary: Update a Server owned by this user by id
+      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
+      operationId: updateUserServer
+      parameters:
+        - $ref: '#/components/parameters/serverIdInPath'
+      responses:
+        '200':
+          $ref: '#/components/responses/userServerArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '404':
+          $ref: '#/components/responses/serverNotFoundError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
 components:
   securitySchemes:
     ApiBearerAuth:
@@ -701,6 +887,18 @@ components:
           type: boolean
         hostId:
           type: string
+    userServerLinksResponseSchema:
+      required:
+        - userId
+        - serverId
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        serverId:
+          type: string
+          format: uuid
     portResponseSchema:
       required:
         - id
@@ -835,6 +1033,34 @@ components:
           type: string
         name:
           type: string
+    userServerResponseSchema:
+      required:
+        - id
+        - applicationName
+        - containerName
+        - isUpdatable
+        - ports
+        - host
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        applicationName:
+          type: string
+        containerName:
+          type: string
+        isUpdatable:
+          type: boolean
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/portResponseSchema'
+        host:
+          type: object
+          properties:
+            url:
+              type: string
   responses:
     hostArrayResponse:
       description: Success
@@ -888,6 +1114,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/serverResponseSchema'
+    userServerLinksResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/userServerLinksResponseSchema'
     portArrayResponse:
       description: Success
       content:
@@ -968,6 +1200,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/fileResponseSchema'
+    userServerArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/userServerResponseSchema'
+    userServerResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/userServerResponseSchema'
   requestBodies:
     hostCreateRequest:
       description: Create a new host
@@ -1053,6 +1299,14 @@ components:
     serverIdInPath:
       description: id of the Server
       name: serverId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    userIdInPath:
+      description: id of the User
+      name: userId
       in: path
       required: true
       schema:

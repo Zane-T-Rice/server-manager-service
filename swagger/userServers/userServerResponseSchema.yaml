@@ -1,0 +1,27 @@
+required:
+  - id
+  - applicationName
+  - containerName
+  - isUpdatable
+  - ports
+  - host
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  applicationName:
+    type: string
+  containerName:
+    type: string
+  isUpdatable:
+    type: boolean
+  ports:
+    type: array
+    items:
+      $ref: "../ports/portResponseSchema.yaml"
+  host:
+    type: object
+    properties:
+      url:
+        type: string

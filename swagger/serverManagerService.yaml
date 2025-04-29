@@ -194,6 +194,40 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
+  /hosts/{hostId}/servers/{serverId}/start:
+    post:
+      tags:
+        - servers
+      summary: Start a Server by id
+      operationId: startServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /hosts/{hostId}/servers/{serverId}/stop:
+    post:
+      tags:
+        - servers
+      summary: Stop a Server by id
+      operationId: stopServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/serverArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
   /hosts/{hostId}/servers/{serverId}/restart:
     post:
       tags:
@@ -229,6 +263,51 @@ paths:
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
           $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /hosts/{hostId}/servers/{serverId}/users/{userId}:
+    post:
+      tags:
+        - userServerLinks
+      summary: Link a Server by id to a User by id
+      operationId: linkUserServer
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/userIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServerLinks/userServerLinksResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          description: "The Server could not be found."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "./servers/errors/serverNotFoundErrorSchema.yaml"
+                  - $ref: "./hosts/errors/hostNotFoundErrorSchema.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+    delete:
+      tags:
+        - userServerLinks
+      summary: Delete a Link between a Server by id and a User by id
+      operationId: linkUserServer
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+        - $ref: "./common/serverIdInPath.yaml"
+        - $ref: "./common/userIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServerLinks/userServerLinksResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          anyOf:
+            - $ref: "./servers/errors/serverNotFoundError.yaml"
+            - $ref: "./hosts/errors/hostNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
   /hosts/{hostId}/servers/{serverId}/ports:
@@ -592,6 +671,113 @@ paths:
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
           $ref: "./files/errors/fileNotFoundError.yaml"
+  /users/servers:
+    get:
+      tags:
+        - userServers
+      summary: Get all Servers For This User
+      operationId: getUserServers
+      parameters:
+        - in: query
+          name: isUpdatable
+          schema:
+            type: boolean
+          description: filter results based on if a Server is updatable or not
+      responses:
+        "200":
+          $ref: "./userServers/userServerArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /users/servers/{serverId}:
+    get:
+      tags:
+        - userServers
+      summary: Get a Server owned by this User by id
+      operationId: getUserServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServers/userServerResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /users/servers/{serverId}/start:
+    post:
+      tags:
+        - userServers
+      summary: Start a Server owned by this user by id
+      operationId: startUserServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServers/userServerArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /users/servers/{serverId}/stop:
+    post:
+      tags:
+        - userServers
+      summary: Stop a Server owned by this user by id
+      operationId: stopUserServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServers/userServerArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /users/servers/{serverId}/restart:
+    post:
+      tags:
+        - userServers
+      summary: Restart a Server owned by this user by id
+      operationId: restartUserServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServers/userServerArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /users/servers/{serverId}/update:
+    post:
+      tags:
+        - userServers
+      summary: Update a Server owned by this user by id
+      description: This is for rebuilding containers to bring them fully up to date. If you are trying to patch the configuration of a Server, use the PATCH /servers/{serverId} route instead.
+      operationId: updateUserServer
+      parameters:
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./userServers/userServerArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          $ref: "./servers/errors/serverNotFoundError.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
 components:
   securitySchemes:
     ApiBearerAuth:
