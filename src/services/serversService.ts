@@ -174,6 +174,7 @@ class ServersService {
     }
 
     const commands = [
+      `docker pull alpine:latest`,
       `docker stop ${shellEscape([server.containerName])}`,
       `docker rm ${shellEscape([server.containerName])}`,
       dockerRun.join(" "),
