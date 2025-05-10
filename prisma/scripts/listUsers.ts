@@ -4,10 +4,10 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-prisma.host
+prisma.user
   .findMany()
-  .then((host) => {
-    console.log(host);
+  .then((user) => {
+    console.log(user);
   })
   .catch((e) => {
     console.error(e);
