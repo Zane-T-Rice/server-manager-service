@@ -201,7 +201,7 @@ describe("ServersService", () => {
         select: ServersService.defaultServerSelect,
       });
       expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
-        `docker stop ${mockServerRecord.containerName}`,
+        `docker stop ${mockServerRecord.containerName};docker rm ${mockServerRecord.containerName}`,
         expect.any(Function)
       );
     });
@@ -226,7 +226,10 @@ describe("ServersService", () => {
       expect(ephemeralContainerRun).toHaveBeenCalledWith(
         req,
         res,
-        [`docker stop ${mockServerRecordIsInResponseChain.containerName}`],
+        [
+          `docker stop ${mockServerRecordIsInResponseChain.containerName}`,
+          `docker rm ${mockServerRecordIsInResponseChain.containerName}`,
+        ],
         mockServerRecordIsInResponseChain
       );
     });

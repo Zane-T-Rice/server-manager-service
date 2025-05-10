@@ -215,6 +215,7 @@ class ServersService {
     const server = dbServer!;
     const commands = [
       ["docker", "stop", shellEscape([server.containerName])].join(" "),
+      ["docker", "rm", shellEscape([server.containerName])].join(" "),
     ];
     if (server.isInResponseChain) {
       // This service may be torn down by the restart.
