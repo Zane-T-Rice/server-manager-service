@@ -35,11 +35,18 @@ jobs:
       - id: deploy
         name: deploy
         env:
-          SERVER_ID: ${{ secrets.SERVER_ID }}
+          SERVER_ID_1: ${{ secrets.SERVER_ID_1 }}
+          SERVER_ID_2: ${{ secrets.SERVER_ID_2 }}
           SERVER_MANAGER_SERVICE_URL: ${{ secrets.SERVER_MANAGER_SERVICE_URL }}
         run: |
           curl --silent --request POST \
-          --url $SERVER_MANAGER_SERVICE_URL/users/servers/$SERVER_ID/update/ \
+          --url $SERVER_MANAGER_SERVICE_URL-1/users/servers/$SERVER_ID_1/update/ \
+          --header 'Content-Type: application/json' \
+          --header "Authorization: Bearer ${{ steps.get-access-token.outputs.auth-token }}" \
+          --data '{}' \
+          && \
+          curl --silent --request POST \
+          --url $SERVER_MANAGER_SERVICE_URL-2/users/servers/$SERVER_ID_2/update/ \
           --header 'Content-Type: application/json' \
           --header "Authorization: Bearer ${{ steps.get-access-token.outputs.auth-token }}" \
           --data '{}'
