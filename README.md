@@ -1,6 +1,6 @@
 # server-manager-service
 
-Provides server information and management functions such as restart and update.
+Provides server information and management functions such as update.
 The intent is to call docker commands based on information stored completely within the service.
 
 ### Requirements
@@ -177,4 +177,4 @@ Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to se
 - Probaby add integration tests. Right now it is all unit tests.
 - Docker with non-root user (mostly so the files it generates are not owned by root).
 - Delete server should stop/delete any related containers before removing the server record.
-- Update/Restart should possibly lock the server record until they complete.
+- Update should possibly lock the host record until it completes.

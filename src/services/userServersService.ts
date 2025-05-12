@@ -32,26 +32,6 @@ class UserServersService {
     return UserServersService.instance;
   }
 
-  /* POST restart an existing server owned by this user. */
-  async restartServer(req: Request, res: Response) {
-    const { serverId } = req.params;
-    const server = await this.prisma.server
-      .findUniqueOrThrow({
-        where: {
-          id: String(serverId),
-          users: {
-            some: {
-              username: String(req.auth?.payload.sub),
-            },
-          },
-        },
-        select: { hostId: true },
-      })
-      .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
-    req.params.hostId = server.hostId;
-    await ServersService.instance.restartServer(req, res);
-  }
-
   /* POST update an existing server owned by this user. */
   async updateServer(req: Request, res: Response) {
     const { serverId } = req.params;

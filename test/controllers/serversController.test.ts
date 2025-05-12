@@ -12,7 +12,6 @@ describe("ServersController", () => {
   // @ts-expect-error to make testing easier
   ServersService.instance = {
     createServer: jest.fn(),
-    restartServer: jest.fn(),
     updateServer: jest.fn(),
     stopServer: jest.fn(),
     getServers: jest.fn(),
@@ -31,16 +30,6 @@ describe("ServersController", () => {
     it("should call createServer in ServersService", async () => {
       await serversController.createServer(req, res);
       expect(ServersService.instance.createServer).toHaveBeenCalledWith(
-        req,
-        res
-      );
-    });
-  });
-
-  describe("restartServer", () => {
-    it("should call restartServer in ServersService", async () => {
-      await serversController.restartServer(req, res);
-      expect(ServersService.instance.restartServer).toHaveBeenCalledWith(
         req,
         res
       );

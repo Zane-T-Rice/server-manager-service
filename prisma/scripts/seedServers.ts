@@ -1,5 +1,5 @@
 // Adds a couple basic servers for testing during development.
-// These should be able to be updated/restarted.
+// These should be able to be updated/started.
 import * as dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { ServersService } from "../../src/services/serversService";

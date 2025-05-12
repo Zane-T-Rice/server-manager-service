@@ -231,24 +231,6 @@ paths:
           $ref: '#/components/responses/serverNotFoundError'
         '500':
           $ref: '#/components/responses/internalServerError'
-  /hosts/{hostId}/servers/{serverId}/restart:
-    post:
-      tags:
-        - servers
-      summary: Restart a Server by id
-      operationId: restartServer
-      parameters:
-        - $ref: '#/components/parameters/hostIdInPath'
-        - $ref: '#/components/parameters/serverIdInPath'
-      responses:
-        '200':
-          $ref: '#/components/responses/serverResponse'
-        '401':
-          $ref: '#/components/responses/notAuthorizedError'
-        '404':
-          $ref: '#/components/responses/serverNotFoundError'
-        '500':
-          $ref: '#/components/responses/internalServerError'
   /hosts/{hostId}/servers/{serverId}/update:
     post:
       tags:
@@ -764,23 +746,6 @@ paths:
         - userServers
       summary: Stop a Server owned by this user by id
       operationId: stopUserServer
-      parameters:
-        - $ref: '#/components/parameters/serverIdInPath'
-      responses:
-        '200':
-          $ref: '#/components/responses/serverArrayResponse'
-        '401':
-          $ref: '#/components/responses/notAuthorizedError'
-        '404':
-          $ref: '#/components/responses/serverNotFoundError'
-        '500':
-          $ref: '#/components/responses/internalServerError'
-  /users/servers/{serverId}/restart:
-    post:
-      tags:
-        - userServers
-      summary: Restart a Server owned by this user by id
-      operationId: restartUserServer
       parameters:
         - $ref: '#/components/parameters/serverIdInPath'
       responses:

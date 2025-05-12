@@ -117,12 +117,12 @@ app.use(
 // For paths beginning with Routes.PROXY, this host must be the correct host
 // or an error will be thrown. This prevents infinite proxy recursion.
 app.use(
-  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|restart|stop)`,
+  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.ADMIN),
   errorHandler(proxyMiddleware(prisma))
 );
 app.use(
-  `(${Routes.PROXY})?/users/servers/:serverId/(update|restart|stop)`,
+  `(${Routes.PROXY})?/users/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.USER),
   errorHandler(proxyMiddleware(prisma))
 );

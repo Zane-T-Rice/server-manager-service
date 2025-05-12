@@ -230,24 +230,6 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /hosts/{hostId}/servers/{serverId}/restart:
-    post:
-      tags:
-        - servers
-      summary: Restart a Server by id
-      operationId: restartServer
-      parameters:
-        - $ref: "./common/hostIdInPath.yaml"
-        - $ref: "./common/serverIdInPath.yaml"
-      responses:
-        "200":
-          $ref: "./servers/serverResponse.yaml"
-        "401":
-          $ref: "./common/errors/notAuthorizedError.yaml"
-        "404":
-          $ref: "./servers/errors/serverNotFoundError.yaml"
-        "500":
-          $ref: "./common/errors/internalServerError.yaml"
   /hosts/{hostId}/servers/{serverId}/update:
     post:
       tags:
@@ -763,23 +745,6 @@ paths:
         - userServers
       summary: Stop a Server owned by this user by id
       operationId: stopUserServer
-      parameters:
-        - $ref: "./common/serverIdInPath.yaml"
-      responses:
-        "200":
-          $ref: "./servers/serverArrayResponse.yaml"
-        "401":
-          $ref: "./common/errors/notAuthorizedError.yaml"
-        "404":
-          $ref: "./servers/errors/serverNotFoundError.yaml"
-        "500":
-          $ref: "./common/errors/internalServerError.yaml"
-  /users/servers/{serverId}/restart:
-    post:
-      tags:
-        - userServers
-      summary: Restart a Server owned by this user by id
-      operationId: restartUserServer
       parameters:
         - $ref: "./common/serverIdInPath.yaml"
       responses:

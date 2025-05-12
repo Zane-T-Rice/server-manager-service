@@ -16,11 +16,6 @@ class ServersController {
     await ServersService.instance.createServer(req, res);
   }
 
-  /* POST restart an existing server. */
-  async restartServer(req: Request, res: Response) {
-    await ServersService.instance.restartServer(req, res);
-  }
-
   /* POST update an existing server. */
   async updateServer(req: Request, res: Response) {
     await ServersService.instance.updateServer(req, res);

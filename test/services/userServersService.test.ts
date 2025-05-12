@@ -82,7 +82,6 @@ describe("UserServersService", () => {
       .spyOn(UserServersService.instance.prisma.user, "findMany")
       .mockResolvedValue([mockUserRecord]);
 
-    jest.spyOn(ServersService.instance, "restartServer").mockResolvedValue();
     jest.spyOn(ServersService.instance, "updateServer").mockResolvedValue();
     jest.spyOn(ServersService.instance, "stopServer").mockResolvedValue();
   });
@@ -100,57 +99,6 @@ describe("UserServersService", () => {
     const prisma = new PrismaClient();
     const serversService2 = new UserServersService(prisma);
     expect(serversService2.prisma).toEqual(currentPrisma);
-  });
-
-  describe("POST /:id/restart", () => {
-    it("Should restart server", async () => {
-      await UserServersService.instance.restartServer(req, res);
-      expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
-      ).toHaveBeenCalledWith({
-        where: {
-          id: mockServerRecord.id,
-          users: {
-            some: {
-              username,
-            },
-          },
-        },
-        select: { hostId: true },
-      });
-      expect(
-        ServersService.instance.restartServer as unknown as jest.Mock
-      ).toHaveBeenCalledWith(expReq, res);
-    });
-    it("should handle any database errors", async () => {
-      expect.assertions(3);
-      jest
-        .spyOn(UserServersService.instance.prisma.server, "findUniqueOrThrow")
-        .mockRejectedValue(new Error());
-      try {
-        await UserServersService.instance.restartServer(req, res);
-      } catch (e) {
-        expect(e).toBeInstanceOf(Error);
-      }
-      expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
-      ).toHaveBeenCalledWith({
-        where: {
-          id: mockServerRecord.id,
-          users: {
-            some: {
-              username,
-            },
-          },
-        },
-        select: { hostId: true },
-      });
-      expect(handleDatabaseErrors).toHaveBeenCalledWith(
-        expect.any(Error),
-        "server",
-        [mockServerRecord.id]
-      );
-    });
   });
 
   describe("POST /:id/stop", () => {

@@ -11,11 +11,6 @@ class UserServersController {
     return UserServersController.instance;
   }
 
-  /* POST restart an existing server. */
-  async restartServer(req: Request, res: Response) {
-    await UserServersService.instance.restartServer(req, res);
-  }
-
   /* POST update an existing server. */
   async updateServer(req: Request, res: Response) {
     await UserServersService.instance.updateServer(req, res);

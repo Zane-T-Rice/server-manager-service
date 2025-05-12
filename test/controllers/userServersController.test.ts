@@ -11,7 +11,6 @@ describe("UserServersController", () => {
   const serversController = new UserServersController();
   // @ts-expect-error to make testing easier
   UserServersService.instance = {
-    restartServer: jest.fn(),
     updateServer: jest.fn(),
     getServers: jest.fn(),
     getServerById: jest.fn(),
@@ -23,16 +22,6 @@ describe("UserServersController", () => {
     const prisma = new PrismaClient();
     new UserServersController(prisma);
     expect(UserServersService).toHaveBeenCalledWith(prisma);
-  });
-
-  describe("restartServer", () => {
-    it("should call restartServer in UserServersService", async () => {
-      await serversController.restartServer(req, res);
-      expect(UserServersService.instance.restartServer).toHaveBeenCalledWith(
-        req,
-        res
-      );
-    });
   });
 
   describe("updateServer", () => {

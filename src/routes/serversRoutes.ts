@@ -9,12 +9,6 @@ new ServersController(prisma); // Initialize ServersController singleton
 /* POST a new server. */
 wrappedRouter.post("/", ServersController.instance.createServer);
 
-/* POST restart an existing server. */
-wrappedRouter.post(
-  "/:serverId/restart",
-  ServersController.instance.restartServer
-);
-
 /* POST update an existing server. */
 wrappedRouter.post(
   "/:serverId/update",

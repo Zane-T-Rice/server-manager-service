@@ -20,8 +20,7 @@ export async function ephemeralContainerRun(
   const ephemeralContainerRun = buildEphemeralContainerRun(commands);
   req.log.flush(); // Make sure the logs are written out in case the server gets torn down by the commands.
 
-  // Respond with a success message. This service may be torn down by the
-  // commands (possibly docker restart or docker stop).
+  // Respond with a success message. This service may be torn down by the commands (possibly docker stop).
   res.json(responseJSON);
 
   await exec(ephemeralContainerRun);

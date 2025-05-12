@@ -6,19 +6,13 @@ const prisma = new PrismaClient();
 const wrappedRouter = new ExpressRouterWrapper();
 new UserServersController(prisma); // Initialize ServersController singleton
 
-/* POST restart an existing server owned by this user. */
-wrappedRouter.post(
-  "/:serverId/restart",
-  UserServersController.instance.restartServer
-);
-
 /* POST update an existing server owned by this user. */
 wrappedRouter.post(
   "/:serverId/update",
   UserServersController.instance.updateServer
 );
 
-/* POST restart an existing server owned by this user. */
+/* POST stop an existing server owned by this user. */
 wrappedRouter.post(
   "/:serverId/stop",
   UserServersController.instance.stopServer
