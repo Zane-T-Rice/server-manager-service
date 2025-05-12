@@ -2,4 +2,4 @@ description: Success
 content:
   application/json:
     schema:
-      $ref: "./userServerLinksResponseSchema.yaml"
+      $ref: "./userServerLinkResponseSchema.yaml"
