@@ -139,7 +139,7 @@ describe("proxyMiddleware", () => {
           await proxyMiddleware(prisma as unknown as PrismaClient)(
             {
               params: { serverId },
-              auth: { payload: { sub: hostId } },
+              auth: { payload: { sub: username } },
             } as unknown as Request,
             {} as Response,
             next
@@ -161,7 +161,7 @@ describe("proxyMiddleware", () => {
       await proxyMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: hostId } },
+          auth: { payload: { sub: username } },
         } as unknown as Request,
         {} as Response,
         next
@@ -191,7 +191,7 @@ describe("proxyMiddleware", () => {
           await proxyMiddleware(prisma as unknown as PrismaClient)(
             {
               params: { serverId },
-              auth: { payload: { sub: hostId } },
+              auth: { payload: { sub: username } },
               originalUrl: Routes.PROXY + `/server/${serverId}/update`,
             } as unknown as Request,
             {} as Response,
@@ -225,7 +225,7 @@ describe("proxyMiddleware", () => {
       await proxyMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: hostId } },
+          auth: { payload: { sub: username } },
           originalUrl: `/server/${serverId}/update`,
         } as unknown as Request,
         {} as Response,
