@@ -214,8 +214,14 @@ class ServersService {
     // to throw.
     const server = dbServer!;
     const commands = [
-      ["docker", "stop", shellEscape([server.containerName])].join(" "),
-      ["docker", "rm", shellEscape([server.containerName])].join(" "),
+      [
+        `(`,
+        // Stop and remove the container if it exists.
+        `docker container inspect ${shellEscape([server.containerName])} &&`,
+        `docker stop ${shellEscape([server.containerName])} &&`,
+        `docker rm ${shellEscape([server.containerName])}`,
+        `) || true`, // Return success if the container does not exist.
+      ].join(" "),
     ];
     if (server.isInResponseChain) {
       // This service may be torn down by the restart.
