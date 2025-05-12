@@ -303,7 +303,7 @@ paths:
         - $ref: "./common/serverIdInPath.yaml"
       responses:
         "200":
-          $ref: "./servers/userServerLinkArrayResponse.yaml"
+          $ref: "./userServerLinks/userServerLinkArrayResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
