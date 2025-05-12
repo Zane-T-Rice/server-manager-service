@@ -12,12 +12,20 @@ class UserServerLinksController {
     return UserServerLinksController.instance;
   }
 
-  /* PATCH a link betwen User and Server of request. */
-  async patchUserServerLinkByUserId(req: Request, res: Response) {
-    await UserServerLinksService.instance.patchUserServerLinkByUserId(req, res);
+  /* Get Users Linked to the Server. */
+  async getUserServerLinks(req: Request, res: Response) {
+    await UserServerLinksService.instance.getUserServerLinks(req, res);
   }
 
-  /* DELETE a link betwen User and Server of request. */
+  /* Connect User and Server. */
+  async createUserServerLinkByUserId(req: Request, res: Response) {
+    await UserServerLinksService.instance.createUserServerLinkByUserId(
+      req,
+      res
+    );
+  }
+
+  /* Disconnect User and Server. */
   async deleteUserServerLinkByUserId(req: Request, res: Response) {
     await UserServerLinksService.instance.deleteUserServerLinkByUserId(
       req,

@@ -267,19 +267,20 @@ paths:
           $ref: "./servers/errors/serverNotFoundError.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
-  /hosts/{hostId}/servers/{serverId}/users/{userId}:
+  /hosts/{hostId}/servers/{serverId}/users:
     post:
       tags:
         - userServerLinks
-      summary: Link a Server by id to a User by id
-      operationId: linkUserServer
+      summary: Create a UserServerLink between a Server by id and a User by username
+      operationId: createUserServerLink
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
-        - $ref: "./common/userIdInPath.yaml"
+      requestBody:
+        $ref: "./userServerLinks/userServerLinkCreateRequest.yaml"
       responses:
         "200":
-          $ref: "./userServerLinks/userServerLinksResponse.yaml"
+          $ref: "./userServerLinks/userServerLinkResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":
@@ -292,18 +293,42 @@ paths:
                   - $ref: "./hosts/errors/hostNotFoundErrorSchema.yaml"
         "500":
           $ref: "./common/errors/internalServerError.yaml"
+    get:
+      tags:
+        - userServerLinks
+      summary: Get all UserServerLinks for the Server by id
+      operationId: getUserServerLinks
+      parameters:
+        - $ref: "./common/hostIdInPath.yaml"
+        - $ref: "./common/serverIdInPath.yaml"
+      responses:
+        "200":
+          $ref: "./servers/userServerLinkArrayResponse.yaml"
+        "401":
+          $ref: "./common/errors/notAuthorizedError.yaml"
+        "404":
+          description: "The Server could not be found."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "./servers/errors/serverNotFoundErrorSchema.yaml"
+                  - $ref: "./hosts/errors/hostNotFoundErrorSchema.yaml"
+        "500":
+          $ref: "./common/errors/internalServerError.yaml"
+  /hosts/{hostId}/servers/{serverId}/users/{userId}:
     delete:
       tags:
         - userServerLinks
-      summary: Delete a Link between a Server by id and a User by id
-      operationId: unlinkUserServer
+      summary: Delete the UserServerLink by id
+      operationId: deleteUserServerLink
       parameters:
         - $ref: "./common/hostIdInPath.yaml"
         - $ref: "./common/serverIdInPath.yaml"
         - $ref: "./common/userIdInPath.yaml"
       responses:
         "200":
-          $ref: "./userServerLinks/userServerLinksResponse.yaml"
+          $ref: "./userServerLinks/userServerLinkResponse.yaml"
         "401":
           $ref: "./common/errors/notAuthorizedError.yaml"
         "404":

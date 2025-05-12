@@ -11,7 +11,8 @@ describe("UserServersController", () => {
   const serversController = new UserServerLinksController();
   // @ts-expect-error to make testing easier
   UserServerLinksService.instance = {
-    patchUserServerLinkByUserId: jest.fn(),
+    getUserServerLinks: jest.fn(),
+    createUserServerLinkByUserId: jest.fn(),
     deleteUserServerLinkByUserId: jest.fn(),
   };
 
@@ -21,11 +22,20 @@ describe("UserServersController", () => {
     expect(UserServerLinksService).toHaveBeenCalledWith(prisma);
   });
 
-  describe("patchUserServerLinkByUserId", () => {
-    it("should call patchUserServerLinkByUserId in UserServerLinksService", async () => {
-      await serversController.patchUserServerLinkByUserId(req, res);
+  describe("getUserServerLinks", () => {
+    it("should call getUserServerLinks in UserServerLinksService", async () => {
+      await serversController.getUserServerLinks(req, res);
       expect(
-        UserServerLinksService.instance.patchUserServerLinkByUserId
+        UserServerLinksService.instance.getUserServerLinks
+      ).toHaveBeenCalledWith(req, res);
+    });
+  });
+
+  describe("createUserServerLinkByUserId", () => {
+    it("should call createUserServerLinkByUserId in UserServerLinksService", async () => {
+      await serversController.createUserServerLinkByUserId(req, res);
+      expect(
+        UserServerLinksService.instance.createUserServerLinkByUserId
       ).toHaveBeenCalledWith(req, res);
     });
   });

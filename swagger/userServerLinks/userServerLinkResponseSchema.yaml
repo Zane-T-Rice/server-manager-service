@@ -1,11 +1,10 @@
 required:
-  - userId
-  - serverId
+  - id
+  - username
 type: object
 properties:
-  userId:
+  id:
     type: string
     format: uuid
-  serverId:
+  username:
     type: string
-    format: uuid

@@ -1,5 +1,5 @@
 import { UserServerLinksService } from "../../src/services";
-import { PrismaClient, Server } from "@prisma/client";
+import { PrismaClient, Server, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
 jest.mock("@prisma/client", () => {
@@ -14,6 +14,7 @@ jest.mock("@prisma/client", () => {
           delete: jest.fn(),
         },
         user: {
+          findMany: jest.fn(),
           update: jest.fn(),
           upsert: jest.fn(),
         },
@@ -31,12 +32,24 @@ describe("UserServerLinksService", () => {
   const hostId = "hostId";
   const serverId = "serverId";
   const userId = "userId";
+  const username = "username";
+  const mockUserRecord = {
+    id: "mockUserRecordId",
+    username,
+  } as User;
   const req: Request = {
     params: {
       hostId,
       serverId,
       userId,
     },
+  } as unknown as Request;
+  const createRequest: Request = {
+    params: {
+      hostId,
+      serverId,
+    },
+    body: { username },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   new UserServerLinksService();
@@ -49,11 +62,14 @@ describe("UserServerLinksService", () => {
       .spyOn(UserServerLinksService.instance.prisma.server, "findUniqueOrThrow")
       .mockResolvedValue({ id: serverId } as Server);
     jest
+      .spyOn(UserServerLinksService.instance.prisma.user, "findMany")
+      .mockResolvedValue([mockUserRecord]);
+    jest
       .spyOn(UserServerLinksService.instance.prisma.user, "upsert")
-      .mockResolvedValue({ id: userId });
+      .mockResolvedValue(mockUserRecord);
     jest
       .spyOn(UserServerLinksService.instance.prisma.user, "update")
-      .mockResolvedValue({ id: userId });
+      .mockResolvedValue(mockUserRecord);
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
@@ -71,10 +87,61 @@ describe("UserServerLinksService", () => {
     expect(serversService2.prisma).toEqual(currentPrisma);
   });
 
-  describe("patchUserServerLinkByUserId", () => {
+  describe("getUserServerLinks", () => {
+    it("Should return list of userServerLinks", async () => {
+      await UserServerLinksService.instance.getUserServerLinks(req, res);
+      expect(
+        UserServerLinksService.instance.prisma.user.findMany
+      ).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith([mockUserRecord]);
+    });
+    it("should handle any database errors", async () => {
+      expect.assertions(4);
+      jest
+        .spyOn(UserServerLinksService.instance.prisma.user, "findMany")
+        .mockRejectedValue(new Error());
+      try {
+        await UserServerLinksService.instance.getUserServerLinks(req, res);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(
+        UserServerLinksService.instance.prisma.user.findMany
+      ).toHaveBeenCalled();
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "userServerLink",
+        []
+      );
+      expect(res.json).not.toHaveBeenCalled();
+    });
+    it("should handle any database errors", async () => {
+      expect.assertions(4);
+      (
+        UserServerLinksService.instance.prisma.server
+          .findUniqueOrThrow as unknown as jest.Mock
+      ).mockRejectedValue(new Error());
+      try {
+        await UserServerLinksService.instance.getUserServerLinks(req, res);
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(
+        UserServerLinksService.instance.prisma.user.findMany
+      ).not.toHaveBeenCalled();
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "server",
+        [serverId]
+      );
+      expect(res.json).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("createUserServerLinkByUserId", () => {
     it("should connect the user and server", async () => {
-      await UserServerLinksService.instance.patchUserServerLinkByUserId(
-        req,
+      await UserServerLinksService.instance.createUserServerLinkByUserId(
+        createRequest,
         res
       );
       expect(
@@ -84,14 +151,13 @@ describe("UserServerLinksService", () => {
           id: String(serverId),
           hostId: String(hostId),
         },
-        select: UserServerLinksService.defaultUserServerLinkSelect,
       });
       expect(
         UserServerLinksService.instance.prisma.user.upsert
       ).toHaveBeenCalledWith({
-        where: { id: String(userId) },
+        where: { username: String(username) },
         create: {
-          id: String(userId),
+          username: String(username),
           servers: {
             connect: {
               id: String(serverId),
@@ -106,7 +172,7 @@ describe("UserServerLinksService", () => {
           },
         },
       });
-      expect(res.json).toHaveBeenCalledWith({ userId, serverId });
+      expect(res.json).toHaveBeenCalledWith(mockUserRecord);
     });
     it("should handle errors when trying to connect the user and server", async () => {
       expect.assertions(4);
@@ -115,8 +181,8 @@ describe("UserServerLinksService", () => {
           .findUniqueOrThrow as unknown as jest.Mock
       ).mockRejectedValue(new Error());
       try {
-        await UserServerLinksService.instance.patchUserServerLinkByUserId(
-          req,
+        await UserServerLinksService.instance.createUserServerLinkByUserId(
+          createRequest,
           res
         );
       } catch (e) {
@@ -129,7 +195,6 @@ describe("UserServerLinksService", () => {
           id: String(serverId),
           hostId: String(hostId),
         },
-        select: UserServerLinksService.defaultUserServerLinkSelect,
       });
       expect(
         UserServerLinksService.instance.prisma.user.upsert
@@ -140,10 +205,58 @@ describe("UserServerLinksService", () => {
         [serverId]
       );
     });
+    it("should handle errors when trying to connect the user and server", async () => {
+      expect.assertions(4);
+      (
+        UserServerLinksService.instance.prisma.user
+          .upsert as unknown as jest.Mock
+      ).mockRejectedValue(new Error());
+      try {
+        await UserServerLinksService.instance.createUserServerLinkByUserId(
+          createRequest,
+          res
+        );
+      } catch (e) {
+        expect(e).toBeInstanceOf(Error);
+      }
+      expect(
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+      ).toHaveBeenCalledWith({
+        where: {
+          id: String(serverId),
+          hostId: String(hostId),
+        },
+      });
+      expect(
+        UserServerLinksService.instance.prisma.user.upsert
+      ).toHaveBeenCalledWith({
+        where: { username: String(username) },
+        create: {
+          username: String(username),
+          servers: {
+            connect: {
+              id: String(serverId),
+            },
+          },
+        },
+        update: {
+          servers: {
+            connect: {
+              id: String(serverId),
+            },
+          },
+        },
+      });
+      expect(handleDatabaseErrors).toHaveBeenCalledWith(
+        expect.any(Error),
+        "userServerLink",
+        [username]
+      );
+    });
   });
 
   describe("deleteUserServerLinkByUserId", () => {
-    it("should connect the user and server", async () => {
+    it("should disconnect the user and server", async () => {
       await UserServerLinksService.instance.deleteUserServerLinkByUserId(
         req,
         res
@@ -155,7 +268,6 @@ describe("UserServerLinksService", () => {
           id: String(serverId),
           hostId: String(hostId),
         },
-        select: UserServerLinksService.defaultUserServerLinkSelect,
       });
       expect(
         UserServerLinksService.instance.prisma.user.update
@@ -169,7 +281,7 @@ describe("UserServerLinksService", () => {
           },
         },
       });
-      expect(res.json).toHaveBeenCalledWith({ userId, serverId });
+      expect(res.json).toHaveBeenCalledWith(mockUserRecord);
     });
     it("should handle errors when trying to connect the user and server", async () => {
       expect.assertions(4);
@@ -192,7 +304,6 @@ describe("UserServerLinksService", () => {
           id: String(serverId),
           hostId: String(hostId),
         },
-        select: UserServerLinksService.defaultUserServerLinkSelect,
       });
       expect(
         UserServerLinksService.instance.prisma.user.update
@@ -224,17 +335,16 @@ describe("UserServerLinksService", () => {
           id: String(serverId),
           hostId: String(hostId),
         },
-        select: UserServerLinksService.defaultUserServerLinkSelect,
       });
       expect(
         UserServerLinksService.instance.prisma.user.update
       ).toHaveBeenCalledWith({
-        data: { servers: { disconnect: { id: "serverId" } } },
-        where: { id: "userId" },
+        data: { servers: { disconnect: { id: serverId } } },
+        where: { id: userId },
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
-        "user",
+        "userServerLink",
         [userId]
       );
     });

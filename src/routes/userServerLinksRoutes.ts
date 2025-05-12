@@ -6,13 +6,16 @@ const prisma = new PrismaClient();
 const wrappedRouter = new ExpressRouterWrapper();
 new UserServerLinksController(prisma); // Initialize ServersController singleton
 
-/* PATCH a link betwen User and Server of request. */
-wrappedRouter.patch(
-  "/:userId",
-  UserServerLinksController.instance.patchUserServerLinkByUserId
+/* Get Users Linked to the Server. */
+wrappedRouter.get("/", UserServerLinksController.instance.getUserServerLinks);
+
+/* Connect User and Server. */
+wrappedRouter.post(
+  "/",
+  UserServerLinksController.instance.createUserServerLinkByUserId
 );
 
-/* DELETE a link betwen User and Server of request. */
+/* Disconnect User and Server. */
 wrappedRouter.delete(
   "/:userId",
   UserServerLinksController.instance.deleteUserServerLinkByUserId

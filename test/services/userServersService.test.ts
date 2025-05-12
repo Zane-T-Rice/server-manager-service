@@ -1,5 +1,5 @@
 import { ServersService, UserServersService } from "../../src/services";
-import { PrismaClient, Server } from "@prisma/client";
+import { PrismaClient, Server, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
 import { BadRequestError } from "../../src/errors";
@@ -29,7 +29,7 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 
 describe("UserServersService", () => {
   const hostId = "hostId";
-  const userId = "userId";
+  const username = "username";
   const body = {
     applicationName: "appName",
     containerName: "containerName",
@@ -41,13 +41,17 @@ describe("UserServersService", () => {
     id: "serverid",
     ...body,
   } as Server;
+  const mockUserRecord = {
+    id: "mockUserRecordId",
+    username,
+  } as User;
   const req: Request = {
     body,
     query: {},
     params: {
       serverId: mockServerRecord.id,
     },
-    auth: { payload: { sub: userId } },
+    auth: { payload: { sub: username } },
   } as unknown as Request;
   const expReq: Request = {
     body,
@@ -56,7 +60,7 @@ describe("UserServersService", () => {
       serverId: mockServerRecord.id,
       hostId: mockServerRecord.hostId,
     },
-    auth: { payload: { sub: userId } },
+    auth: { payload: { sub: username } },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   new ServersService();
@@ -76,7 +80,7 @@ describe("UserServersService", () => {
 
     jest
       .spyOn(UserServersService.instance.prisma.user, "findMany")
-      .mockResolvedValue([{ id: "userId" }]);
+      .mockResolvedValue([mockUserRecord]);
 
     jest.spyOn(ServersService.instance, "restartServer").mockResolvedValue();
     jest.spyOn(ServersService.instance, "updateServer").mockResolvedValue();
@@ -108,7 +112,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -135,7 +139,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -159,7 +163,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -186,7 +190,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -210,7 +214,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -237,7 +241,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: userId,
+              username,
             },
           },
         },
@@ -261,7 +265,7 @@ describe("UserServersService", () => {
         where: {
           users: {
             some: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -284,7 +288,7 @@ describe("UserServersService", () => {
           isUpdatable: true,
           users: {
             some: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -308,7 +312,7 @@ describe("UserServersService", () => {
         where: {
           users: {
             some: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -333,7 +337,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -358,7 +362,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -393,7 +397,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             every: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -418,7 +422,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             every: {
-              id: String(req.auth?.payload.sub),
+              username: String(req.auth?.payload.sub),
             },
           },
         },
@@ -435,7 +439,7 @@ describe("UserServersService", () => {
       expect.assertions(4);
       jest
         .spyOn(UserServersService.instance.prisma.user, "findMany")
-        .mockResolvedValue([mockServerRecord, mockServerRecord]);
+        .mockResolvedValue([mockUserRecord, mockUserRecord]);
       try {
         await UserServersService.instance.deleteServer(req, res);
       } catch (e) {
