@@ -24,6 +24,7 @@ describe("proxyMiddleware", () => {
   let next = jest.fn();
   const hostId = "hostId";
   const serverId = "serverid";
+  const username = "username";
 
   beforeEach(() => {
     process.env.HOST = "host-url";
@@ -170,7 +171,7 @@ describe("proxyMiddleware", () => {
           id: serverId,
           users: {
             some: {
-              id: hostId,
+              username,
             },
           },
         },
@@ -206,7 +207,7 @@ describe("proxyMiddleware", () => {
           id: serverId,
           users: {
             some: {
-              id: hostId,
+              username,
             },
           },
         },
