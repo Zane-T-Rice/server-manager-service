@@ -23,7 +23,7 @@ export function isServerMiddleware(prisma: PrismaClient) {
             id: String(serverId),
             users: {
               some: {
-                id: String(req.auth?.payload.sub),
+                username: String(req.auth?.payload.sub),
               },
             },
           },
