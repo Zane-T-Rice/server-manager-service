@@ -304,7 +304,7 @@ describe("ServersService", () => {
           "docker pull alpine:latest",
           "docker stop containerName",
           "docker rm containerName",
-          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' containerName",
+          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
         ].join(";"),
         expect.any(Function)
       );
@@ -327,7 +327,7 @@ describe("ServersService", () => {
           "docker pull alpine:latest",
           "docker stop containerName",
           "docker rm containerName",
-          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' -v '/path/to/server-manager-service/prisma/db:/server-manager-service/prisma/db' -v '/var/run/docker.sock:/var/run/docker.sock' --env 'ENV=local' containerName",
+          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
         ],
         { ...mockServerRecord, isInResponseChain: true, isUpdatable: true }
       );

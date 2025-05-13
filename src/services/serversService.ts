@@ -116,7 +116,7 @@ class ServersService {
     });
     server.volumes.forEach((volume) => {
       dockerRun.push(
-        `-v ${shellEscape([`${volume.hostPath}:${volume.containerPath}`])}`
+        `--mount ${shellEscape([`type=bind,src=${volume.hostPath},dst=${volume.containerPath}`])}`
       );
     });
     server.environmentVariables.forEach((variable) => {
