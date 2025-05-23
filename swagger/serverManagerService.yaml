@@ -22,6 +22,8 @@ tags:
     description: Manage a Server's build Files
   - name: userServers
     description: Actions that non-admin users can take on Servers
+  - name: userServerLinks
+    description: Actions that give or take permissions from a user for a given Server
 servers:
   - url: /server-manager-service
   - url: /
