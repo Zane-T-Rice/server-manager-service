@@ -20,6 +20,8 @@ tags:
     description: Manage a Server's EnvironmentVariables
   - name: files
     description: Manage a Server's build Files
+  - name: userServers
+    description: Actions that non-admin users can take on Servers
 servers:
   - url: /server-manager-service
   - url: /
