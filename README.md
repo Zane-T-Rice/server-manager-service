@@ -149,14 +149,14 @@ You can directy view and interact with the database in many ways. Prisma offers 
 npx prisma studio
 
 # Running an ad-hoc script that interfaces with prisma.
-npx ts-node prisma/scripts/listUsers.ts
+npx ts-node --files prisma/scripts/listUsers.ts
 ```
 
 There is a script to seed a development database with a couple Host and Server records.
 
 ```sh
 # Seed development database.
-npx ts-node prisma/scripts/seedServers.ts
+npx ts-node --files prisma/scripts/seedServers.ts
 ```
 
 If your local database becomes a mess you can wipe it out with this command.
