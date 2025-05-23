@@ -21,6 +21,8 @@ tags:
     description: Manage a Server's EnvironmentVariables
   - name: files
     description: Manage a Server's build Files
+  - name: userServers
+    description: Actions that non-admin users can take on Servers
 externalDocs:
   description: GitHub
   url: https://github.com/Zane-T-Rice/server-manager-service
