@@ -148,7 +148,6 @@ class ServersService {
       `docker pull alpine:latest`,
       `docker stop ${shellEscape([server.containerName])}`,
       `docker rm ${shellEscape([server.containerName])}`,
-      `docker rmi ${shellEscape([server.containerName])}`,
       dockerRun.join(" "),
     ];
 
