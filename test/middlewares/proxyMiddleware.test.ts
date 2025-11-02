@@ -42,7 +42,7 @@ describe("proxyMiddleware", () => {
     );
   });
 
-  describe("admin:servers", () => {
+  describe("server-manager:admin", () => {
     it("should call handleDatabaseErrors if server does not exist", async () => {
       prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
 
@@ -130,7 +130,7 @@ describe("proxyMiddleware", () => {
     });
   });
 
-  describe("user:servers", () => {
+  describe("server-manager:public", () => {
     it("should call handleDatabaseErrors if server does not exist", async () => {
       prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
 

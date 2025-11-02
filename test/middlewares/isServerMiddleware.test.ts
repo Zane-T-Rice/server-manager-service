@@ -27,7 +27,7 @@ describe("isServerMiddleware", () => {
     next = jest.fn();
   });
 
-  describe("admin:servers", () => {
+  describe("server-manager:admin", () => {
     it("should call next if server exists", async () => {
       prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
         {} as unknown as Server
@@ -59,7 +59,7 @@ describe("isServerMiddleware", () => {
     });
   });
 
-  describe("user:servers", () => {
+  describe("server-manager:public", () => {
     it("should call next if server exists", async () => {
       prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
         {} as unknown as Server

@@ -57,7 +57,7 @@ These commands are safe to repeat.
 
 - WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 - ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
-- The service uses the permissions "admin:servers" and "user:servers" to authorize users per route.
+- The service uses the permissions "server-manager:admin" and "server-manager:public" to authorize users per route.
 
 ```sh
 (

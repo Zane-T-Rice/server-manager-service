@@ -1,6 +1,6 @@
 enum Permissions {
-  ADMIN = "admin:servers",
-  USER = "user:servers",
+  ADMIN = "server-manager:admin",
+  USER = "server-manager:public",
 }
 
 export { Permissions };
