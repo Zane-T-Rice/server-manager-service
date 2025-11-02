@@ -30,13 +30,18 @@ docker network create \
   --gateway=172.19.5.254 \
   -o enable_icc=true \
   server-manager-service-network
+
+# Prisma is the database and you must use this version to be sure it will work.
+prisma --version
+prisma                  : 5.22.0
 ```
 
 ### Quick Notes
 
 Many of the steps involve running npx to interact with prisma. On most distros this will probably work as written.
-On NixOS, you will want to use the provided shell.nix to set some environment variables and then this should work
-properly.
+On NixOS, you will want to use the provided shell.nix to install the correct version of prisma and set some 
+environment variables. Alternatively, you can install prisma and set the environment variables in your .env file.
+Make sure to use the same tarball as the shell.nix for the prisma package.
 
 ```sh
 # On most distros
@@ -45,6 +50,17 @@ npx prisma studio
 # On NixOS
 nix-shell .
 npx prisma studio
+
+# Or on NixOS, set these in your .env file and install prisma version 5.22 in your nix configuration or home manager
+PRISMA_QUERY_ENGINE_BINARY=/nix/store/ikd1v7jwcsr4nvxqmcxjqzqqk0s9xv6i-prisma-engines-5.22.0/bin/query-engine
+PRISMA_QUERY_ENGINE_LIBRARY=/nix/store/ikd1v7jwcsr4nvxqmcxjqzqqk0s9xv6i-prisma-engines-5.22.0/lib/libquery_engine.node
+PRISMA_SCHEMA_ENGINE_BINARY=/nix/store/ikd1v7jwcsr4nvxqmcxjqzqqk0s9xv6i-prisma-engines-5.22.0/bin/schema-engine
+
+prismaPkg = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/59133ee770406f605d61698bc4f1a89efcf461d5.tar.gz";
+  }) {};
+
+prismaPkg.prisma
 ```
 
 The npx commands require the DATABASE_URL environment variable is set. You can either set it on the command line before each command `DATABASE_URL="file:./db/dev.db" npx prisma studio` or in a .env file.
