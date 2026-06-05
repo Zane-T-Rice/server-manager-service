@@ -24,7 +24,7 @@
     "prisma": "5.22.0",
     "shell-escape": "^0.2.0",
     "swagger-ui-dist": "^5.17.14",
-    "uuid": "^11.0.2"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
