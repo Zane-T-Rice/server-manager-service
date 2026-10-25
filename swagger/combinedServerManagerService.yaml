@@ -25,10 +25,45 @@ tags:
     description: Actions that non-admin users can take on Servers
   - name: userServerLinks
     description: Actions that give or take permissions from a user for a given Server
+  - name: auth0Users
+    description: Find Auth0 users and machine-to-machine applications to link to Servers
 externalDocs:
   description: GitHub
   url: https://github.com/Zane-T-Rice/server-manager-service
 paths:
+  /auth0-users:
+    get:
+      tags:
+        - auth0Users
+      summary: Find Auth0 Users (by part of their email) and machine-to-machine applications (by name)
+      description: One email can belong to several Auth0 users, so link the one you want by its userId (Auth0 user id). Machine-to-machine applications have a userId of <client_id>@clients.
+      operationId: getAuth0Users
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Text to search for. Ignored when all is true.
+          schema:
+            type: string
+        - name: all
+          in: query
+          required: false
+          description: When true, list every user (a page at a time) and, on page 0, every machine-to-machine application instead of searching. Auth0 only pages through the first 1000 users.
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          description: The zero-based page of users to list when all is true.
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/auth0UserArrayResponse'
+        '401':
+          $ref: '#/components/responses/notAuthorizedError'
+        '500':
+          $ref: '#/components/responses/internalServerError'
   /hosts:
     post:
       tags:
@@ -252,41 +287,6 @@ paths:
           $ref: '#/components/responses/notAuthorizedError'
         '404':
           $ref: '#/components/responses/serverNotFoundError'
-        '500':
-          $ref: '#/components/responses/internalServerError'
-  /hosts/{hostId}/servers/{serverId}/users/search:
-    get:
-      tags:
-        - userServerLinks
-      summary: Search Auth0 for Users (by part of their email) and machine-to-machine applications (by name) to link
-      description: One email can belong to several Auth0 users, so link the one you want by its userId (Auth0 user id). Machine-to-machine applications have a userId of <client_id>@clients.
-      operationId: searchAuth0Users
-      parameters:
-        - $ref: '#/components/parameters/hostIdInPath'
-        - $ref: '#/components/parameters/serverIdInPath'
-        - name: email
-          in: query
-          required: false
-          description: Text to search for. Ignored when all is true.
-          schema:
-            type: string
-        - name: all
-          in: query
-          required: false
-          description: When true, list every user (a page at a time) and, on page 0, every machine-to-machine application instead of searching. Auth0 only pages through the first 1000 users.
-          schema:
-            type: boolean
-        - name: page
-          in: query
-          required: false
-          description: The zero-based page of users to list when all is true.
-          schema:
-            type: integer
-      responses:
-        '200':
-          $ref: '#/components/responses/auth0UserArrayResponse'
-        '401':
-          $ref: '#/components/responses/notAuthorizedError'
         '500':
           $ref: '#/components/responses/internalServerError'
   /hosts/{hostId}/servers/{serverId}/users:
@@ -949,9 +949,13 @@ components:
           type: string
     auth0UserResponseSchema:
       required:
+        - id
         - userId
       type: object
       properties:
+        id:
+          type: string
+          description: Same as userId. Search results are not saved yet.
         userId:
           type: string
           description: The Auth0 user id.

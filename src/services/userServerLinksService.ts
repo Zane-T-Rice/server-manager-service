@@ -8,16 +8,11 @@ import {
   CLIENT_SUB_SUFFIX,
   getAuth0ClientById,
   getAuth0UserById,
-  listAuth0Users,
-  searchAuth0ClientsByName,
-  searchAuth0UsersByEmail,
 } from "../utils/auth0ManagementClient";
 
 class UserServerLinksService {
   static instance: UserServerLinksService;
   prisma: PrismaClient;
-
-  static allUsersPageSize = 50;
 
   static defaultUserServerLinkSelect = {
     id: true,
@@ -126,40 +121,6 @@ class UserServerLinksService {
       })
       .catch((e) => handleDatabaseErrors(e, "userServerLink", [userId]));
     res.json(user);
-  }
-
-  /* Search Auth0 for users and machine-to-machine applications to link.
-   * Users are found by their email, machines by their name.
-   * With all=true, instead list every user (a page at a time, see page) and,
-   * on the first page, every machine. For when emails are not predictable. */
-  async searchAuth0Users(req: Request, res: Response) {
-    const text = String(req.query.email ?? "");
-    let users: Awaited<ReturnType<typeof searchAuth0UsersByEmail>> = [];
-    let clients: Awaited<ReturnType<typeof searchAuth0ClientsByName>> = [];
-    if (req.query.all === "true") {
-      const page = Math.max(parseInt(String(req.query.page ?? "0")) || 0, 0);
-      [users, clients] = await Promise.all([
-        listAuth0Users(page, UserServerLinksService.allUsersPageSize),
-        page === 0 ? searchAuth0ClientsByName("", 100) : [],
-      ]);
-    } else if (text) {
-      [users, clients] = await Promise.all([
-        searchAuth0UsersByEmail(text),
-        searchAuth0ClientsByName(text),
-      ]);
-    }
-    res.json([
-      ...users.map((user) => ({
-        userId: user.user_id,
-        email: user.email,
-        type: "user",
-      })),
-      ...clients.map((client) => ({
-        userId: `${client.client_id}${CLIENT_SUB_SUFFIX}`,
-        applicationName: client.name,
-        type: "machine",
-      })),
-    ]);
   }
 
   /* Disconnect User and Server. */

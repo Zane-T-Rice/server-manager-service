@@ -1,3 +1,4 @@
+export * from "./auth0UsersService";
 export * from "./environmentVariablesService";
 export * from "./filesService";
 export * from "./hostsService";

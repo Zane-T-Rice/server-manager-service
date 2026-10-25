@@ -1,7 +1,11 @@
 required:
+  - id
   - userId
 type: object
 properties:
+  id:
+    type: string
+    description: Same as userId. Search results are not saved yet.
   userId:
     type: string
     description: The Auth0 user id.

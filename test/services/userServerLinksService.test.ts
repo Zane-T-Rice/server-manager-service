@@ -5,9 +5,6 @@ import { handleDatabaseErrors } from "../../src/utils";
 import {
   getAuth0ClientById,
   getAuth0UserById,
-  listAuth0Users,
-  searchAuth0ClientsByName,
-  searchAuth0UsersByEmail,
 } from "../../src/utils/auth0ManagementClient";
 jest.mock("@prisma/client", () => {
   return {
@@ -40,9 +37,6 @@ jest.mock("../../src/utils/auth0ManagementClient", () => {
     CLIENT_SUB_SUFFIX: "@clients",
     getAuth0ClientById: jest.fn(),
     getAuth0UserById: jest.fn(),
-    listAuth0Users: jest.fn(),
-    searchAuth0ClientsByName: jest.fn(),
-    searchAuth0UsersByEmail: jest.fn(),
   };
 });
 
@@ -166,81 +160,6 @@ describe("UserServerLinksService", () => {
         [serverId]
       );
       expect(res.json).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("searchAuth0Users", () => {
-    it("should return matching Auth0 users and machine-to-machine applications", async () => {
-      (searchAuth0UsersByEmail as jest.Mock).mockResolvedValue([
-        { user_id: "google-oauth2|1", email },
-        { user_id: "auth0|2", email },
-      ]);
-      (searchAuth0ClientsByName as jest.Mock).mockResolvedValue([
-        { client_id: "abc", name: "My Machine" },
-      ]);
-      await UserServerLinksService.instance.searchAuth0Users(
-        { query: { email: "user@" } } as unknown as Request,
-        res
-      );
-      expect(searchAuth0UsersByEmail).toHaveBeenCalledWith("user@");
-      expect(searchAuth0ClientsByName).toHaveBeenCalledWith("user@");
-      expect(res.json).toHaveBeenCalledWith([
-        { userId: "google-oauth2|1", email, type: "user" },
-        { userId: "auth0|2", email, type: "user" },
-        {
-          userId: "abc@clients",
-          applicationName: "My Machine",
-          type: "machine",
-        },
-      ]);
-    });
-    it("should list every user and machine on the first page when all is true", async () => {
-      (listAuth0Users as jest.Mock).mockResolvedValue([
-        { user_id: "auth0|1", email },
-      ]);
-      (searchAuth0ClientsByName as jest.Mock).mockResolvedValue([
-        { client_id: "abc", name: "My Machine" },
-      ]);
-      await UserServerLinksService.instance.searchAuth0Users(
-        { query: { all: "true" } } as unknown as Request,
-        res
-      );
-      expect(listAuth0Users).toHaveBeenCalledWith(
-        0,
-        UserServerLinksService.allUsersPageSize
-      );
-      expect(searchAuth0ClientsByName).toHaveBeenCalledWith("", 100);
-      expect(searchAuth0UsersByEmail).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([
-        { userId: "auth0|1", email, type: "user" },
-        {
-          userId: "abc@clients",
-          applicationName: "My Machine",
-          type: "machine",
-        },
-      ]);
-    });
-    it("should only list users on later pages when all is true", async () => {
-      (listAuth0Users as jest.Mock).mockResolvedValue([]);
-      await UserServerLinksService.instance.searchAuth0Users(
-        { query: { all: "true", page: "2" } } as unknown as Request,
-        res
-      );
-      expect(listAuth0Users).toHaveBeenCalledWith(
-        2,
-        UserServerLinksService.allUsersPageSize
-      );
-      expect(searchAuth0ClientsByName).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([]);
-    });
-    it("should not search Auth0 without an email", async () => {
-      await UserServerLinksService.instance.searchAuth0Users(
-        { query: {} } as unknown as Request,
-        res
-      );
-      expect(searchAuth0UsersByEmail).not.toHaveBeenCalled();
-      expect(searchAuth0ClientsByName).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([]);
     });
   });
 

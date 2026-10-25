@@ -1,3 +1,4 @@
+export * from "./auth0UsersRoutes";
 export * from "./environmentVariablesRoutes";
 export * from "./filesRoutes";
 export * from "./hostsRoutes";

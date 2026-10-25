@@ -1,3 +1,4 @@
+export * from "./auth0UsersController";
 export * from "./environmentVariablesController";
 export * from "./filesController";
 export * from "./hostsController";

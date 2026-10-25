@@ -11,6 +11,7 @@ import {
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
 import {
+  auth0UsersRouter,
   environmentVariablesRouter as evRouter,
   filesRouter,
   hostsRouter,
@@ -40,7 +41,7 @@ app.use((req, res, next) => {
     req.headers["server-manager-service-trace-id"] ?? randomUUID();
   res.appendHeader(
     "server-manager-service-trace-id",
-    req.headers["server-manager-service-trace-id"]
+    req.headers["server-manager-service-trace-id"],
   );
   next();
 });
@@ -53,7 +54,7 @@ app.use(
     customReceivedMessage: function () {
       return "request received";
     },
-  })
+  }),
 );
 
 // Support broswer clients which do preflight checks for any fetch
@@ -61,7 +62,7 @@ app.use(
 app.use(
   cors({
     origin: process.env.WEBSITE_DOMAIN,
-  })
+  }),
 );
 
 // Swagger
@@ -78,7 +79,7 @@ const indexContent = fs
   .toString()
   .replace(
     /https:\/\/petstore.swagger.io\/.*\/swagger.(json|yaml)/,
-    `${process.env.HOST}/swagger-files/serverManagerService.yaml`
+    `${process.env.HOST}/swagger-files/serverManagerService.yaml`,
   );
 app.get(`${swaggerRoutePath}/swagger-initializer.js`, (req, res) => {
   res.send(indexContent);
@@ -91,26 +92,26 @@ app.use(
     audience: process.env.AUDIENCE,
     issuerBaseURL: process.env.ISSUER,
     tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
-  })
+  }),
 );
 
 // For routes that require a host, make sure the host is real.
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId`,
   requiredScopes(Permissions.ADMIN),
-  errorHandler(isHostMiddleware(prisma))
+  errorHandler(isHostMiddleware(prisma)),
 );
 
 // For routes that require a server, make sure the server is real.
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
   requiredScopes(Permissions.ADMIN),
-  errorHandler(isServerMiddleware(prisma))
+  errorHandler(isServerMiddleware(prisma)),
 );
 app.use(
   `/users/servers/:serverId`,
   requiredScopes(Permissions.USER),
-  errorHandler(isServerMiddleware(prisma))
+  errorHandler(isServerMiddleware(prisma)),
 );
 
 // Proxy to correct host for routes that need host affinity.
@@ -119,12 +120,12 @@ app.use(
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.ADMIN),
-  errorHandler(proxyMiddleware(prisma))
+  errorHandler(proxyMiddleware(prisma)),
 );
 app.use(
   `(${Routes.PROXY})?/users/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.USER),
-  errorHandler(proxyMiddleware(prisma))
+  errorHandler(proxyMiddleware(prisma)),
 );
 
 // Parse the request.
@@ -146,35 +147,38 @@ app.use("/hosts", requiredScopes(Permissions.ADMIN), hostsRouter);
 app.use(
   "/hosts/:hostId/servers",
   requiredScopes(Permissions.ADMIN),
-  serversRouter
+  serversRouter,
 );
 app.use(
   "/hosts/:hostId/servers/:serverId/ports",
   requiredScopes(Permissions.ADMIN),
-  portsRouter
+  portsRouter,
 );
 app.use(
   "/hosts/:hostId/servers/:serverId/environmentVariables",
   requiredScopes(Permissions.ADMIN),
-  evRouter
+  evRouter,
 );
 app.use(
   "/hosts/:hostId/servers/:serverId/volumes",
   requiredScopes(Permissions.ADMIN),
-  volumesRouter
+  volumesRouter,
 );
 app.use(
   "/hosts/:hostId/servers/:serverId/files",
   requiredScopes(Permissions.ADMIN),
-  filesRouter
+  filesRouter,
 );
 
 // Admin Level REST APIs For Managing Server to User Links
 app.use(
   "/hosts/:hostId/servers/:serverId/users",
   requiredScopes(Permissions.ADMIN),
-  userServerLinksRouter
+  userServerLinksRouter,
 );
+
+// Admin Level REST API For Finding Auth0 Users To Link To Servers
+app.use("/auth0-users", requiredScopes(Permissions.ADMIN), auth0UsersRouter);
 
 // User Level REST APIs
 app.use("/users/servers", requiredScopes(Permissions.USER), userServersRouter);
