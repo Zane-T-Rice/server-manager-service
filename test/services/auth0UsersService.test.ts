@@ -43,14 +43,12 @@ describe("Auth0UsersService", () => {
       expect(searchAuth0ClientsByName).toHaveBeenCalledWith("user@");
       expect(res.json).toHaveBeenCalledWith([
         {
-          id: "google-oauth2|1",
           userId: "google-oauth2|1",
           email,
           type: "user",
         },
-        { id: "auth0|2", userId: "auth0|2", email, type: "user" },
+        { userId: "auth0|2", email, type: "user" },
         {
-          id: "abc@clients",
           userId: "abc@clients",
           applicationName: "My Machine",
           type: "machine",
@@ -75,9 +73,8 @@ describe("Auth0UsersService", () => {
       expect(searchAuth0ClientsByName).toHaveBeenCalledWith("", 100);
       expect(searchAuth0UsersByEmail).not.toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith([
-        { id: "auth0|1", userId: "auth0|1", email, type: "user" },
+        { userId: "auth0|1", email, type: "user" },
         {
-          id: "abc@clients",
           userId: "abc@clients",
           applicationName: "My Machine",
           type: "machine",
