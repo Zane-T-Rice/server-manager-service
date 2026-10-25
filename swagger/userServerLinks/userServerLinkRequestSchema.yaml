@@ -1,6 +1,7 @@
+description: The Auth0 user id of the User to link.
 required:
-  - username
+  - userId
 type: object
 properties:
-  username:
+  userId:
     type: string

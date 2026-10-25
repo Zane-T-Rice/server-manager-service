@@ -24,7 +24,7 @@ describe("proxyMiddleware", () => {
   let next = jest.fn();
   const hostId = "hostId";
   const serverId = "serverid";
-  const username = "username";
+  const userId = "userId";
 
   beforeEach(() => {
     process.env.HOST = "host-url";
@@ -139,7 +139,7 @@ describe("proxyMiddleware", () => {
           await proxyMiddleware(prisma as unknown as PrismaClient)(
             {
               params: { serverId },
-              auth: { payload: { sub: username } },
+              auth: { payload: { sub: userId } },
             } as unknown as Request,
             {} as Response,
             next
@@ -161,7 +161,7 @@ describe("proxyMiddleware", () => {
       await proxyMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: username } },
+          auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
         next
@@ -171,7 +171,7 @@ describe("proxyMiddleware", () => {
           id: serverId,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -191,7 +191,7 @@ describe("proxyMiddleware", () => {
           await proxyMiddleware(prisma as unknown as PrismaClient)(
             {
               params: { serverId },
-              auth: { payload: { sub: username } },
+              auth: { payload: { sub: userId } },
               originalUrl: Routes.PROXY + `/server/${serverId}/update`,
             } as unknown as Request,
             {} as Response,
@@ -207,7 +207,7 @@ describe("proxyMiddleware", () => {
           id: serverId,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -225,7 +225,7 @@ describe("proxyMiddleware", () => {
       await proxyMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: username } },
+          auth: { payload: { sub: userId } },
           originalUrl: `/server/${serverId}/update`,
         } as unknown as Request,
         {} as Response,

@@ -73,6 +73,7 @@ These commands are safe to repeat.
 
 - WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 - ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
+- AUTH0_MGMT_CLIENT_ID and AUTH0_MGMT_CLIENT_SECRET are for an Auth0 Machine-to-Machine application authorized for the Auth0 Management API with the `read:users` and `read:clients` scopes. They are used (along with ISSUER) to search for Auth0 users and to look up the email of a user when linking it to a server.
 - The service uses the permissions "server-manager:admin" and "server-manager:public" to authorize users per route.
 
 ```sh
@@ -91,7 +92,7 @@ These commands are safe to repeat.
   --network server-manager-service-network \
   --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env AUDIENCE="" --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
+  --env AUDIENCE="" --env ISSUER="" --env AUTH0_MGMT_CLIENT_ID="" --env AUTH0_MGMT_CLIENT_SECRET="" --env TOKEN_SIGNING_ALG="RS256" \
   server-manager-service
 )
 ```
@@ -137,7 +138,7 @@ npm run start:dev
   --network=server-manager-service-network \
   --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
   --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env AUDIENCE="" --env ISSUER="" --env TOKEN_SIGNING_ALG="RS256" \
+  --env AUDIENCE="" --env ISSUER="" --env AUTH0_MGMT_CLIENT_ID="" --env AUTH0_MGMT_CLIENT_SECRET="" --env TOKEN_SIGNING_ALG="RS256" \
   server-manager-service
 )
 ```

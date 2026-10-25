@@ -17,6 +17,11 @@ class UserServerLinksController {
     await UserServerLinksService.instance.getUserServerLinks(req, res);
   }
 
+  /* Search Auth0 for users to link. */
+  async searchAuth0Users(req: Request, res: Response) {
+    await UserServerLinksService.instance.searchAuth0Users(req, res);
+  }
+
   /* Connect User and Server. */
   async createUserServerLinkByUserId(req: Request, res: Response) {
     await UserServerLinksService.instance.createUserServerLinkByUserId(

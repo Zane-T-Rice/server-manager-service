@@ -29,7 +29,7 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 
 describe("UserServersService", () => {
   const hostId = "hostId";
-  const username = "username";
+  const userId = "userId";
   const body = {
     applicationName: "appName",
     containerName: "containerName",
@@ -43,7 +43,7 @@ describe("UserServersService", () => {
   } as Server;
   const mockUserRecord = {
     id: "mockUserRecordId",
-    username,
+    userId,
   } as User;
   const req: Request = {
     body,
@@ -51,7 +51,7 @@ describe("UserServersService", () => {
     params: {
       serverId: mockServerRecord.id,
     },
-    auth: { payload: { sub: username } },
+    auth: { payload: { sub: userId } },
   } as unknown as Request;
   const expReq: Request = {
     body,
@@ -60,7 +60,7 @@ describe("UserServersService", () => {
       serverId: mockServerRecord.id,
       hostId: mockServerRecord.hostId,
     },
-    auth: { payload: { sub: username } },
+    auth: { payload: { sub: userId } },
   } as unknown as Request;
   const res: Response = { json: jest.fn() } as unknown as Response;
   new ServersService();
@@ -111,7 +111,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -138,7 +138,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -162,7 +162,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -189,7 +189,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -213,7 +213,7 @@ describe("UserServersService", () => {
         where: {
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -236,7 +236,7 @@ describe("UserServersService", () => {
           isUpdatable: true,
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -260,7 +260,7 @@ describe("UserServersService", () => {
         where: {
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -285,7 +285,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -310,7 +310,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -345,7 +345,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             every: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -370,7 +370,7 @@ describe("UserServersService", () => {
           id: mockServerRecord.id,
           users: {
             every: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },

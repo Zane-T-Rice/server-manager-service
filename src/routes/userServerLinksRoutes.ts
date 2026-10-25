@@ -9,6 +9,12 @@ new UserServerLinksController(prisma); // Initialize ServersController singleton
 /* Get Users Linked to the Server. */
 wrappedRouter.get("/", UserServerLinksController.instance.getUserServerLinks);
 
+/* Search Auth0 for users to link. */
+wrappedRouter.get(
+  "/search",
+  UserServerLinksController.instance.searchAuth0Users
+);
+
 /* Connect User and Server. */
 wrappedRouter.post(
   "/",

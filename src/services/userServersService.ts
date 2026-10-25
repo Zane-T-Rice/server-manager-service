@@ -41,7 +41,7 @@ class UserServersService {
           id: String(serverId),
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -61,7 +61,7 @@ class UserServersService {
           id: String(serverId),
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -97,7 +97,7 @@ class UserServersService {
           isUpdatable,
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -115,7 +115,7 @@ class UserServersService {
           id: String(serverId),
           users: {
             some: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },
@@ -147,7 +147,7 @@ class UserServersService {
           id: String(serverId),
           users: {
             every: {
-              username: String(req.auth?.payload.sub),
+              userId: String(req.auth?.payload.sub),
             },
           },
         },

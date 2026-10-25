@@ -16,7 +16,7 @@ describe("isServerMiddleware", () => {
   let next = jest.fn();
   const serverId = "serverid";
   const hostId = "hostId";
-  const username = "username";
+  const userId = "userId";
 
   beforeEach(() => {
     prisma = {
@@ -67,7 +67,7 @@ describe("isServerMiddleware", () => {
       await isServerMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: username } },
+          auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
         next
@@ -77,7 +77,7 @@ describe("isServerMiddleware", () => {
           id: serverId,
           users: {
             some: {
-              username,
+              userId,
             },
           },
         },
@@ -90,7 +90,7 @@ describe("isServerMiddleware", () => {
       await isServerMiddleware(prisma as unknown as PrismaClient)(
         {
           params: { serverId },
-          auth: { payload: { sub: username } },
+          auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
         next
