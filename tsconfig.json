@@ -3,6 +3,7 @@
     "sourceMap": true,
     "outDir": "build",
     "strict": true,
+    "types": ["node", "jest"],
     "lib": ["esnext", "dom"],
     "esModuleInterop": true,
     "moduleResolution": "NodeNext",
