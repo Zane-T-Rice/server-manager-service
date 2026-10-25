@@ -205,6 +205,20 @@ describe("UserServerLinksService", () => {
       expect(getAuth0UserById).toHaveBeenCalledWith(userId);
       expect(res.json).toHaveBeenCalledWith(mockUserRecord);
     });
+    it("should link a user that has no email", async () => {
+      (getAuth0UserById as jest.Mock).mockResolvedValue({ user_id: userId });
+      await UserServerLinksService.instance.createUserServerLinkByUserId(
+        createRequest,
+        res
+      );
+      expect(
+        UserServerLinksService.instance.prisma.user.upsert
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({ email: null }),
+        })
+      );
+    });
     it("should link a machine-to-machine application by its client sub", async () => {
       (getAuth0ClientById as jest.Mock).mockResolvedValue({
         client_id: "abc",

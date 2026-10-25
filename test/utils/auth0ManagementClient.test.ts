@@ -26,19 +26,17 @@ describe("auth0ManagementClient", () => {
       { user_id: "google-oauth2|1", email: "a@b.com" },
       { user_id: "auth0|2", email: "a@b.com" },
     ];
-    fetchMock
-      .mockResolvedValueOnce(tokenResponse)
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => users,
-      });
+    fetchMock.mockResolvedValueOnce(tokenResponse).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => users,
+    });
 
     await expect(searchAuth0UsersByEmail(" A@b ")).resolves.toEqual(users);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       "https://tenant.auth0.com/oauth/token",
-      expect.objectContaining({ method: "POST" })
+      expect.objectContaining({ method: "POST" }),
     );
     const [url, options] = fetchMock.mock.calls[1];
     expect(options).toEqual({ headers: { authorization: "Bearer token" } });
@@ -59,6 +57,17 @@ describe("auth0ManagementClient", () => {
     expect(params.get("q")).toBe("email:*a\\+b\\*\\:c*");
   });
 
+  it("should surface a failure to get a token", async () => {
+    // Move past the expiry of any cached token so a new one is requested.
+    const now = jest
+      .spyOn(Date, "now")
+      .mockReturnValue(Date.now() + 86_400_000);
+    fetchMock.mockResolvedValue({ ok: false, status: 500 });
+    await expect(searchAuth0UsersByEmail("a")).rejects.toThrow();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    now.mockRestore();
+  });
+
   it("should surface search failures", async () => {
     fetchMock.mockResolvedValue({ ok: false, status: 500 });
     await expect(searchAuth0UsersByEmail("a")).rejects.toThrow();
@@ -76,14 +85,14 @@ describe("auth0ManagementClient", () => {
     });
     expect(fetchMock).toHaveBeenCalledWith(
       "https://tenant.auth0.com/api/v2/users/auth0%7C1",
-      expect.anything()
+      expect.anything(),
     );
   });
 
   it("should reject an unknown user id and surface other failures", async () => {
     fetchMock.mockResolvedValue({ ok: false, status: 404 });
     await expect(getAuth0UserById("auth0|nope")).rejects.toThrow(
-      "No Auth0 user was found"
+      "No Auth0 user was found",
     );
     fetchMock.mockResolvedValue({ ok: false, status: 500 });
     await expect(getAuth0UserById("auth0|1")).rejects.toThrow();
@@ -118,7 +127,7 @@ describe("auth0ManagementClient", () => {
     });
     fetchMock.mockResolvedValue({ ok: false, status: 404 });
     await expect(getAuth0ClientById("nope")).rejects.toThrow(
-      "No Auth0 user was found"
+      "No Auth0 user was found",
     );
     fetchMock.mockResolvedValue({ ok: false, status: 500 });
     await expect(getAuth0ClientById("1")).rejects.toThrow();
@@ -136,6 +145,11 @@ describe("auth0ManagementClient", () => {
     expect(params.get("sort")).toBe("email:1");
     fetchMock.mockResolvedValue({ ok: false, status: 500 });
     await expect(listAuth0Users(0, 50)).rejects.toThrow();
+  });
+
+  it("should surface machine-to-machine application search failures", async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 500 });
+    await expect(searchAuth0ClientsByName("bot")).rejects.toThrow();
   });
 
   it("should limit the machine-to-machine applications returned", async () => {
