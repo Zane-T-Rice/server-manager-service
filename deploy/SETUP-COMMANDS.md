@@ -93,6 +93,43 @@ sudo k3s kubectl get nodes # `server` and `server2`, both Ready
   rejected by the network policy (the hop rewrites the source to a pod-network address). With it, a server
   answers on the node it runs on, like docker, and sees real player addresses.
 
+## Servers moved to Kubernetes
+
+| Server     | Node     | Moved | Docker container (kept, stopped, restart=no) |
+| ---------- | -------- | ----- | -------------------------------------------- |
+| `salty`    | server-1 | yes   | `salty` on 192.168.1.3                       |
+| `jellyfin` | server-2 | yes   | `jellyfin` on 192.168.1.4                    |
+
+Roll one back (example: jellyfin):
+
+```sh
+ssh 192.168.1.3 "sudo k3s kubectl -n server-manager-workloads delete deploy,svc -l server-manager/server-id=d3ac5159-2a98-4f05-ab61-66f797927653"
+ssh 192.168.1.4 "docker update --restart=always jellyfin && docker start jellyfin"
+```
+
+(`salty` is the same on 192.168.1.3 with id `676ba1de-eaec-49c3-9b3b-162e74dc99ee`.)
+
+**Do not press "update" on these in the old service UI.** The old instances still run the docker code. It would
+build and `docker run` a second copy, and two Jellyfins on the same database would corrupt it.
+
+## Problems met while migrating
+
+- The build job copied ConfigMap symlinks instead of files, so `COPY ./script.sh` produced an image without it. Fixed
+  with an init container that copies real files (commit `fe1775e`).
+- Renaming the k3s nodes left flannel without VXLAN forwarding entries, so pods on `server-1` could not reach CoreDNS on
+  `server-2`. `sudo systemctl restart k3s` on both nodes rebuilt them. If DNS inside pods ever times out after a
+  node change, check `bridge fdb show | grep flannel` first.
+- Node names are now `server-1` and `server-2`, matching the `Host` records in the database.
+
+## Not moved yet, and why
+
+- **remarkable-sync**: it mails through `postfix:25`, a docker network name, and postfix only accepts mail from the docker
+  subnet (`172.19.0.0/16`). My network policy also blocks pod-to-pod traffic, so servers cannot talk to each other. They
+  need moving together, with a decision on how servers should reach each other.
+- **postfix**: see above.
+- **The service itself**: its image clones the service from GitHub, so the Kubernetes code must be pushed first.
+- The game servers are not running, so there is nothing to move yet.
+
 ## Still to do
 
 - Point each `Host` record's `name` at its node name (`server`, `server2`).
