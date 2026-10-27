@@ -5,7 +5,9 @@ import { PrismaClient, Server } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
 import { ephemeralContainerRun } from "../../src/utils";
+import * as k8sOrchestrator from "../../src/services/orchestrator/k8sOrchestrator";
 jest.mock("node:fs");
+jest.mock("../../src/services/orchestrator/k8sOrchestrator");
 jest.mock("child_process");
 jest.mock("@prisma/client", () => {
   return {
@@ -586,6 +588,93 @@ describe("ServersService", () => {
         [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("on Kubernetes", () => {
+    const completeServer = {
+      ...mockServerRecord,
+      isInResponseChain: false,
+      isUpdatable: true,
+      ports: [{ id: "p", number: 3000, protocol: "tcp" }],
+      volumes: [{ id: "v", hostPath: "/srv/a", containerPath: "/a" }],
+      environmentVariables: [{ id: "e", name: "ENV", value: "local" }],
+      files: [{ id: "f", name: "Dockerfile", content: "RlJPTQ==" }],
+      host: { name: "desktop-1" },
+    };
+    const expectedSpec = {
+      id: mockServerRecord.id,
+      containerName: mockServerRecord.containerName,
+      hostName: "desktop-1",
+      ports: completeServer.ports,
+      volumes: completeServer.volumes,
+      environmentVariables: completeServer.environmentVariables,
+      files: completeServer.files,
+    };
+    const k8sReq = {
+      ...req,
+      log: { flush: jest.fn() },
+    } as unknown as Request;
+
+    beforeEach(() => {
+      process.env.ORCHESTRATOR = "k8s";
+    });
+    afterEach(() => {
+      delete process.env.ORCHESTRATOR;
+    });
+
+    it("Should build and apply the server, then respond", async () => {
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValue(completeServer);
+      await serversService.updateServer(k8sReq, res);
+      expect(k8sOrchestrator.buildImage).toHaveBeenCalledWith(expectedSpec);
+      expect(k8sOrchestrator.applyServer).toHaveBeenCalledWith(expectedSpec);
+      expect(child_process.exec).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        ...mockServerRecord,
+        isInResponseChain: false,
+        isUpdatable: true,
+      });
+    });
+    it("Should respond before applying a server in the response chain", async () => {
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValue({ ...completeServer, isInResponseChain: true });
+      await serversService.updateServer(k8sReq, res);
+      expect(k8sReq.log.flush).toHaveBeenCalled();
+      expect((res.json as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        (k8sOrchestrator.applyServer as jest.Mock).mock.invocationCallOrder[0],
+      );
+    });
+    it("Should remove the server on stop, then respond", async () => {
+      await serversService.stopServer(k8sReq, res);
+      expect(k8sOrchestrator.removeServer).toHaveBeenCalledWith(
+        mockServerRecord,
+      );
+      expect(child_process.exec).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+    });
+    it("Should respond before removing a server in the response chain", async () => {
+      const inChain = { ...mockServerRecord, isInResponseChain: true };
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValue(inChain);
+      await serversService.stopServer(k8sReq, res);
+      expect(k8sReq.log.flush).toHaveBeenCalled();
+      expect((res.json as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        (k8sOrchestrator.removeServer as jest.Mock).mock.invocationCallOrder[0],
+      );
+    });
+    it("Should report statuses from the cluster", async () => {
+      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(
+        new Map([[mockServerRecord.containerName, "running"]]),
+      );
+      await serversService.getServers(req, res);
+      expect(child_process.exec).not.toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "running" },
+      ]);
     });
   });
 });

@@ -1,0 +1,13 @@
+# Workloads (the servers, build jobs, and the service itself) live in one namespace.
+# The registry lives in its own so the hostPath policy below does not apply to it.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: server-manager-workloads
+  labels:
+    server-manager/workloads: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: server-manager-system

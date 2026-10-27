@@ -1,0 +1,9 @@
+# /etc/rancher/k3s/config.yaml on the control-plane desktop.
+# Game servers keep the exact ports they use today, so NodePorts must cover them.
+# Beware: a NodePort on a port a host service already uses (22, 80, 443, 6443, 10250, ...)
+# hijacks that port on every node. Do not give a server one of those.
+kube-apiserver-arg:
+  - "service-node-port-range=1-65535"
+write-kubeconfig-mode: "0600"
+# Uncomment if the desktops are not on one private network (needs UDP 51820 between them).
+# flannel-backend: wireguard-native

@@ -1,0 +1,141 @@
+import {
+  buildBuilderJob,
+  buildContextConfigMap,
+  buildDeployment,
+  buildService,
+  deploymentStatus,
+  imageRef,
+  labelSelector,
+  resourceName,
+  ServerSpec,
+  WORKLOADS_NAMESPACE,
+} from "../../../src/services/orchestrator/manifests";
+
+describe("orchestrator manifests", () => {
+  const server: ServerSpec = {
+    id: "abc-123",
+    containerName: "Minecraft Server!",
+    hostName: "desktop-1",
+    ports: [
+      { number: 25565, protocol: "tcp" },
+      { number: 19132, protocol: "udp" },
+    ],
+    volumes: [{ hostPath: "/srv/mc", containerPath: "/data" }],
+    environmentVariables: [{ name: "EULA", value: "true" }],
+    files: [
+      { name: "Dockerfile", content: "RlJPTSBhbHBpbmU=" },
+      { name: "nested/start.sh", content: "ZWNobyBoaQ==" },
+    ],
+  };
+  const registry = "registry.local:5000";
+
+  it("names resources from the id, not the free-form container name", () => {
+    expect(resourceName(server)).toBe("server-abc-123");
+    expect(imageRef(registry, server)).toBe(
+      "registry.local:5000/server-abc-123:latest",
+    );
+  });
+
+  it("builds label selectors for one server or for all", () => {
+    expect(labelSelector(server)).toBe(
+      "app.kubernetes.io/managed-by=server-manager,server-manager/server-id=abc-123",
+    );
+    expect(labelSelector()).toBe("app.kubernetes.io/managed-by=server-manager");
+  });
+
+  it("builds a Recreate deployment pinned to the host with bind mounts", () => {
+    const deployment = buildDeployment(server, registry, "now");
+    expect(deployment.metadata.namespace).toBe(WORKLOADS_NAMESPACE);
+    expect(deployment.spec.strategy.type).toBe("Recreate");
+    expect(deployment.metadata.annotations).toEqual({
+      "server-manager/container-name": "Minecraft Server!",
+    });
+    expect(deployment.spec.template.metadata.annotations).toEqual({
+      "server-manager/restarted-at": "now",
+    });
+    const pod = deployment.spec.template.spec;
+    expect(pod.nodeSelector).toEqual({ "kubernetes.io/hostname": "desktop-1" });
+    expect(pod.containers[0].env).toEqual([{ name: "EULA", value: "true" }]);
+    expect(pod.containers[0].ports).toEqual([
+      { containerPort: 25565, protocol: "TCP" },
+      { containerPort: 19132, protocol: "UDP" },
+    ]);
+    expect(pod.containers[0].volumeMounts).toEqual([
+      { name: "volume-0", mountPath: "/data" },
+    ]);
+    expect(pod.volumes).toEqual([
+      { name: "volume-0", hostPath: { path: "/srv/mc", type: "Directory" } },
+    ]);
+  });
+
+  it("gives pods no API token unless a service account is requested", () => {
+    const pod = buildDeployment(server, registry, "now").spec.template.spec;
+    expect(pod).toMatchObject({ automountServiceAccountToken: false });
+    expect(pod).not.toHaveProperty("serviceAccountName");
+    const own = buildDeployment(server, registry, "now", "server-manager").spec
+      .template.spec;
+    expect(own).toMatchObject({ serviceAccountName: "server-manager" });
+    expect(own).not.toHaveProperty("automountServiceAccountToken");
+  });
+
+  it("publishes each port on the node under the same number", () => {
+    const service = buildService(server);
+    expect(service.spec.type).toBe("NodePort");
+    expect(service.spec.ports).toEqual([
+      {
+        name: "tcp-25565",
+        port: 25565,
+        targetPort: 25565,
+        nodePort: 25565,
+        protocol: "TCP",
+      },
+      {
+        name: "udp-19132",
+        port: 19132,
+        targetPort: 19132,
+        nodePort: 19132,
+        protocol: "UDP",
+      },
+    ]);
+  });
+
+  it("puts build files in a config map by base name", () => {
+    expect(buildContextConfigMap(server).binaryData).toEqual({
+      Dockerfile: "RlJPTSBhbHBpbmU=",
+      "start.sh": "ZWNobyBoaQ==",
+    });
+  });
+
+  it("builds a kaniko job that passes env vars as build args", () => {
+    const job = buildBuilderJob(server, registry);
+    const container = job.spec.template.spec.containers[0];
+    expect(container.args).toEqual([
+      "--dockerfile=/workspace/Dockerfile",
+      "--context=dir:///workspace",
+      "--destination=registry.local:5000/server-abc-123:latest",
+      "--cache=false",
+      "--build-arg=EULA=true",
+    ]);
+    expect(job.spec.template.spec.volumes[0].configMap.name).toBe(
+      buildContextConfigMap(server).metadata.name,
+    );
+  });
+
+  it("passes --insecure to kaniko for a plain http registry", () => {
+    const args = buildBuilderJob(server, registry, true).spec.template.spec
+      .containers[0].args;
+    expect(args).toContain("--insecure");
+    expect(buildBuilderJob(server, registry).spec.template.spec).toMatchObject({
+      automountServiceAccountToken: false,
+    });
+  });
+
+  it("maps deployment replicas to a status", () => {
+    expect(deploymentStatus({})).toBe("stopped");
+    expect(deploymentStatus({ spec: { replicas: 0 } })).toBe("stopped");
+    expect(deploymentStatus({ spec: { replicas: 1 } })).toBe("starting");
+    expect(
+      deploymentStatus({ spec: { replicas: 1 }, status: { readyReplicas: 1 } }),
+    ).toBe("running");
+  });
+});

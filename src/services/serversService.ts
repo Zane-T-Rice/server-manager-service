@@ -2,6 +2,8 @@ import * as fs from "node:fs";
 import { Request, Response } from "express";
 import { EnvironmentVariablesService } from "./environmentVariablesService";
 import { ephemeralContainerRun } from "../utils";
+import * as k8sOrchestrator from "./orchestrator/k8sOrchestrator";
+import { ServerSpec } from "./orchestrator/manifests";
 import { exec as exec2 } from "child_process";
 import { FilesService } from "./filesService";
 import { handleDatabaseErrors } from "../utils/handleDatabaseErrors";
@@ -41,7 +43,34 @@ class ServersService {
     files: {
       select: FilesService.defaultFileSelect,
     },
+    host: {
+      select: { name: true },
+    },
   };
+
+  /* True when servers run on Kubernetes instead of through the docker CLI. */
+  static useK8s() {
+    return process.env.ORCHESTRATOR === "k8s";
+  }
+
+  /* The fields of a complete server that the orchestrator needs. */
+  static toServerSpec(
+    server: Pick<ServerSpec, "id" | "containerName" | "ports" | "volumes"> & {
+      environmentVariables: ServerSpec["environmentVariables"];
+      files: ServerSpec["files"];
+      host: { name: string };
+    },
+  ): ServerSpec {
+    return {
+      id: server.id,
+      containerName: server.containerName,
+      hostName: server.host.name,
+      ports: server.ports,
+      volumes: server.volumes,
+      environmentVariables: server.environmentVariables,
+      files: server.files,
+    };
+  }
 
   constructor(prisma?: PrismaClient) {
     ServersService.instance = ServersService.instance ?? this;
@@ -91,6 +120,10 @@ class ServersService {
     // did not find a server above and handleDatabaseErrors is guaranteed
     // to throw.
     const server = dbServer!;
+
+    if (ServersService.useK8s()) {
+      return this.updateServerK8s(req, res, server);
+    }
 
     // Write build files to temporary directory
     const temporaryDirectoryName = randomUUID();
@@ -170,6 +203,35 @@ class ServersService {
     }
   }
 
+  /* Update a server on Kubernetes: build the image in a job, then roll out the Deployment. */
+  private async updateServerK8s(
+    req: Request,
+    res: Response,
+    server: Parameters<typeof ServersService.toServerSpec>[0] & {
+      isInResponseChain: boolean;
+    },
+  ) {
+    const spec = ServersService.toServerSpec(server);
+    const responseServer = (
+      Object.keys(
+        ServersService.defaultServerSelect,
+      ) as (keyof typeof ServersService.defaultServerSelect)[]
+    ).reduce((a, b) => {
+      return { ...a, [b]: server[b as keyof typeof server] };
+    }, {});
+
+    await k8sOrchestrator.buildImage(spec);
+    if (server.isInResponseChain) {
+      // Applying the Deployment replaces this very pod, so respond first.
+      req.log.flush();
+      res.json(responseServer);
+      await k8sOrchestrator.applyServer(spec);
+    } else {
+      await k8sOrchestrator.applyServer(spec);
+      res.json(responseServer);
+    }
+  }
+
   /* POST stop an existing server. */
   async stopServer(req: Request, res: Response) {
     const { hostId, serverId } = req.params;
@@ -184,6 +246,18 @@ class ServersService {
     // did not find a server above and handleDatabaseErrors is guaranteed
     // to throw.
     const server = dbServer!;
+    if (ServersService.useK8s()) {
+      if (server.isInResponseChain) {
+        // Removing the Deployment tears this pod down, so respond first.
+        req.log.flush();
+        res.json(server);
+        await k8sOrchestrator.removeServer(server);
+      } else {
+        await k8sOrchestrator.removeServer(server);
+        res.json(server);
+      }
+      return;
+    }
     const commands = [
       [
         `(`,
@@ -208,6 +282,9 @@ class ServersService {
 
   /* Status of every container on this host, keyed by container name. */
   async getContainerStatuses(): Promise<Map<string, string> | undefined> {
+    if (ServersService.useK8s()) {
+      return k8sOrchestrator.getStatuses();
+    }
     try {
       const { stdout } = await exec(
         `docker ps --all --format '{{.Names}}|{{.State}}'`,

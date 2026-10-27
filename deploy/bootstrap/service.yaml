@@ -1,0 +1,66 @@
+# Starts the service the first time. After that it updates itself through its own Server record,
+# which replaces this Deployment (same name), so SERVER_ID must be that record's id.
+# Render with: SERVER_ID=... NODE_NAME=... REGISTRY=... IMAGE=... envsubst < deploy/bootstrap/service.yaml | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-${SERVER_ID}
+  namespace: server-manager-workloads
+  labels:
+    app.kubernetes.io/managed-by: server-manager
+    server-manager/server-id: ${SERVER_ID}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: server-manager
+      server-manager/server-id: ${SERVER_ID}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: server-manager
+        server-manager/server-id: ${SERVER_ID}
+    spec:
+      serviceAccountName: server-manager
+      nodeSelector:
+        kubernetes.io/hostname: ${NODE_NAME}
+      containers:
+        - name: server
+          image: ${IMAGE}
+          env:
+            - { name: ORCHESTRATOR, value: k8s }
+            - { name: REGISTRY, value: "${REGISTRY}" }
+            - { name: REGISTRY_INSECURE, value: "true" }
+            - { name: SELF_SERVER_ID, value: "${SERVER_ID}" }
+            # Plus DATABASE_URL, AUDIENCE, ISSUER, TOKEN_SIGNING_ALG, WEBSITE_DOMAIN, ... as in the README.
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: db
+              mountPath: /server-manager-service/prisma/db
+      volumes:
+        - name: db
+          hostPath:
+            path: /srv/server-manager/db
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-${SERVER_ID}
+  namespace: server-manager-workloads
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/managed-by: server-manager
+    server-manager/server-id: ${SERVER_ID}
+  ports:
+    - {
+        name: tcp-3000,
+        port: 3000,
+        targetPort: 3000,
+        nodePort: 3000,
+        protocol: TCP,
+      }

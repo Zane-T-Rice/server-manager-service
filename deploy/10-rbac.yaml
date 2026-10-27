@@ -1,0 +1,39 @@
+# What the service may do, in the workloads namespace only. Nothing cluster-wide.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: server-manager
+  namespace: server-manager-workloads
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: server-manager
+  namespace: server-manager-workloads
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "update", "delete"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs/status"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: server-manager
+  namespace: server-manager-workloads
+subjects:
+  - kind: ServiceAccount
+    name: server-manager
+    namespace: server-manager-workloads
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: server-manager
