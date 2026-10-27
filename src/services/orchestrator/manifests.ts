@@ -2,7 +2,7 @@
 
 export const WORKLOADS_NAMESPACE = "server-manager-workloads";
 const MANAGED_BY = "server-manager";
-export const CONTAINER_NAME_ANNOTATION = "server-manager/container-name";
+export const SERVER_ID_LABEL = "server-manager/server-id";
 
 export interface ServerSpec {
   id: string;
@@ -29,7 +29,7 @@ export function aliasName(server: Pick<ServerSpec, "containerName">) {
 export function labels(server: Pick<ServerSpec, "id">) {
   return {
     "app.kubernetes.io/managed-by": MANAGED_BY,
-    "server-manager/server-id": server.id,
+    [SERVER_ID_LABEL]: server.id,
   };
 }
 
@@ -61,7 +61,6 @@ export function buildDeployment(
       name,
       namespace: WORKLOADS_NAMESPACE,
       labels: labels(server),
-      annotations: { [CONTAINER_NAME_ANNOTATION]: server.containerName },
     },
     spec: {
       replicas: 1,

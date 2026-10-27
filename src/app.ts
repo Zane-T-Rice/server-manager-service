@@ -6,8 +6,6 @@ import {
   errorHandler,
   isHostMiddleware,
   isServerMiddleware,
-  hostProxyMiddleware,
-  serverProxyMiddleware,
 } from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
@@ -24,7 +22,7 @@ import {
 } from "./routes";
 import express from "express";
 import path from "path";
-import { Permissions, Routes } from "./constants";
+import { Permissions } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
@@ -98,14 +96,14 @@ app.use(
 
 // For routes that require a host, make sure the host is real.
 app.use(
-  `(${Routes.PROXY})?/hosts/:hostId`,
+  `/hosts/:hostId`,
   requiredScopes(Permissions.ADMIN),
   errorHandler(isHostMiddleware(prisma)),
 );
 
 // For routes that require a server, make sure the server is real.
 app.use(
-  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
+  `/hosts/:hostId/servers/:serverId`,
   requiredScopes(Permissions.ADMIN),
   errorHandler(isServerMiddleware(prisma)),
 );
@@ -115,46 +113,13 @@ app.use(
   errorHandler(isServerMiddleware(prisma)),
 );
 
-// Proxy to correct host for routes that need host affinity.
-// For paths beginning with Routes.PROXY, this host must be the correct host
-// or an error will be thrown. This prevents infinite proxy recursion.
-app.use(
-  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|stop)`,
-  requiredScopes(Permissions.ADMIN),
-  errorHandler(serverProxyMiddleware(prisma)),
-);
-app.use(
-  `(${Routes.PROXY})?/users/servers/:serverId/(update|stop)`,
-  requiredScopes(Permissions.USER),
-  errorHandler(serverProxyMiddleware(prisma)),
-);
-app.get(
-  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
-  requiredScopes(Permissions.ADMIN),
-  errorHandler(serverProxyMiddleware(prisma)),
-);
-app.get(
-  `(${Routes.PROXY})?/users/servers/:serverId`,
-  requiredScopes(Permissions.USER),
-  errorHandler(serverProxyMiddleware(prisma)),
-);
-app.get(
-  `(${Routes.PROXY})?/hosts/:hostId/servers`,
-  requiredScopes(Permissions.ADMIN),
-  errorHandler(hostProxyMiddleware(prisma)),
-);
-
 // Parse the request.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Log the request body now that it has been successfully parsed.
-// Rewrite request url to strip off any leading /proxy.
 app.use((req, res, next) => {
   req.log.info(req.body, "request body");
-  req.url = req.originalUrl.startsWith(Routes.PROXY)
-    ? req.originalUrl.substring(Routes.PROXY.length)
-    : req.originalUrl;
   next();
 });
 

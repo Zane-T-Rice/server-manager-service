@@ -5,10 +5,10 @@ import {
   buildDeployment,
   aliasName,
   buildAliasService,
-  CONTAINER_NAME_ANNOTATION,
   deploymentStatus,
   labelSelector,
   resourceName,
+  SERVER_ID_LABEL,
   ServerSpec,
   WORKLOADS_NAMESPACE,
 } from "./manifests";
@@ -30,7 +30,7 @@ function isNotFound(e: unknown) {
 function registry(): string {
   const value = process.env.REGISTRY;
   if (!value) {
-    throw new Error("REGISTRY must be set when ORCHESTRATOR=k8s.");
+    throw new Error("REGISTRY must be set.");
   }
   return value;
 }
@@ -75,21 +75,31 @@ export async function buildImage(server: ServerSpec) {
   await core.createNamespacedConfigMap({ namespace, body: configMap });
   await batch.createNamespacedJob({ namespace, body: job });
 
-  const deadline = Date.now() + BUILD_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    const { status } = await batch.readNamespacedJobStatus({
-      name: job.metadata.name,
-      namespace,
-    });
-    if (status?.succeeded) {
-      return;
+  try {
+    const deadline = Date.now() + BUILD_TIMEOUT_MS;
+    while (Date.now() < deadline) {
+      const { status } = await batch.readNamespacedJobStatus({
+        name: job.metadata.name,
+        namespace,
+      });
+      if (status?.succeeded) {
+        return;
+      }
+      if (status?.failed) {
+        throw new Error(`Image build for ${server.containerName} failed.`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, BUILD_POLL_MS));
     }
-    if (status?.failed) {
-      throw new Error(`Image build for ${server.containerName} failed.`);
-    }
-    await new Promise((resolve) => setTimeout(resolve, BUILD_POLL_MS));
+    throw new Error(`Image build for ${server.containerName} timed out.`);
+  } finally {
+    // The pod has read its build files by now (or never will); do not leave them behind.
+    await ignoreNotFound(
+      core.deleteNamespacedConfigMap({
+        name: configMap.metadata.name,
+        namespace,
+      }),
+    );
   }
-  throw new Error(`Image build for ${server.containerName} timed out.`);
 }
 
 /* Creates or replaces the server's Deployment and Service. */
@@ -157,7 +167,7 @@ export async function removeServer(
   }
 }
 
-/* Status of every managed server, keyed by container name. */
+/* Status of every managed server, keyed by server id. */
 export async function getStatuses(): Promise<Map<string, string> | undefined> {
   try {
     const { items } = await (
@@ -168,8 +178,7 @@ export async function getStatuses(): Promise<Map<string, string> | undefined> {
     });
     return new Map(
       items.map((deployment) => [
-        deployment.metadata?.annotations?.[CONTAINER_NAME_ANNOTATION] ??
-          String(deployment.metadata?.name),
+        String(deployment.metadata?.labels?.[SERVER_ID_LABEL]),
         deploymentStatus(deployment),
       ]),
     );

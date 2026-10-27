@@ -48,9 +48,6 @@ describe("orchestrator manifests", () => {
     const deployment = buildDeployment(server, registry, "now");
     expect(deployment.metadata.namespace).toBe(WORKLOADS_NAMESPACE);
     expect(deployment.spec.strategy.type).toBe("Recreate");
-    expect(deployment.metadata.annotations).toEqual({
-      "server-manager/container-name": "Minecraft Server!",
-    });
     expect(deployment.spec.template.metadata.annotations).toEqual({
       "server-manager/restarted-at": "now",
     });

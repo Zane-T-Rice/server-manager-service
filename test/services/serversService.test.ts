@@ -1,14 +1,9 @@
-import * as child_process from "child_process";
-import * as fs from "node:fs";
 import { ServersService } from "../../src/services";
 import { PrismaClient, Server } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
-import { ephemeralContainerRun } from "../../src/utils";
 import * as k8sOrchestrator from "../../src/services/orchestrator/k8sOrchestrator";
-jest.mock("node:fs");
 jest.mock("../../src/services/orchestrator/k8sOrchestrator");
-jest.mock("child_process");
 jest.mock("@prisma/client", () => {
   return {
     PrismaClient: jest.fn().mockImplementation(() => {
@@ -29,12 +24,6 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
     handleDatabaseErrors: jest.fn().mockRejectedValue(new Error()),
   };
 });
-jest.mock("../../src/utils/ephemeralContainerRun", () => {
-  return {
-    ephemeralContainerRun: jest.fn(),
-  };
-});
-
 describe("ServersService", () => {
   const hostId = "hostId";
   const body = {
@@ -57,11 +46,7 @@ describe("ServersService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (child_process.exec as unknown as jest.Mock).mockImplementation(
-      (_, callback) => {
-        callback(null, { stdout: "" });
-      },
-    );
+    (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(new Map());
 
     jest
       .spyOn(serversService.prisma.server, "create")
@@ -78,8 +63,6 @@ describe("ServersService", () => {
     jest
       .spyOn(serversService.prisma.server, "delete")
       .mockResolvedValue(mockServerRecord);
-
-    (fs.writeFileSync as unknown as jest.Mock).mockImplementation(() => true);
   });
 
   it("should use passed in prisma client if no prisma client is set", () => {
@@ -130,44 +113,32 @@ describe("ServersService", () => {
   });
 
   describe("POST /:id/stop", () => {
-    it("Should stop server", async () => {
-      await serversService.stopServer(req, res);
+    const flushReq = {
+      ...req,
+      log: { flush: jest.fn() },
+    } as unknown as Request;
+    it("Should remove the server, then respond", async () => {
+      await serversService.stopServer(flushReq, res);
       expect(
         serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
       });
-      expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
-        `( docker container inspect ${mockServerRecord.containerName} && docker stop ${mockServerRecord.containerName} && docker rm ${mockServerRecord.containerName} ) || true`,
-        expect.any(Function),
+      expect(k8sOrchestrator.removeServer).toHaveBeenCalledWith(
+        mockServerRecord,
       );
+      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+      expect(flushReq.log.flush).not.toHaveBeenCalled();
     });
-    it("Should stop server using an ephemeral container", async () => {
-      const mockServerRecordIsInResponseChain = {
-        ...mockServerRecord,
-        isInResponseChain: true,
-      };
+    it("Should respond before removing a server in the response chain", async () => {
       jest
         .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValueOnce(mockServerRecordIsInResponseChain);
-      await serversService.stopServer(req, res);
-      expect(
-        serversService.prisma.server.findUniqueOrThrow,
-      ).toHaveBeenCalledWith({
-        where: {
-          id: mockServerRecordIsInResponseChain.id,
-          hostId,
-        },
-        select: ServersService.defaultServerSelect,
-      });
-      expect(ephemeralContainerRun).toHaveBeenCalledWith(
-        req,
-        res,
-        [
-          `( docker container inspect ${mockServerRecordIsInResponseChain.containerName} && docker stop ${mockServerRecordIsInResponseChain.containerName} && docker rm ${mockServerRecordIsInResponseChain.containerName} ) || true`,
-        ],
-        mockServerRecordIsInResponseChain,
+        .mockResolvedValue({ ...mockServerRecord, isInResponseChain: true });
+      await serversService.stopServer(flushReq, res);
+      expect(flushReq.log.flush).toHaveBeenCalled();
+      expect((res.json as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        (k8sOrchestrator.removeServer as jest.Mock).mock.invocationCallOrder[0],
       );
     });
     it("should handle any database errors", async () => {
@@ -191,148 +162,75 @@ describe("ServersService", () => {
         "server",
         [mockServerRecord.id],
       );
-      expect(ephemeralContainerRun).not.toHaveBeenCalled();
+      expect(k8sOrchestrator.removeServer).not.toHaveBeenCalled();
     });
   });
 
   describe("POST /:id/update", () => {
-    const mockCompleteServerRecord = {
+    const completeServer = {
       ...mockServerRecord,
       isInResponseChain: false,
       isUpdatable: true,
-      ports: [
-        {
-          id: "c237d998-f514-4640-b150-478bf9362bca",
-          number: 3000,
-          protocol: "udp",
-        },
-        {
-          id: "32de6034-59f3-44ea-bd1c-8a3393260ca6",
-          number: 3000,
-          protocol: "tcp",
-        },
-      ],
-      volumes: [
-        {
-          id: "b3e2148d-1e5a-4895-ae4b-0c9c3628699b",
-          hostPath: "/path/to/server-manager-service/prisma/db",
-          containerPath: "/server-manager-service/prisma/db",
-        },
-        {
-          id: "3122939b-5838-4b47-9ec5-5e942520bc15",
-          hostPath: "/var/run/docker.sock",
-          containerPath: "/var/run/docker.sock",
-        },
-      ],
-      environmentVariables: [
-        {
-          id: "cf1f3fe1-cc09-4a9c-8a69-8f25a1883e8c",
-          name: "ENV",
-          value: "local",
-        },
-      ],
-      files: [
-        {
-          id: "4cda33aa-4d2f-49a2-b152-39f8c85db042",
-          content:
-            "IyEvdXNyL2Jpbi9lbnYgYmFzaAoKIyBNaWdyYXRlIGRhdGFiYXNlIHRvIG1ha2Ugc3VyZSBpdCBpcyBpbiBzeW5jIHdpdGggbGF0ZXN0IHNjaGVtYS4KUFJJU01BX0VOR0lORVNfRElSPSQobml4IGV2YWwgbml4cGtncyNwcmlzbWEtZW5naW5lcy5vdXRQYXRoIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIG5peC1jb21tYW5kIC0tZXh0cmEtZXhwZXJpbWVudGFsLWZlYXR1cmVzIGZsYWtlcyAgfCBzZWQgJ3MvXi4vLycgfCBzZWQgJ3MvLiQvLycpCmV4cG9ydCBQUklTTUFfUVVFUllfRU5HSU5FX0xJQlJBUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvbGliL2xpYnF1ZXJ5X2VuZ2luZS5ub2RlIgpleHBvcnQgUFJJU01BX1FVRVJZX0VOR0lORV9CSU5BUlk9IiRQUklTTUFfRU5HSU5FU19ESVIvYmluL3F1ZXJ5LWVuZ2luZSIKZXhwb3J0IFBSSVNNQV9TQ0hFTUFfRU5HSU5FX0JJTkFSWT0iJFBSSVNNQV9FTkdJTkVTX0RJUi9iaW4vc2NoZW1hLWVuZ2luZSIKbnB4IHByaXNtYSBtaWdyYXRlIGRlcGxveQoKIyBTdGFydCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlCm5wbSBydW4gc3RhcnQK",
-          name: "start-server-manager-service-server.sh",
-        },
-        {
-          id: "661142ef-1090-46ba-a649-741690f2bc3f",
-          content:
-            "RlJPTSBuaXhvcy9uaXgKCiMgVGhpcyBpcyB0aGUgc3VmZml4IG9mIHdoaWNoZXZlciBmaWxlIGluIGVudmlyb25tZW50cy8gdGhhdCB5b3Ugd2FudCB0byB1c2UuCiMgT3ZlcnJpZGUgRU5WIGZvciBkZXBsb3ltZW50cyB0byBub24tbG9jYWwgZW52aXJvbm1lbnRzIHdpdGggLS1idWlsZC1hcmcgRU5WPXN1ZmZpeC4KRU5WIEVOVj1sb2NhbApBUkcgRU5WCgojIEluc3RhbGwgZGVwZW5kZW5jaWVzClJVTiBuaXgtY2hhbm5lbCAtLXVwZGF0ZQpSVU4gbml4LWVudiAtaUEgbml4cGtncy5naXQgbml4cGtncy5ub2RlanMgbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnBucG0gbml4cGtncy5ub2RlUGFja2FnZXNfbGF0ZXN0LnZlcmNlbCBuaXhwa2dzLm5vZGVQYWNrYWdlc19sYXRlc3QucHJpc21hIG5peHBrZ3Mub3BlbnNzbCBuaXhwa2dzLmdudXNlZCBuaXhwa2dzLmRvY2tlcgoKIyBJbnN0YWxsIGxhdGVzdCBzZXJ2ZXItbWFuYWdlci1zZXJ2aWNlClJVTiBnaXQgY2xvbmUgaHR0cHM6Ly9naXRodWIuY29tL1phbmUtVC1SaWNlL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UuZ2l0CldPUktESVIgL3NlcnZlci1tYW5hZ2VyLXNlcnZpY2UKUlVOIGNwIGVudmlyb25tZW50cy8uZW52LiRFTlYgLmVudgpSVU4gbnBtIGluc3RhbGwKCkVYUE9TRSAzMDAwL3VkcApFWFBPU0UgMzAwMC90Y3AKCkNPUFkgLi9zdGFydC1zZXJ2ZXItbWFuYWdlci1zZXJ2aWNlLXNlcnZlci5zaCAvc3RhcnQtc2VydmVyLW1hbmFnZXItc2VydmljZS1zZXJ2ZXIuc2gKRU5UUllQT0lOVCBbImJhc2giLCAiL3N0YXJ0LXNlcnZlci1tYW5hZ2VyLXNlcnZpY2Utc2VydmVyLnNoIl0K",
-          name: "Dockerfile",
-        },
-      ],
+      ports: [{ id: "p", number: 3000, protocol: "tcp" }],
+      volumes: [{ id: "v", hostPath: "/srv/a", containerPath: "/a" }],
+      environmentVariables: [{ id: "e", name: "ENV", value: "local" }],
+      files: [{ id: "f", name: "Dockerfile", content: "RlJPTQ==" }],
+      host: { name: "server-1" },
     };
+    const expectedSpec = {
+      id: mockServerRecord.id,
+      containerName: mockServerRecord.containerName,
+      hostName: "server-1",
+      ports: completeServer.ports,
+      volumes: completeServer.volumes,
+      environmentVariables: completeServer.environmentVariables,
+      files: completeServer.files,
+    };
+    const flushReq = {
+      ...req,
+      log: { flush: jest.fn() },
+    } as unknown as Request;
+    const calledBefore = (first: jest.Mock, second: jest.Mock) =>
+      first.mock.invocationCallOrder[0] < second.mock.invocationCallOrder[0];
 
-    const updateBuildStepExpectations = async () => {
+    it("Should build and apply the server, then respond", async () => {
+      jest
+        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
+        .mockResolvedValue(completeServer);
+      await serversService.updateServer(flushReq, res);
       expect(
         serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockServerRecord.id,
-          hostId,
-          isUpdatable: true,
-        },
+        where: { id: mockServerRecord.id, hostId, isUpdatable: true },
         select: ServersService.completeServerSelect,
       });
+      expect(k8sOrchestrator.buildImage).toHaveBeenCalledWith(expectedSpec);
+      expect(k8sOrchestrator.applyServer).toHaveBeenCalledWith(expectedSpec);
       expect(
-        child_process.exec as unknown as jest.Mock,
-      ).toHaveBeenNthCalledWith(
-        1,
-        expect.stringMatching(/mkdir .*-.*-.*-.*-.*/),
-        expect.any(Function),
-      );
-      expect(fs.writeFileSync as unknown as jest.Mock).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /.*-.*-.*-.*-.*\/start-server-manager-service-server.sh/,
+        calledBefore(
+          k8sOrchestrator.applyServer as jest.Mock,
+          res.json as jest.Mock,
         ),
-        Buffer.from(
-          mockCompleteServerRecord.files[0].content,
-          "base64",
-        ).toString("utf-8"),
-      );
-      expect(
-        child_process.exec as unknown as jest.Mock,
-      ).toHaveBeenNthCalledWith(
-        2,
-        expect.stringMatching(
-          /cd .*-.*-.*-.*-.* && docker build -t containerName --no-cache --build-arg 'ENV=local' ./,
-        ),
-        expect.any(Function),
-      );
-      expect(
-        child_process.exec as unknown as jest.Mock,
-      ).toHaveBeenNthCalledWith(
-        3,
-        expect.stringMatching(/rm -rf .*-.*-.*-.*-.*/),
-        expect.any(Function),
-      );
-    };
-    it("Should update server", async () => {
-      // Return a complete server
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValue(mockCompleteServerRecord);
-      await serversService.updateServer(req, res);
-      updateBuildStepExpectations();
-      expect(
-        child_process.exec as unknown as jest.Mock,
-      ).toHaveBeenNthCalledWith(
-        4,
-        [
-          "docker pull alpine:latest",
-          "docker stop containerName",
-          "docker rm containerName",
-          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
-        ].join(";"),
-        expect.any(Function),
-      );
+      ).toBe(true);
+      expect(res.json).toHaveBeenCalledWith({
+        ...mockServerRecord,
+        isInResponseChain: false,
+        isUpdatable: true,
+      });
     });
-    it("Should update server using an ephemeral container", async () => {
-      const mockCompleteServerRecordIsInResponseChain = {
-        ...mockCompleteServerRecord,
-        isInResponseChain: true,
-      };
-      // Return a complete server
+    it("Should respond before applying a server in the response chain", async () => {
       jest
         .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValue(mockCompleteServerRecordIsInResponseChain);
-      await serversService.updateServer(req, res);
-      updateBuildStepExpectations();
-      expect(ephemeralContainerRun).toHaveBeenCalledWith(
-        req,
-        res,
-        [
-          "docker pull alpine:latest",
-          "docker stop containerName",
-          "docker rm containerName",
-          "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
-        ],
-        { ...mockServerRecord, isInResponseChain: true, isUpdatable: true },
-      );
+        .mockResolvedValue({ ...completeServer, isInResponseChain: true });
+      await serversService.updateServer(flushReq, res);
+      expect(flushReq.log.flush).toHaveBeenCalled();
+      expect(k8sOrchestrator.buildImage).toHaveBeenCalledWith(expectedSpec);
+      expect(
+        calledBefore(
+          res.json as jest.Mock,
+          k8sOrchestrator.applyServer as jest.Mock,
+        ),
+      ).toBe(true);
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
@@ -347,11 +245,7 @@ describe("ServersService", () => {
       expect(
         serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
-        where: {
-          id: mockServerRecord.id,
-          hostId,
-          isUpdatable: true,
-        },
+        where: { id: mockServerRecord.id, hostId, isUpdatable: true },
         select: ServersService.completeServerSelect,
       });
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
@@ -359,7 +253,7 @@ describe("ServersService", () => {
         "server",
         [mockServerRecord.id],
       );
-      expect(ephemeralContainerRun).not.toHaveBeenCalled();
+      expect(k8sOrchestrator.buildImage).not.toHaveBeenCalled();
     });
   });
 
@@ -389,36 +283,20 @@ describe("ServersService", () => {
         { ...mockServerRecord, status: "stopped" },
       ]);
     });
-    it("Should include the status of the container of each server", async () => {
-      (child_process.exec as unknown as jest.Mock).mockImplementation(
-        (_, callback) => {
-          callback(null, {
-            stdout: `other|exited\n${mockServerRecord.containerName}|running\n`,
-          });
-        },
+    it("Should include the status of each server, by id", async () => {
+      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(
+        new Map([
+          ["other", "exited"],
+          [mockServerRecord.id, "running"],
+        ]),
       );
       await serversService.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
         { ...mockServerRecord, status: "running" },
       ]);
     });
-    it("Should report status unknown if the host could not be reached", async () => {
-      const unreachableRes = {
-        json: jest.fn(),
-        locals: { hostUnreachable: true },
-      } as unknown as Response;
-      await serversService.getServers(req, unreachableRes);
-      expect(child_process.exec).not.toHaveBeenCalled();
-      expect(unreachableRes.json).toHaveBeenCalledWith([
-        { ...mockServerRecord, status: "unknown" },
-      ]);
-    });
-    it("Should report status unknown if docker can not be asked", async () => {
-      (child_process.exec as unknown as jest.Mock).mockImplementation(
-        (_, callback) => {
-          callback(new Error("docker is down"));
-        },
-      );
+    it("Should report status unknown if the cluster can not be asked", async () => {
+      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(undefined);
       await serversService.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
         { ...mockServerRecord, status: "unknown" },
@@ -474,13 +352,9 @@ describe("ServersService", () => {
         status: "stopped",
       });
     });
-    it("Should include the status of the container", async () => {
-      (child_process.exec as unknown as jest.Mock).mockImplementation(
-        (_, callback) => {
-          callback(null, {
-            stdout: `${mockServerRecord.containerName}|running\n`,
-          });
-        },
+    it("Should include the status of the server", async () => {
+      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(
+        new Map([[mockServerRecord.id, "running"]]),
       );
       await serversService.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
@@ -488,12 +362,8 @@ describe("ServersService", () => {
         status: "running",
       });
     });
-    it("Should report status unknown if docker can not be asked", async () => {
-      (child_process.exec as unknown as jest.Mock).mockImplementation(
-        (_, callback) => {
-          callback(new Error("docker is down"));
-        },
-      );
+    it("Should report status unknown if the cluster can not be asked", async () => {
+      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(undefined);
       await serversService.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
         ...mockServerRecord,
@@ -588,93 +458,6 @@ describe("ServersService", () => {
         [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("on Kubernetes", () => {
-    const completeServer = {
-      ...mockServerRecord,
-      isInResponseChain: false,
-      isUpdatable: true,
-      ports: [{ id: "p", number: 3000, protocol: "tcp" }],
-      volumes: [{ id: "v", hostPath: "/srv/a", containerPath: "/a" }],
-      environmentVariables: [{ id: "e", name: "ENV", value: "local" }],
-      files: [{ id: "f", name: "Dockerfile", content: "RlJPTQ==" }],
-      host: { name: "desktop-1" },
-    };
-    const expectedSpec = {
-      id: mockServerRecord.id,
-      containerName: mockServerRecord.containerName,
-      hostName: "desktop-1",
-      ports: completeServer.ports,
-      volumes: completeServer.volumes,
-      environmentVariables: completeServer.environmentVariables,
-      files: completeServer.files,
-    };
-    const k8sReq = {
-      ...req,
-      log: { flush: jest.fn() },
-    } as unknown as Request;
-
-    beforeEach(() => {
-      process.env.ORCHESTRATOR = "k8s";
-    });
-    afterEach(() => {
-      delete process.env.ORCHESTRATOR;
-    });
-
-    it("Should build and apply the server, then respond", async () => {
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValue(completeServer);
-      await serversService.updateServer(k8sReq, res);
-      expect(k8sOrchestrator.buildImage).toHaveBeenCalledWith(expectedSpec);
-      expect(k8sOrchestrator.applyServer).toHaveBeenCalledWith(expectedSpec);
-      expect(child_process.exec).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        ...mockServerRecord,
-        isInResponseChain: false,
-        isUpdatable: true,
-      });
-    });
-    it("Should respond before applying a server in the response chain", async () => {
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValue({ ...completeServer, isInResponseChain: true });
-      await serversService.updateServer(k8sReq, res);
-      expect(k8sReq.log.flush).toHaveBeenCalled();
-      expect((res.json as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-        (k8sOrchestrator.applyServer as jest.Mock).mock.invocationCallOrder[0],
-      );
-    });
-    it("Should remove the server on stop, then respond", async () => {
-      await serversService.stopServer(k8sReq, res);
-      expect(k8sOrchestrator.removeServer).toHaveBeenCalledWith(
-        mockServerRecord,
-      );
-      expect(child_process.exec).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
-    });
-    it("Should respond before removing a server in the response chain", async () => {
-      const inChain = { ...mockServerRecord, isInResponseChain: true };
-      jest
-        .spyOn(serversService.prisma.server, "findUniqueOrThrow")
-        .mockResolvedValue(inChain);
-      await serversService.stopServer(k8sReq, res);
-      expect(k8sReq.log.flush).toHaveBeenCalled();
-      expect((res.json as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
-        (k8sOrchestrator.removeServer as jest.Mock).mock.invocationCallOrder[0],
-      );
-    });
-    it("Should report statuses from the cluster", async () => {
-      (k8sOrchestrator.getStatuses as jest.Mock).mockResolvedValue(
-        new Map([[mockServerRecord.containerName, "running"]]),
-      );
-      await serversService.getServers(req, res);
-      expect(child_process.exec).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([
-        { ...mockServerRecord, status: "running" },
-      ]);
     });
   });
 });

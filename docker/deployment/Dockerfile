@@ -2,7 +2,7 @@
 FROM alpine
 
 # Install dependencies
-RUN apk add --no-cache bash git npm openssl docker zlib libgcc glib
+RUN apk add --no-cache bash git npm openssl zlib libgcc glib
 
 # Install latest server-manager-service
 RUN git clone https://github.com/Zane-T-Rice/server-manager-service.git

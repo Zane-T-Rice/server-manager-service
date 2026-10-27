@@ -1,14 +1,16 @@
 # server-manager-service
 
 Provides server information and management functions such as update.
-The intent is to call docker commands based on information stored completely within the service.
+The intent is to run servers on Kubernetes (k3s) based on information stored completely within the service.
+The service has no access to the host: it only holds a namespaced Kubernetes service account, and the cluster
+decides what is allowed. See [deploy/README.md](deploy/README.md) to set up the cluster and
+[deploy/SETUP-COMMANDS.md](deploy/SETUP-COMMANDS.md) for what was done on the current machines.
 
 ### Requirements
 
 ```sh
-# Docker is required to run the application.
-docker --version
-Docker version 27.5.1, build v27.5.1
+# A k3s cluster is required to run servers. See deploy/README.md.
+k3s --version
 
 # The rest of these are only required to write code.
 node --version
@@ -19,17 +21,6 @@ v22.14.0
 # it can be easily imported or used by more tools, such as Insomnia.
 redocly --version
 1.34.2
-
-# The service currently depends on a docker bridge network with the name server-manager-service-network.
-# Here is an example of how to create such a network. Any docker container on this network can be
-# managed by server-manager-service.
-docker network create \
-  --driver=bridge \
-  --subnet=172.19.0.0/16 \
-  --ip-range=172.19.0.0/16 \
-  --gateway=172.19.5.254 \
-  -o enable_icc=true \
-  server-manager-service-network
 
 # Prisma is the database and you must use this version to be sure it will work.
 prisma --version
@@ -67,35 +58,16 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 
 ### How To Get This Running (Deployment)
 
-**Make sure to update the /path/to and the HOST**
+The service runs as a Pod on the cluster, started like any other server (see [deploy/README.md](deploy/README.md)).
+Its environment variables are stored as Environment Variables on its own server record:
 
-These commands are safe to repeat.
-
+- ORCHESTRATOR=k8s is no longer needed; the service always uses Kubernetes.
+- REGISTRY is the registry that build jobs push to and nodes pull from (e.g. `192.168.1.3:5000`). REGISTRY_INSECURE=true if it is plain http.
+- SELF_SERVER_ID is the id of the service's own server record, so it can update itself with its own service account.
 - WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 - ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
 - AUTH0_MGMT_CLIENT_ID and AUTH0_MGMT_CLIENT_SECRET are for an Auth0 Machine-to-Machine application authorized for the Auth0 Management API with the `read:users` and `read:clients` scopes. They are used (along with ISSUER) to search for Auth0 users and to look up the email of a user when linking it to a server.
 - The service uses the permissions "server-manager:admin" and "server-manager:public" to authorize users per route.
-
-```sh
-(
-  cp docker/deployment/Dockerfile .
-  cp docker/deployment/start-server-manager-service-server.sh .
-  docker stop server-manager-service
-  docker rm server-manager-service
-  docker build -t server-manager-service --no-cache .
-  docker run --name=server-manager-service -d \
-  -p 3000:3000/udp \
-  -p 3000:3000/tcp \
-  -v /path/to/server-manager-service/prisma:/server-manager-service/prisma \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  --restart unless-stopped \
-  --network server-manager-service-network \
-  --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
-  --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env AUDIENCE="" --env ISSUER="" --env AUTH0_MGMT_CLIENT_ID="" --env AUTH0_MGMT_CLIENT_SECRET="" --env TOKEN_SIGNING_ALG="RS256" \
-  server-manager-service
-)
-```
 
 ### How to Install
 
@@ -112,36 +84,15 @@ This is only required if you want to work on the code or look at the code withou
 
 **Make sure to update the /path/to.**
 
-You can run the service directly or inside of a Docker container.
+Run the service directly. Set the environment variables above in a .env file (plus DATABASE_URL, PORT and HOST),
+point KUBECONFIG at a cluster set up as described in [deploy/README.md](deploy/README.md), and run:
 
 ```sh
-# The environment variables that are needed are in the below Docker command prefixed by the --env flags.
-# You can run the service by simply setting the environment variables in a .env file and then running
 npm run start:dev
-
-# If you want to use a Docker container instead, you can do the following.
-# These commands will let you run the service locally in a docker container.
-# Running these commands again will rebuild the container with any changes
-# since the last time the commands were run.
-(
-  cp docker/development/Dockerfile .
-  cp docker/development/start-server-manager-service-server.sh .
-  docker stop server-manager-service
-  docker rm server-manager-service
-  docker build -t server-manager-service --no-cache .
-  docker run --name=server-manager-service -d \
-  -p 3000:3000/udp \
-  -p 3000:3000/tcp \
-  -v /path/to/server-manager-service/prisma:/server-manager-service/prisma \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  --restart unless-stopped \
-  --network=server-manager-service-network \
-  --env LOG_LEVEL="info" --env PORT="3000" --env DATABASE_URL="file:./db/dev.db" \
-  --env WEBSITE_DOMAIN="http://localhost:3100" --env HOST="http://localhost:3000" \
-  --env AUDIENCE="" --env ISSUER="" --env AUTH0_MGMT_CLIENT_ID="" --env AUTH0_MGMT_CLIENT_SECRET="" --env TOKEN_SIGNING_ALG="RS256" \
-  server-manager-service
-)
 ```
+
+The docker files in docker/development and docker/deployment build the same image that the build jobs produce for the
+service's own server record. They need no docker socket and no docker CLI.
 
 ### Manual Testing
 
@@ -184,14 +135,18 @@ npx prisma migrate reset
 
 ### Configuring Servers
 
-Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server during the `/start` and `/update` commands. The content field of a File is the base64 encoded string of the File.
+Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server in a build job on the cluster during the `/update` command.
+
+Things that differ from a plain `docker run`:
+
+- Ports are published on the node the server runs on (`hostPort`), as `docker run -p` did.
+- Volumes must be under one of the `allowedHostPaths` in [deploy/20-admission-policy.yaml](deploy/20-admission-policy.yaml), and privileged containers, host networking and added capabilities are refused by the cluster.
+- Servers cannot reach each other unless a link is added to [deploy/35-server-links.yaml](deploy/35-server-links.yaml). A server is reached by its container name, as on the old docker network.
+- The server runs on the node whose name equals its Host record's name. The content field of a File is the base64 encoded string of the File.
 
 ### To Do
 
-- Make network name configurable (and optional)
-- Make restart policy configurable (and optional)
 - Input validation in controllers.
 - Probaby add integration tests. Right now it is all unit tests.
-- Docker with non-root user (mostly so the files it generates are not owned by root).
 - Delete server should stop/delete any related containers before removing the server record.
 - Update should possibly lock the host record until it completes.

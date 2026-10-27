@@ -3,7 +3,6 @@ import { PrismaClient, Server, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { handleDatabaseErrors } from "../../src/utils";
 import { BadRequestError } from "../../src/errors";
-import { Routes } from "../../src/constants";
 jest.mock("@prisma/client", () => {
   return {
     PrismaClient: jest.fn().mockImplementation(() => {
@@ -30,7 +29,6 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 
 describe("UserServersService", () => {
   const localHost = "http://localhost:3000";
-  const remoteHost = "https://remote.example/2";
   const hostId = "hostId";
   const userId = "userId";
   const body = {
@@ -217,7 +215,6 @@ describe("UserServersService", () => {
         .mockResolvedValue(containers);
 
     beforeEach(() => {
-      process.env.HOST = localHost;
       mockContainers(new Map());
       jest
         .spyOn(UserServersService.instance.prisma.server, "findMany")
@@ -267,95 +264,19 @@ describe("UserServersService", () => {
         { ...serverWithHost(localHost), status: "stopped" },
       ]);
     });
-    it("Should report the docker status of servers on this host", async () => {
-      mockContainers(new Map([[mockServerRecord.containerName, "running"]]));
+    it("Should report the status of each server, by id", async () => {
+      mockContainers(new Map([[mockServerRecord.id, "running"]]));
       await UserServersService.instance.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
         { ...serverWithHost(localHost), status: "running" },
       ]);
     });
-    it("Should report status unknown if docker can not be asked", async () => {
+    it("Should report status unknown if the cluster can not be asked", async () => {
       mockContainers(undefined);
       await UserServersService.instance.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
         { ...serverWithHost(localHost), status: "unknown" },
       ]);
-    });
-    describe("servers on another host", () => {
-      const fetchMock = jest.fn();
-      const authedReq = {
-        ...req,
-        originalUrl: "/users/servers",
-        headers: { authorization: "Bearer token" },
-      } as unknown as Request;
-
-      beforeEach(() => {
-        global.fetch = fetchMock;
-        fetchMock.mockReset();
-        jest
-          .spyOn(UserServersService.instance.prisma.server, "findMany")
-          .mockResolvedValue([serverWithHost(remoteHost)] as never);
-      });
-
-      it("Should ask that host for the status, as this user", async () => {
-        fetchMock.mockResolvedValue({
-          ok: true,
-          json: async () => [{ id: mockServerRecord.id, status: "running" }],
-        });
-        await UserServersService.instance.getServers(authedReq, res);
-        expect(fetchMock).toHaveBeenCalledWith(
-          `https://remote.example/2${Routes.PROXY}/users/servers`,
-          expect.objectContaining({
-            headers: { authorization: "Bearer token" },
-          }),
-        );
-        expect(
-          ServersService.instance.getContainerStatuses,
-        ).not.toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith([
-          { ...serverWithHost(remoteHost), status: "running" },
-        ]);
-      });
-      it("Should ask the cluster, not the other host, on Kubernetes", async () => {
-        process.env.ORCHESTRATOR = "k8s";
-        try {
-          (
-            ServersService.instance.getContainerStatuses as jest.Mock
-          ).mockResolvedValue(new Map([["containerName", "running"]]));
-          await UserServersService.instance.getServers(authedReq, res);
-        } finally {
-          delete process.env.ORCHESTRATOR;
-        }
-        expect(fetchMock).not.toHaveBeenCalled();
-        expect(ServersService.instance.getContainerStatuses).toHaveBeenCalled();
-      });
-      it("Should report status unknown if that host can not be reached", async () => {
-        fetchMock.mockRejectedValue(new Error("connect ECONNREFUSED"));
-        await UserServersService.instance.getServers(authedReq, res);
-        expect(res.json).toHaveBeenCalledWith([
-          { ...serverWithHost(remoteHost), status: "unknown" },
-        ]);
-      });
-      it("Should report status unknown if that host answers with an error", async () => {
-        fetchMock.mockResolvedValue({ ok: false });
-        await UserServersService.instance.getServers(authedReq, res);
-        expect(res.json).toHaveBeenCalledWith([
-          { ...serverWithHost(remoteHost), status: "unknown" },
-        ]);
-      });
-      it(`Should not ask other hosts for a request that starts with ${Routes.PROXY}`, async () => {
-        await UserServersService.instance.getServers(
-          {
-            ...authedReq,
-            originalUrl: `${Routes.PROXY}/users/servers`,
-          } as unknown as Request,
-          res,
-        );
-        expect(fetchMock).not.toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith([
-          { ...serverWithHost(remoteHost), status: "unknown" },
-        ]);
-      });
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
@@ -412,19 +333,17 @@ describe("UserServersService", () => {
         status: "stopped",
       });
     });
-    it("Should include the status of the container", async () => {
+    it("Should include the status of the server", async () => {
       jest
         .spyOn(ServersService.instance, "getContainerStatuses")
-        .mockResolvedValue(
-          new Map([[mockServerRecord.containerName, "running"]]),
-        );
+        .mockResolvedValue(new Map([[mockServerRecord.id, "running"]]));
       await UserServersService.instance.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
         ...mockServerRecord,
         status: "running",
       });
     });
-    it("Should report status unknown if docker can not be asked", async () => {
+    it("Should report status unknown if the cluster can not be asked", async () => {
       jest
         .spyOn(ServersService.instance, "getContainerStatuses")
         .mockResolvedValue(undefined);

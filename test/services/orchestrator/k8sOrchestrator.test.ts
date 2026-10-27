@@ -60,6 +60,8 @@ describe("k8sOrchestrator", () => {
         status: { succeeded: 1 },
       });
       await buildImage(server);
+      // Cleared before the build, and removed again once the job is done with it.
+      expect(client.core.deleteNamespacedConfigMap).toHaveBeenCalledTimes(2);
       expect(client.core.createNamespacedConfigMap).toHaveBeenCalledTimes(1);
       expect(client.batch.createNamespacedJob).toHaveBeenCalledTimes(1);
       expect(client.batch.readNamespacedJobStatus).toHaveBeenCalledWith({
@@ -86,6 +88,7 @@ describe("k8sOrchestrator", () => {
       await expect(buildImage(server)).rejects.toThrow(
         "Image build for game failed.",
       );
+      expect(client.core.deleteNamespacedConfigMap).toHaveBeenCalledTimes(2);
     });
 
     it("fails if the job takes too long", async () => {
@@ -106,9 +109,7 @@ describe("k8sOrchestrator", () => {
 
     it("requires a registry", async () => {
       delete process.env.REGISTRY;
-      await expect(buildImage(server)).rejects.toThrow(
-        "REGISTRY must be set when ORCHESTRATOR=k8s.",
-      );
+      await expect(buildImage(server)).rejects.toThrow("REGISTRY must be set.");
     });
   });
 
@@ -201,25 +202,25 @@ describe("k8sOrchestrator", () => {
   });
 
   describe("getStatuses", () => {
-    it("maps container names to statuses", async () => {
+    it("maps server ids to statuses", async () => {
       client.apps.listNamespacedDeployment.mockResolvedValue({
         items: [
           {
-            metadata: {
-              name: "server-abc",
-              annotations: { "server-manager/container-name": "game" },
-            },
+            metadata: { labels: { "server-manager/server-id": "abc" } },
             spec: { replicas: 1 },
             status: { readyReplicas: 1 },
           },
-          { metadata: { name: "server-def" }, spec: { replicas: 1 } },
+          {
+            metadata: { labels: { "server-manager/server-id": "def" } },
+            spec: { replicas: 1 },
+          },
           {},
         ],
       });
       expect(await getStatuses()).toEqual(
         new Map([
-          ["game", "running"],
-          ["server-def", "starting"],
+          ["abc", "running"],
+          ["def", "starting"],
           ["undefined", "stopped"],
         ]),
       );
