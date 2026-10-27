@@ -20,3 +20,9 @@ properties:
   hostId:
     type: string
     format: uuid
+  status:
+    type: string
+    description: >-
+      Only present when getting all Servers. The state of the Server's container
+      on its host, i.e. running, paused, restarting, exited or created. "stopped"
+      means there is no container and "unknown" means the host could not be asked.

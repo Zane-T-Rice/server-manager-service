@@ -4,7 +4,10 @@ import { PrismaClient } from "@prisma/client";
 import { ServersService } from "./serversService";
 import { BadRequestError } from "../errors";
 import { formatMessage } from "../utils";
-import { ErrorMessages } from "../constants";
+import { ErrorMessages, Routes } from "../constants";
+
+// Do not wait forever on a host that does not answer.
+const HOST_STATUS_TIMEOUT_MS = 3000;
 
 class UserServersService {
   static instance: UserServersService;
@@ -86,6 +89,81 @@ class UserServersService {
     return result;
   }
 
+  /* The status of the containers of a host other than this one, as reported by that host. */
+  async getRemoteStatuses(
+    req: Request,
+    hostUrl: string
+  ): Promise<Map<string, string>> {
+    const statuses = new Map<string, string>();
+    try {
+      const url = new URL(hostUrl);
+      const path = url.pathname.replace(/\/$/, "");
+      // The proxy prefix makes the host answer for itself instead of asking the other hosts in turn.
+      const response = await fetch(
+        `${url.origin}${path}${Routes.PROXY}/users/servers`,
+        {
+          headers: { authorization: String(req.headers.authorization) },
+          signal: AbortSignal.timeout(HOST_STATUS_TIMEOUT_MS),
+        }
+      );
+      if (response.ok) {
+        const servers = (await response.json()) as {
+          id: string;
+          status?: string;
+        }[];
+        servers.forEach((server) => {
+          if (server.status) statuses.set(server.id, server.status);
+        });
+      }
+    } catch {
+      // The statuses of this host stay unknown.
+    }
+    return statuses;
+  }
+
+  /* The status of each server by id: from docker here, or from the host that runs the server. */
+  async getStatuses(
+    req: Request,
+    servers: { id: string; containerName: string; host: { url: string } }[]
+  ): Promise<Map<string, string>> {
+    const isLocal = (server: { host: { url: string } }) =>
+      server.host.url === process.env.HOST;
+    const statuses = new Map<string, string>();
+
+    // A proxied request is only asking for this host's own servers.
+    const remoteHostUrls = req.originalUrl?.startsWith(Routes.PROXY)
+      ? []
+      : Array.from(
+          new Set(servers.filter((s) => !isLocal(s)).map((s) => s.host.url))
+        );
+    const [containers, ...remoteStatuses] = await Promise.all([
+      servers.some(isLocal)
+        ? ServersService.instance.getContainerStatuses()
+        : undefined,
+      ...remoteHostUrls.map((url) => this.getRemoteStatuses(req, url)),
+    ]);
+
+    servers.filter(isLocal).forEach((server) => {
+      statuses.set(
+        server.id,
+        containers
+          ? (containers.get(server.containerName) ?? "stopped")
+          : "unknown"
+      );
+    });
+    remoteHostUrls.forEach((hostUrl, index) => {
+      servers
+        .filter((server) => server.host.url === hostUrl)
+        .forEach((server) => {
+          statuses.set(
+            server.id,
+            remoteStatuses[index].get(server.id) ?? "unknown"
+          );
+        });
+    });
+    return statuses;
+  }
+
   /* GET all servers available to this user. */
   async getServers(req: Request, res: Response) {
     const { isUpdatable: isUpdatableQuery } = req.query;
@@ -103,7 +181,13 @@ class UserServersService {
         },
       })
       .catch((e) => handleDatabaseErrors(e, "server", []));
-    res.json(servers);
+    const statuses = await this.getStatuses(req, servers);
+    res.json(
+      servers.map((server) => ({
+        ...server,
+        status: statuses.get(server.id) ?? "unknown",
+      }))
+    );
   }
 
   /* GET server owned by this user by id. */
@@ -122,7 +206,14 @@ class UserServersService {
         select: UserServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
-    res.json(server);
+    // This request is proxied to the host of the server, so docker here is the right one to ask.
+    const statuses = await ServersService.instance.getContainerStatuses();
+    res.json({
+      ...server,
+      status: statuses
+        ? (statuses.get(server.containerName) ?? "stopped")
+        : "unknown",
+    });
   }
 
   /* DELETE an existing server owned by _only_ this user. */

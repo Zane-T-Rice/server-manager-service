@@ -206,6 +206,23 @@ class ServersService {
     }
   }
 
+  /* Status of every container on this host, keyed by container name. */
+  async getContainerStatuses(): Promise<Map<string, string> | undefined> {
+    try {
+      const { stdout } = await exec(
+        `docker ps --all --format '{{.Names}}|{{.State}}'`
+      );
+      return new Map(
+        String(stdout)
+          .split("\n")
+          .filter((line) => line.includes("|"))
+          .map((line) => line.split("|") as [string, string])
+      );
+    } catch {
+      return undefined;
+    }
+  }
+
   stringToBoolean(value: string | undefined | null): boolean | undefined {
     let result;
     if (value === undefined || value == null) {
@@ -232,7 +249,20 @@ class ServersService {
     const servers = await this.prisma.server
       .findMany(query)
       .catch((e) => handleDatabaseErrors(e, "server", []));
-    res.json(servers);
+    // A container only exists while the server is started (stopping removes it).
+    // The status is "unknown" if docker could not be asked.
+    // A host that could not be reached has no statuses to report from here.
+    const statuses = res.locals?.hostUnreachable
+      ? undefined
+      : await this.getContainerStatuses();
+    res.json(
+      servers.map((server) => ({
+        ...server,
+        status: statuses
+          ? (statuses.get(server.containerName) ?? "stopped")
+          : "unknown",
+      }))
+    );
   }
 
   /* GET server by id. */
@@ -244,7 +274,14 @@ class ServersService {
         select: ServersService.defaultServerSelect,
       })
       .catch((e) => handleDatabaseErrors(e, "server", [serverId]));
-    res.json(server);
+    // This request is proxied to the host of the server, so docker here is the right one to ask.
+    const statuses = await this.getContainerStatuses();
+    res.json({
+      ...server,
+      status: statuses
+        ? (statuses.get(server.containerName) ?? "stopped")
+        : "unknown",
+    });
   }
 
   /* PATCH an existing server. */

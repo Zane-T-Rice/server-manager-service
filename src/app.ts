@@ -6,7 +6,8 @@ import {
   errorHandler,
   isHostMiddleware,
   isServerMiddleware,
-  proxyMiddleware,
+  hostProxyMiddleware,
+  serverProxyMiddleware,
 } from "./middlewares";
 import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
 import cors from "cors";
@@ -120,12 +121,31 @@ app.use(
 app.use(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.ADMIN),
-  errorHandler(proxyMiddleware(prisma)),
+  errorHandler(serverProxyMiddleware(prisma)),
 );
 app.use(
   `(${Routes.PROXY})?/users/servers/:serverId/(update|stop)`,
   requiredScopes(Permissions.USER),
-  errorHandler(proxyMiddleware(prisma)),
+  errorHandler(serverProxyMiddleware(prisma)),
+);
+
+// The status of a server comes from the host that runs it.
+app.get(
+  `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
+  requiredScopes(Permissions.ADMIN),
+  errorHandler(serverProxyMiddleware(prisma)),
+);
+app.get(
+  `(${Routes.PROXY})?/users/servers/:serverId`,
+  requiredScopes(Permissions.USER),
+  errorHandler(serverProxyMiddleware(prisma)),
+);
+
+// The status of the servers comes from the host that runs them.
+app.get(
+  `(${Routes.PROXY})?/hosts/:hostId/servers`,
+  requiredScopes(Permissions.ADMIN),
+  errorHandler(hostProxyMiddleware(prisma)),
 );
 
 // Parse the request.

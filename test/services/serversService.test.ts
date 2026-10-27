@@ -383,7 +383,44 @@ describe("ServersService", () => {
     it("Should return list of servers", async () => {
       await serversService.getServers(req, res);
       expect(serversService.prisma.server.findMany).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
+      expect(res.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "stopped" },
+      ]);
+    });
+    it("Should include the status of the container of each server", async () => {
+      (child_process.exec as unknown as jest.Mock).mockImplementation(
+        (_, callback) => {
+          callback(null, {
+            stdout: `other|exited\n${mockServerRecord.containerName}|running\n`,
+          });
+        }
+      );
+      await serversService.getServers(req, res);
+      expect(res.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "running" },
+      ]);
+    });
+    it("Should report status unknown if the host could not be reached", async () => {
+      const unreachableRes = {
+        json: jest.fn(),
+        locals: { hostUnreachable: true },
+      } as unknown as Response;
+      await serversService.getServers(req, unreachableRes);
+      expect(child_process.exec).not.toHaveBeenCalled();
+      expect(unreachableRes.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "unknown" },
+      ]);
+    });
+    it("Should report status unknown if docker can not be asked", async () => {
+      (child_process.exec as unknown as jest.Mock).mockImplementation(
+        (_, callback) => {
+          callback(new Error("docker is down"));
+        }
+      );
+      await serversService.getServers(req, res);
+      expect(res.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "unknown" },
+      ]);
     });
     it("Should return list of servers that are updatable", async () => {
       const isUpdatableRequest: Request = {
@@ -397,7 +434,9 @@ describe("ServersService", () => {
         select: ServersService.defaultServerSelect,
         where: { hostId, isUpdatable: true },
       });
-      expect(res.json).toHaveBeenCalledWith([mockServerRecord]);
+      expect(res.json).toHaveBeenCalledWith([
+        { ...mockServerRecord, status: "stopped" },
+      ]);
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
@@ -428,7 +467,36 @@ describe("ServersService", () => {
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
       });
-      expect(res.json).toHaveBeenCalledWith(mockServerRecord);
+      expect(res.json).toHaveBeenCalledWith({
+        ...mockServerRecord,
+        status: "stopped",
+      });
+    });
+    it("Should include the status of the container", async () => {
+      (child_process.exec as unknown as jest.Mock).mockImplementation(
+        (_, callback) => {
+          callback(null, {
+            stdout: `${mockServerRecord.containerName}|running\n`,
+          });
+        }
+      );
+      await serversService.getServerById(req, res);
+      expect(res.json).toHaveBeenCalledWith({
+        ...mockServerRecord,
+        status: "running",
+      });
+    });
+    it("Should report status unknown if docker can not be asked", async () => {
+      (child_process.exec as unknown as jest.Mock).mockImplementation(
+        (_, callback) => {
+          callback(new Error("docker is down"));
+        }
+      );
+      await serversService.getServerById(req, res);
+      expect(res.json).toHaveBeenCalledWith({
+        ...mockServerRecord,
+        status: "unknown",
+      });
     });
     it("should handle any database errors", async () => {
       expect.assertions(4);
