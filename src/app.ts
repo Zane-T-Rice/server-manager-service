@@ -128,8 +128,6 @@ app.use(
   requiredScopes(Permissions.USER),
   errorHandler(serverProxyMiddleware(prisma)),
 );
-
-// The status of a server comes from the host that runs it.
 app.get(
   `(${Routes.PROXY})?/hosts/:hostId/servers/:serverId`,
   requiredScopes(Permissions.ADMIN),
@@ -140,8 +138,6 @@ app.get(
   requiredScopes(Permissions.USER),
   errorHandler(serverProxyMiddleware(prisma)),
 );
-
-// The status of the servers comes from the host that runs them.
 app.get(
   `(${Routes.PROXY})?/hosts/:hostId/servers`,
   requiredScopes(Permissions.ADMIN),
