@@ -106,7 +106,7 @@ describe("HostsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "host",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -132,7 +132,7 @@ describe("HostsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "host",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -168,7 +168,7 @@ describe("HostsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "host",
-        [mockHostRecord.id]
+        [mockHostRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -206,7 +206,7 @@ describe("HostsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "host",
-        [mockHostRecord.id]
+        [mockHostRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -242,7 +242,7 @@ describe("HostsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "host",
-        [mockHostRecord.id]
+        [mockHostRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });

@@ -41,6 +41,6 @@ describe("expressRouterWrapper", () => {
       await expressRouterWrapper[route](path, [routeFunction]);
       expect(errorHandler).toHaveBeenCalledWith(routeFunction);
       expect(spy).toHaveBeenCalledWith(path, true);
-    }
+    },
   );
 });

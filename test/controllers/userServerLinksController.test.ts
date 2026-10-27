@@ -26,7 +26,7 @@ describe("UserServersController", () => {
     it("should call getUserServerLinks in UserServerLinksService", async () => {
       await serversController.getUserServerLinks(req, res);
       expect(
-        UserServerLinksService.instance.getUserServerLinks
+        UserServerLinksService.instance.getUserServerLinks,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -35,7 +35,7 @@ describe("UserServersController", () => {
     it("should call createUserServerLinkByUserId in UserServerLinksService", async () => {
       await serversController.createUserServerLinkByUserId(req, res);
       expect(
-        UserServerLinksService.instance.createUserServerLinkByUserId
+        UserServerLinksService.instance.createUserServerLinkByUserId,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -44,7 +44,7 @@ describe("UserServersController", () => {
     it("should call deleteUserServerLinkByUserId in UserServerLinksService", async () => {
       await serversController.deleteUserServerLinkByUserId(req, res);
       expect(
-        UserServerLinksService.instance.deleteUserServerLinkByUserId
+        UserServerLinksService.instance.deleteUserServerLinkByUserId,
       ).toHaveBeenCalledWith(req, res);
     });
   });

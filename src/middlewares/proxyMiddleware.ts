@@ -16,7 +16,7 @@ export function proxyReqPathResolver(hostPath: string) {
 export function proxyErrorHandler(
   next: NextFunction,
   serverId: string,
-  serverHostUrl: string | undefined
+  serverHostUrl: string | undefined,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function (err: any) {
@@ -26,8 +26,8 @@ export function proxyErrorHandler(
           formatMessage(ErrorMessages.hostDown, {
             serverId,
             serverHostUrl,
-          })
-        )
+          }),
+        ),
       );
     } else next(err);
   };
@@ -41,7 +41,7 @@ async function proxyToOtherHost(
   next: NextFunction,
   hostUrl: string,
   mismatchMessage: string,
-  proxyOptions: Pick<proxy.ProxyOptions, "timeout" | "proxyErrorHandler">
+  proxyOptions: Pick<proxy.ProxyOptions, "timeout" | "proxyErrorHandler">,
 ) {
   // Do not proxy if this is the matching host.
   if (hostUrl === process.env.HOST) {
@@ -102,7 +102,7 @@ export function serverProxyMiddleware(prisma: PrismaClient) {
         serverHostUrl: server.host.url,
         hostUrl: process.env.HOST,
       }),
-      { proxyErrorHandler: proxyErrorHandler(next, serverId, server.host.url) }
+      { proxyErrorHandler: proxyErrorHandler(next, serverId, server.host.url) },
     );
   };
 }
@@ -132,7 +132,7 @@ export function hostProxyMiddleware(prisma: PrismaClient) {
       {
         timeout: HOST_PROXY_TIMEOUT_MS,
         proxyErrorHandler: hostProxyErrorHandler(res, next),
-      }
+      },
     );
   };
 }

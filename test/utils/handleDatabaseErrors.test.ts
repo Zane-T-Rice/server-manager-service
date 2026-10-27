@@ -18,8 +18,8 @@ describe("handleDatabaseErrors", () => {
           clientVersion: "version",
         }),
         resource,
-        ids
-      )
+        ids,
+      ),
     ).toThrow(new NotFoundError(resource, ids));
   });
 
@@ -31,8 +31,8 @@ describe("handleDatabaseErrors", () => {
           clientVersion: "version",
         }),
         resource,
-        ids
-      )
+        ids,
+      ),
     ).toThrow(new BadRequestError(message));
   });
 
@@ -41,14 +41,14 @@ describe("handleDatabaseErrors", () => {
       handleDatabaseErrors(
         { code: "P2037" } as Prisma.PrismaClientKnownRequestError,
         resource,
-        ids
-      )
+        ids,
+      ),
     ).toThrow(new InternalServerError());
   });
 
   it("throws InternalServerError for errors that are not Prisma errors", async () => {
     expect(() => handleDatabaseErrors(new Error(), resource, ids)).toThrow(
-      new InternalServerError()
+      new InternalServerError(),
     );
   });
 });

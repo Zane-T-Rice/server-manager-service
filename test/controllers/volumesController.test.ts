@@ -29,7 +29,7 @@ describe("VolumesController", () => {
       await volumesController.createVolume(req, res);
       expect(VolumesService.instance.createVolume).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -46,7 +46,7 @@ describe("VolumesController", () => {
       await volumesController.getVolumeById(req, res);
       expect(VolumesService.instance.getVolumeById).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -56,7 +56,7 @@ describe("VolumesController", () => {
       await volumesController.patchVolume(req, res);
       expect(VolumesService.instance.patchVolume).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -66,7 +66,7 @@ describe("VolumesController", () => {
       await volumesController.deleteVolume(req, res);
       expect(VolumesService.instance.deleteVolume).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });

@@ -64,7 +64,9 @@ class EnvironmentVariablesService {
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
       .catch((e) =>
-        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+        handleDatabaseErrors(e, "environment variable", [
+          environmentVariableId,
+        ]),
       );
     res.json(environmentVariable);
   }
@@ -89,7 +91,9 @@ class EnvironmentVariablesService {
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
       .catch((e) =>
-        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+        handleDatabaseErrors(e, "environment variable", [
+          environmentVariableId,
+        ]),
       );
     res.json(environmentVariable);
   }
@@ -109,7 +113,9 @@ class EnvironmentVariablesService {
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
       })
       .catch((e) =>
-        handleDatabaseErrors(e, "environment variable", [environmentVariableId])
+        handleDatabaseErrors(e, "environment variable", [
+          environmentVariableId,
+        ]),
       );
     res.json(environmentVariable);
   }

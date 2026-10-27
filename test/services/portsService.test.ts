@@ -114,7 +114,7 @@ describe("PortsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "port",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe("PortsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "port",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -172,7 +172,7 @@ describe("PortsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "port",
-        [mockPortRecord.id]
+        [mockPortRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -206,7 +206,7 @@ describe("PortsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "port",
-        [mockPortRecord.id]
+        [mockPortRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -238,7 +238,7 @@ describe("PortsService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "port",
-        [mockPortRecord.id]
+        [mockPortRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });

@@ -37,10 +37,10 @@ describe("serverProxyMiddleware", () => {
     };
     next = jest.fn();
     (proxy as jest.Mock).mockImplementation(
-      () => (req: Request, res: Response, next: NextFunction) => next()
+      () => (req: Request, res: Response, next: NextFunction) => next(),
     );
     (handleDatabaseErrors as unknown as jest.Mock).mockRejectedValue(
-      new Error()
+      new Error(),
     );
   });
 
@@ -53,13 +53,13 @@ describe("serverProxyMiddleware", () => {
           await serverProxyMiddleware(prisma as unknown as PrismaClient)(
             { params: { hostId, serverId } } as unknown as Request,
             {} as Response,
-            next
-          )
+            next,
+          ),
       ).rejects.toThrow();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
       expect(next).not.toHaveBeenCalled();
     });
@@ -72,7 +72,7 @@ describe("serverProxyMiddleware", () => {
       await serverProxyMiddleware(prisma as unknown as PrismaClient)(
         { params: { hostId, serverId } } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: serverId, hostId },
@@ -95,12 +95,12 @@ describe("serverProxyMiddleware", () => {
               originalUrl: Routes.PROXY + `/server/${serverId}/update`,
             } as unknown as Request,
             {} as Response,
-            next
-          )
+            next,
+          ),
       ).rejects.toThrow(
         new BadRequestError(
-          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`
-        )
+          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`,
+        ),
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: serverId, hostId },
@@ -121,7 +121,7 @@ describe("serverProxyMiddleware", () => {
           originalUrl: `/server/${serverId}/update`,
         } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(proxy as jest.Mock).toHaveBeenCalledWith(nonMatchingUrl, {
         memoizeHost: false,
@@ -144,13 +144,13 @@ describe("serverProxyMiddleware", () => {
               auth: { payload: { sub: userId } },
             } as unknown as Request,
             {} as Response,
-            next
-          )
+            next,
+          ),
       ).rejects.toThrow();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
       expect(next).not.toHaveBeenCalled();
     });
@@ -166,7 +166,7 @@ describe("serverProxyMiddleware", () => {
           auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: {
@@ -197,12 +197,12 @@ describe("serverProxyMiddleware", () => {
               originalUrl: Routes.PROXY + `/server/${serverId}/update`,
             } as unknown as Request,
             {} as Response,
-            next
-          )
+            next,
+          ),
       ).rejects.toThrow(
         new BadRequestError(
-          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`
-        )
+          `The host for server with id ${serverId} is ${nonMatchingUrl} which resolves to a real host, but does not exactly match the existing host's url ${process.env.HOST}.`,
+        ),
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: {
@@ -231,7 +231,7 @@ describe("serverProxyMiddleware", () => {
           originalUrl: `/server/${serverId}/update`,
         } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(proxy as jest.Mock).toHaveBeenCalledWith(nonMatchingUrl, {
         memoizeHost: false,
@@ -266,8 +266,8 @@ describe("serverProxyMiddleware", () => {
           formatMessage(ErrorMessages.hostDown, {
             serverId,
             serverHostUrl: process.env.HOST,
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -294,10 +294,10 @@ describe("hostProxyMiddleware", () => {
     prisma = { host: { findUniqueOrThrow: jest.fn() } };
     next = jest.fn();
     (proxy as jest.Mock).mockImplementation(
-      () => (req: Request, res: Response, next: NextFunction) => next()
+      () => (req: Request, res: Response, next: NextFunction) => next(),
     );
     (handleDatabaseErrors as unknown as jest.Mock).mockRejectedValue(
-      new Error()
+      new Error(),
     );
   });
 
@@ -308,13 +308,13 @@ describe("hostProxyMiddleware", () => {
         await hostProxyMiddleware(prisma as unknown as PrismaClient)(
           { params: { hostId } } as unknown as Request,
           {} as Response,
-          next
-        )
+          next,
+        ),
     ).rejects.toThrow();
     expect(handleDatabaseErrors).toHaveBeenCalledWith(
       expect.any(Error),
       "host",
-      [hostId]
+      [hostId],
     );
     expect(next).not.toHaveBeenCalled();
   });
@@ -326,7 +326,7 @@ describe("hostProxyMiddleware", () => {
     await hostProxyMiddleware(prisma as unknown as PrismaClient)(
       { params: { hostId } } as unknown as Request,
       {} as Response,
-      next
+      next,
     );
     expect(next).toHaveBeenCalledTimes(1);
     expect(proxy as jest.Mock).not.toHaveBeenCalled();
@@ -342,8 +342,8 @@ describe("hostProxyMiddleware", () => {
             originalUrl: `${Routes.PROXY}/hosts/${hostId}/servers`,
           } as unknown as Request,
           {} as Response,
-          next
-        )
+          next,
+        ),
     ).rejects.toThrow(BadRequestError);
     expect(next).not.toHaveBeenCalled();
   });
@@ -358,7 +358,7 @@ describe("hostProxyMiddleware", () => {
         originalUrl: `/hosts/${hostId}/servers`,
       } as unknown as Request,
       {} as Response,
-      next
+      next,
     );
     expect(proxy as jest.Mock).toHaveBeenCalledWith("http://localhost:3000", {
       memoizeHost: false,
@@ -377,7 +377,7 @@ describe("hostProxyMiddleware", () => {
         hostProxyErrorHandler(res, next)({ code });
         expect(res.locals.hostUnreachable).toBe(true);
         expect(next).toHaveBeenCalledWith();
-      }
+      },
     );
     it("should pass any other error on to next", () => {
       const res = { locals: {} } as unknown as Response;

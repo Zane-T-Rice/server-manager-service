@@ -16,7 +16,7 @@ class EnvironmentVariablesController {
   async createEnvironmentVariable(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.createEnvironmentVariable(
       req,
-      res
+      res,
     );
   }
 
@@ -24,7 +24,7 @@ class EnvironmentVariablesController {
   async getEnvironmentVariables(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.getEnvironmentVariables(
       req,
-      res
+      res,
     );
   }
 
@@ -32,7 +32,7 @@ class EnvironmentVariablesController {
   async getEnvironmentVariableById(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.getEnvironmentVariableById(
       req,
-      res
+      res,
     );
   }
 
@@ -40,7 +40,7 @@ class EnvironmentVariablesController {
   async patchEnvironmentVariable(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.patchEnvironmentVariable(
       req,
-      res
+      res,
     );
   }
 
@@ -48,7 +48,7 @@ class EnvironmentVariablesController {
   async deleteEnvironmentVariable(req: Request, res: Response) {
     await EnvironmentVariablesService.instance.deleteEnvironmentVariable(
       req,
-      res
+      res,
     );
   }
 }

@@ -92,7 +92,7 @@ class UserServersService {
   /* The status of the containers of a host other than this one, as reported by that host. */
   async getRemoteStatuses(
     req: Request,
-    hostUrl: string
+    hostUrl: string,
   ): Promise<Map<string, string>> {
     const statuses = new Map<string, string>();
     try {
@@ -104,7 +104,7 @@ class UserServersService {
         {
           headers: { authorization: String(req.headers.authorization) },
           signal: AbortSignal.timeout(HOST_STATUS_TIMEOUT_MS),
-        }
+        },
       );
       if (response.ok) {
         const servers = (await response.json()) as {
@@ -124,7 +124,7 @@ class UserServersService {
   /* The status of each server by id: from docker here, or from the host that runs the server. */
   async getStatuses(
     req: Request,
-    servers: { id: string; containerName: string; host: { url: string } }[]
+    servers: { id: string; containerName: string; host: { url: string } }[],
   ): Promise<Map<string, string>> {
     const isLocal = (server: { host: { url: string } }) =>
       server.host.url === process.env.HOST;
@@ -134,7 +134,7 @@ class UserServersService {
     const remoteHostUrls = req.originalUrl?.startsWith(Routes.PROXY)
       ? []
       : Array.from(
-          new Set(servers.filter((s) => !isLocal(s)).map((s) => s.host.url))
+          new Set(servers.filter((s) => !isLocal(s)).map((s) => s.host.url)),
         );
     const [containers, ...remoteStatuses] = await Promise.all([
       servers.some(isLocal)
@@ -148,7 +148,7 @@ class UserServersService {
         server.id,
         containers
           ? (containers.get(server.containerName) ?? "stopped")
-          : "unknown"
+          : "unknown",
       );
     });
     remoteHostUrls.forEach((hostUrl, index) => {
@@ -157,7 +157,7 @@ class UserServersService {
         .forEach((server) => {
           statuses.set(
             server.id,
-            remoteStatuses[index].get(server.id) ?? "unknown"
+            remoteStatuses[index].get(server.id) ?? "unknown",
           );
         });
     });
@@ -186,7 +186,7 @@ class UserServersService {
       servers.map((server) => ({
         ...server,
         status: statuses.get(server.id) ?? "unknown",
-      }))
+      })),
     );
   }
 
@@ -230,7 +230,7 @@ class UserServersService {
     });
     if (usersOfServer.length > 1)
       throw new BadRequestError(
-        formatMessage(ErrorMessages.serverOwnedByMultipleUsers, { serverId })
+        formatMessage(ErrorMessages.serverOwnedByMultipleUsers, { serverId }),
       );
     const server = await this.prisma.server
       .delete({

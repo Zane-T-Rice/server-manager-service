@@ -17,7 +17,7 @@ async function updateUserIdToUUID() {
         where: { id: user.id },
         data: { id: randomUUID() },
       });
-    })
+    }),
   );
 }
 

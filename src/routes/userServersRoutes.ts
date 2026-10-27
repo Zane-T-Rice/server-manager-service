@@ -9,13 +9,13 @@ new UserServersController(prisma); // Initialize ServersController singleton
 /* POST update an existing server owned by this user. */
 wrappedRouter.post(
   "/:serverId/update",
-  UserServersController.instance.updateServer
+  UserServersController.instance.updateServer,
 );
 
 /* POST stop an existing server owned by this user. */
 wrappedRouter.post(
   "/:serverId/stop",
-  UserServersController.instance.stopServer
+  UserServersController.instance.stopServer,
 );
 
 /* GET all servers for the user. */

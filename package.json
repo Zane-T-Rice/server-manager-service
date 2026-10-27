@@ -9,7 +9,9 @@
     "lint": "npx eslint src; npx eslint test;",
     "test": "rm -rf build && npm run build && jest --coverage --verbose --passWithNoTests --rootDir build",
     "migrate": "npx prisma migrate deploy",
-    "migrate:dev": "npx prisma migrate dev --name init"
+    "migrate:dev": "npx prisma migrate dev --name init",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

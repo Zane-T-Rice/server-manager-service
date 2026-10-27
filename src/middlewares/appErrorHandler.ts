@@ -6,7 +6,7 @@ function appErrorHandler(
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   req.log.error(err);
   if (err.name === ErrorMessageNames.badRequestError) {

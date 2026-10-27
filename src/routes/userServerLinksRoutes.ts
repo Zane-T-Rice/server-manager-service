@@ -12,13 +12,13 @@ wrappedRouter.get("/", UserServerLinksController.instance.getUserServerLinks);
 /* Connect User and Server. */
 wrappedRouter.post(
   "/",
-  UserServerLinksController.instance.createUserServerLinkByUserId
+  UserServerLinksController.instance.createUserServerLinkByUserId,
 );
 
 /* Disconnect User and Server. */
 wrappedRouter.delete(
   "/:userId",
-  UserServerLinksController.instance.deleteUserServerLinkByUserId
+  UserServerLinksController.instance.deleteUserServerLinkByUserId,
 );
 
 const userServerLinksRouter = wrappedRouter.router;

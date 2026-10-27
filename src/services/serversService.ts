@@ -101,7 +101,7 @@ class ServersService {
     ];
     server.environmentVariables.forEach((variable) => {
       dockerBuild.push(
-        `--build-arg ${shellEscape([`${variable.name}=${variable.value}`])}`
+        `--build-arg ${shellEscape([`${variable.name}=${variable.value}`])}`,
       );
     });
     dockerBuild.push(".");
@@ -111,17 +111,17 @@ class ServersService {
     ];
     server.ports.forEach((port) => {
       dockerRun.push(
-        `-p ${shellEscape([`${port.number}:${port.number}/${port.protocol}`])}`
+        `-p ${shellEscape([`${port.number}:${port.number}/${port.protocol}`])}`,
       );
     });
     server.volumes.forEach((volume) => {
       dockerRun.push(
-        `--mount ${shellEscape([`type=bind,src=${volume.hostPath},dst=${volume.containerPath}`])}`
+        `--mount ${shellEscape([`type=bind,src=${volume.hostPath},dst=${volume.containerPath}`])}`,
       );
     });
     server.environmentVariables.forEach((variable) => {
       dockerRun.push(
-        `--env ${shellEscape([`${variable.name}=${variable.value}`])}`
+        `--env ${shellEscape([`${variable.name}=${variable.value}`])}`,
       );
     });
     dockerRun.push(shellEscape([server.containerName]));
@@ -133,8 +133,8 @@ class ServersService {
       server.files.forEach((file) =>
         fs.writeFileSync(
           path.join(`${temporaryDirectoryName}`, path.basename(file.name)),
-          Buffer.from(file.content, "base64").toString("utf-8")
-        )
+          Buffer.from(file.content, "base64").toString("utf-8"),
+        ),
       );
 
       // Build new image
@@ -153,7 +153,7 @@ class ServersService {
 
     const responseServer = (
       Object.keys(
-        ServersService.defaultServerSelect
+        ServersService.defaultServerSelect,
       ) as (keyof typeof ServersService.defaultServerSelect)[]
     ).reduce((a, b) => {
       return { ...a, [b]: server[b] };
@@ -210,13 +210,13 @@ class ServersService {
   async getContainerStatuses(): Promise<Map<string, string> | undefined> {
     try {
       const { stdout } = await exec(
-        `docker ps --all --format '{{.Names}}|{{.State}}'`
+        `docker ps --all --format '{{.Names}}|{{.State}}'`,
       );
       return new Map(
         String(stdout)
           .split("\n")
           .filter((line) => line.includes("|"))
-          .map((line) => line.split("|") as [string, string])
+          .map((line) => line.split("|") as [string, string]),
       );
     } catch {
       return undefined;
@@ -261,7 +261,7 @@ class ServersService {
         status: statuses
           ? (statuses.get(server.containerName) ?? "stopped")
           : "unknown",
-      }))
+      })),
     );
   }
 

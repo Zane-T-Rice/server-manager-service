@@ -58,7 +58,7 @@ describe("ServersService", () => {
     (child_process.exec as unknown as jest.Mock).mockImplementation(
       (_, callback) => {
         callback(null, { stdout: "" });
-      }
+      },
     );
 
     jest
@@ -121,7 +121,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -131,14 +131,14 @@ describe("ServersService", () => {
     it("Should stop server", async () => {
       await serversService.stopServer(req, res);
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
       });
       expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
         `( docker container inspect ${mockServerRecord.containerName} && docker stop ${mockServerRecord.containerName} && docker rm ${mockServerRecord.containerName} ) || true`,
-        expect.any(Function)
+        expect.any(Function),
       );
     });
     it("Should stop server using an ephemeral container", async () => {
@@ -151,7 +151,7 @@ describe("ServersService", () => {
         .mockResolvedValueOnce(mockServerRecordIsInResponseChain);
       await serversService.stopServer(req, res);
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecordIsInResponseChain.id,
@@ -165,7 +165,7 @@ describe("ServersService", () => {
         [
           `( docker container inspect ${mockServerRecordIsInResponseChain.containerName} && docker stop ${mockServerRecordIsInResponseChain.containerName} && docker rm ${mockServerRecordIsInResponseChain.containerName} ) || true`,
         ],
-        mockServerRecordIsInResponseChain
+        mockServerRecordIsInResponseChain,
       );
     });
     it("should handle any database errors", async () => {
@@ -179,7 +179,7 @@ describe("ServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
@@ -187,7 +187,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(ephemeralContainerRun).not.toHaveBeenCalled();
     });
@@ -247,7 +247,7 @@ describe("ServersService", () => {
 
     const updateBuildStepExpectations = async () => {
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -257,36 +257,36 @@ describe("ServersService", () => {
         select: ServersService.completeServerSelect,
       });
       expect(
-        child_process.exec as unknown as jest.Mock
+        child_process.exec as unknown as jest.Mock,
       ).toHaveBeenNthCalledWith(
         1,
         expect.stringMatching(/mkdir .*-.*-.*-.*-.*/),
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(fs.writeFileSync as unknown as jest.Mock).toHaveBeenCalledWith(
         expect.stringMatching(
-          /.*-.*-.*-.*-.*\/start-server-manager-service-server.sh/
+          /.*-.*-.*-.*-.*\/start-server-manager-service-server.sh/,
         ),
         Buffer.from(
           mockCompleteServerRecord.files[0].content,
-          "base64"
-        ).toString("utf-8")
+          "base64",
+        ).toString("utf-8"),
       );
       expect(
-        child_process.exec as unknown as jest.Mock
+        child_process.exec as unknown as jest.Mock,
       ).toHaveBeenNthCalledWith(
         2,
         expect.stringMatching(
-          /cd .*-.*-.*-.*-.* && docker build -t containerName --no-cache --build-arg 'ENV=local' ./
+          /cd .*-.*-.*-.*-.* && docker build -t containerName --no-cache --build-arg 'ENV=local' ./,
         ),
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(
-        child_process.exec as unknown as jest.Mock
+        child_process.exec as unknown as jest.Mock,
       ).toHaveBeenNthCalledWith(
         3,
         expect.stringMatching(/rm -rf .*-.*-.*-.*-.*/),
-        expect.any(Function)
+        expect.any(Function),
       );
     };
     it("Should update server", async () => {
@@ -297,7 +297,7 @@ describe("ServersService", () => {
       await serversService.updateServer(req, res);
       updateBuildStepExpectations();
       expect(
-        child_process.exec as unknown as jest.Mock
+        child_process.exec as unknown as jest.Mock,
       ).toHaveBeenNthCalledWith(
         4,
         [
@@ -306,7 +306,7 @@ describe("ServersService", () => {
           "docker rm containerName",
           "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
         ].join(";"),
-        expect.any(Function)
+        expect.any(Function),
       );
     });
     it("Should update server using an ephemeral container", async () => {
@@ -329,7 +329,7 @@ describe("ServersService", () => {
           "docker rm containerName",
           "docker run --name=containerName -d --restart always --network=server-manager-service-network -p '3000:3000/udp' -p '3000:3000/tcp' --mount 'type=bind,src=/path/to/server-manager-service/prisma/db,dst=/server-manager-service/prisma/db' --mount 'type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock' --env 'ENV=local' containerName",
         ],
-        { ...mockServerRecord, isInResponseChain: true, isUpdatable: true }
+        { ...mockServerRecord, isInResponseChain: true, isUpdatable: true },
       );
     });
     it("should handle any database errors", async () => {
@@ -343,7 +343,7 @@ describe("ServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -355,7 +355,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(ephemeralContainerRun).not.toHaveBeenCalled();
     });
@@ -393,7 +393,7 @@ describe("ServersService", () => {
           callback(null, {
             stdout: `other|exited\n${mockServerRecord.containerName}|running\n`,
           });
-        }
+        },
       );
       await serversService.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
@@ -415,7 +415,7 @@ describe("ServersService", () => {
       (child_process.exec as unknown as jest.Mock).mockImplementation(
         (_, callback) => {
           callback(new Error("docker is down"));
-        }
+        },
       );
       await serversService.getServers(req, res);
       expect(res.json).toHaveBeenCalledWith([
@@ -452,7 +452,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -462,7 +462,7 @@ describe("ServersService", () => {
     it("Should return server", async () => {
       await serversService.getServerById(req, res);
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
@@ -478,7 +478,7 @@ describe("ServersService", () => {
           callback(null, {
             stdout: `${mockServerRecord.containerName}|running\n`,
           });
-        }
+        },
       );
       await serversService.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
@@ -490,7 +490,7 @@ describe("ServersService", () => {
       (child_process.exec as unknown as jest.Mock).mockImplementation(
         (_, callback) => {
           callback(new Error("docker is down"));
-        }
+        },
       );
       await serversService.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
@@ -509,7 +509,7 @@ describe("ServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        serversService.prisma.server.findUniqueOrThrow
+        serversService.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: { id: mockServerRecord.id, hostId },
         select: ServersService.defaultServerSelect,
@@ -517,7 +517,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -551,7 +551,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -583,7 +583,7 @@ describe("ServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });

@@ -39,7 +39,7 @@ prisma                  : 5.22.0
 ### Quick Notes
 
 Many of the steps involve running npx to interact with prisma. On most distros this will probably work as written.
-On NixOS, you will want to use the provided shell.nix to install the correct version of prisma and set some 
+On NixOS, you will want to use the provided shell.nix to install the correct version of prisma and set some
 environment variables. Alternatively, you can install prisma and set the environment variables in your .env file.
 Make sure to use the same tarball as the shell.nix for the prisma package.
 

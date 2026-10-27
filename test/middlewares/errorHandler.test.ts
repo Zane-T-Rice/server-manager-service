@@ -10,7 +10,7 @@ describe("errorHandler", () => {
     const result = wrapper(
       jest.fn() as unknown as Request,
       jest.fn() as unknown as Response,
-      nextFunction
+      nextFunction,
     );
     expect(await result).toBe(true);
   });
@@ -20,7 +20,7 @@ describe("errorHandler", () => {
     const result = wrapper(
       jest.fn() as unknown as Request,
       jest.fn() as unknown as Response,
-      nextFunction
+      nextFunction,
     );
     expect(await result).toEqual(nextFunctionResult);
   });

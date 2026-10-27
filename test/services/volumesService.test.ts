@@ -114,7 +114,7 @@ describe("VolumesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "volume",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe("VolumesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "volume",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -150,7 +150,7 @@ describe("VolumesService", () => {
     it("Should return volume", async () => {
       await volumesService.getVolumeById(req, res);
       expect(
-        volumesService.prisma.volume.findUniqueOrThrow
+        volumesService.prisma.volume.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where,
         select: VolumesService.defaultVolumeSelect,
@@ -168,7 +168,7 @@ describe("VolumesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        volumesService.prisma.volume.findUniqueOrThrow
+        volumesService.prisma.volume.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where,
         select: VolumesService.defaultVolumeSelect,
@@ -176,7 +176,7 @@ describe("VolumesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "volume",
-        [mockVolumeRecord.id]
+        [mockVolumeRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -210,7 +210,7 @@ describe("VolumesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "volume",
-        [mockVolumeRecord.id]
+        [mockVolumeRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -242,7 +242,7 @@ describe("VolumesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "volume",
-        [mockVolumeRecord.id]
+        [mockVolumeRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });

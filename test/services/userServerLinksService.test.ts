@@ -116,7 +116,7 @@ describe("UserServerLinksService", () => {
     it("Should return list of userServerLinks", async () => {
       await UserServerLinksService.instance.getUserServerLinks(req, res);
       expect(
-        UserServerLinksService.instance.prisma.user.findMany
+        UserServerLinksService.instance.prisma.user.findMany,
       ).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith([mockUserRecord]);
     });
@@ -131,12 +131,12 @@ describe("UserServerLinksService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.user.findMany
+        UserServerLinksService.instance.prisma.user.findMany,
       ).toHaveBeenCalled();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "userServerLink",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -152,12 +152,12 @@ describe("UserServerLinksService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.user.findMany
+        UserServerLinksService.instance.prisma.user.findMany,
       ).not.toHaveBeenCalled();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -167,10 +167,10 @@ describe("UserServerLinksService", () => {
     it("should connect the user and server", async () => {
       await UserServerLinksService.instance.createUserServerLinkByUserId(
         createRequest,
-        res
+        res,
       );
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -178,7 +178,7 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).toHaveBeenCalledWith({
         where: { userId },
         select: UserServerLinksService.defaultUserServerLinkSelect,
@@ -209,14 +209,14 @@ describe("UserServerLinksService", () => {
       (getAuth0UserById as jest.Mock).mockResolvedValue({ user_id: userId });
       await UserServerLinksService.instance.createUserServerLinkByUserId(
         createRequest,
-        res
+        res,
       );
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           create: expect.objectContaining({ email: null }),
-        })
+        }),
       );
     });
     it("should link a machine-to-machine application by its client sub", async () => {
@@ -229,12 +229,12 @@ describe("UserServerLinksService", () => {
           params: { hostId, serverId },
           body: { userId: "abc@clients" },
         } as unknown as Request,
-        res
+        res,
       );
       expect(getAuth0ClientById).toHaveBeenCalledWith("abc");
       expect(getAuth0UserById).not.toHaveBeenCalled();
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { userId: "abc@clients" },
@@ -243,19 +243,19 @@ describe("UserServerLinksService", () => {
             email: null,
             applicationName: "My Machine",
           }),
-        })
+        }),
       );
     });
     it("should reject a request without a userId", async () => {
       await expect(
         UserServerLinksService.instance.createUserServerLinkByUserId(
           emptyCreateRequest,
-          res
-        )
+          res,
+        ),
       ).rejects.toThrow("Argument `userId` is missing.");
       expect(getAuth0UserById).not.toHaveBeenCalled();
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).not.toHaveBeenCalled();
     });
     it("should handle errors when trying to connect the user and server", async () => {
@@ -267,13 +267,13 @@ describe("UserServerLinksService", () => {
       try {
         await UserServerLinksService.instance.createUserServerLinkByUserId(
           createRequest,
-          res
+          res,
         );
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -281,12 +281,12 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).not.toHaveBeenCalled();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
     });
     it("should handle errors when trying to connect the user and server", async () => {
@@ -298,13 +298,13 @@ describe("UserServerLinksService", () => {
       try {
         await UserServerLinksService.instance.createUserServerLinkByUserId(
           createRequest,
-          res
+          res,
         );
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -312,7 +312,7 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.upsert
+        UserServerLinksService.instance.prisma.user.upsert,
       ).toHaveBeenCalledWith({
         where: { userId },
         select: UserServerLinksService.defaultUserServerLinkSelect,
@@ -339,7 +339,7 @@ describe("UserServerLinksService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "userServerLink",
-        [userId]
+        [userId],
       );
     });
   });
@@ -348,10 +348,10 @@ describe("UserServerLinksService", () => {
     it("should disconnect the user and server", async () => {
       await UserServerLinksService.instance.deleteUserServerLinkByUserId(
         req,
-        res
+        res,
       );
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -359,7 +359,7 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.update
+        UserServerLinksService.instance.prisma.user.update,
       ).toHaveBeenCalledWith({
         where: { id: String(deleteUserId) },
         data: {
@@ -381,13 +381,13 @@ describe("UserServerLinksService", () => {
       try {
         await UserServerLinksService.instance.deleteUserServerLinkByUserId(
           req,
-          res
+          res,
         );
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -395,12 +395,12 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.update
+        UserServerLinksService.instance.prisma.user.update,
       ).not.toHaveBeenCalled();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
     });
     it("should handle errors when trying to connect the user and server", async () => {
@@ -412,13 +412,13 @@ describe("UserServerLinksService", () => {
       try {
         await UserServerLinksService.instance.deleteUserServerLinkByUserId(
           req,
-          res
+          res,
         );
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServerLinksService.instance.prisma.server.findUniqueOrThrow
+        UserServerLinksService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: String(serverId),
@@ -426,7 +426,7 @@ describe("UserServerLinksService", () => {
         },
       });
       expect(
-        UserServerLinksService.instance.prisma.user.update
+        UserServerLinksService.instance.prisma.user.update,
       ).toHaveBeenCalledWith({
         data: { servers: { disconnect: { id: serverId } } },
         where: { id: deleteUserId },
@@ -434,7 +434,7 @@ describe("UserServerLinksService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "userServerLink",
-        [deleteUserId]
+        [deleteUserId],
       );
     });
   });

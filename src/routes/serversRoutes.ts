@@ -12,7 +12,7 @@ wrappedRouter.post("/", ServersController.instance.createServer);
 /* POST update an existing server. */
 wrappedRouter.post(
   "/:serverId/update",
-  ServersController.instance.updateServer
+  ServersController.instance.updateServer,
 );
 
 /* POST stop an existing server. */

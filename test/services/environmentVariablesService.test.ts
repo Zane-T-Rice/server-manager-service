@@ -65,7 +65,7 @@ describe("EnvironmentVariablesService", () => {
     jest
       .spyOn(
         environmentVariablesService.prisma.environmentVariable,
-        "findUniqueOrThrow"
+        "findUniqueOrThrow",
       )
       .mockResolvedValue(mockEnvironmentVariableRecord);
     jest
@@ -81,7 +81,7 @@ describe("EnvironmentVariablesService", () => {
     EnvironmentVariablesService.instance.prisma = undefined;
     const prisma = new PrismaClient();
     const environmentVariablesService2 = new EnvironmentVariablesService(
-      prisma
+      prisma,
     );
     expect(environmentVariablesService2.prisma).toEqual(prisma);
   });
@@ -90,7 +90,7 @@ describe("EnvironmentVariablesService", () => {
     const currentPrisma = EnvironmentVariablesService.instance.prisma;
     const prisma = new PrismaClient();
     const environmentVariablesService2 = new EnvironmentVariablesService(
-      prisma
+      prisma,
     );
     expect(environmentVariablesService2.prisma).toEqual(currentPrisma);
   });
@@ -99,7 +99,7 @@ describe("EnvironmentVariablesService", () => {
     it("should create a new environmentVariable record and return the new record", async () => {
       await environmentVariablesService.createEnvironmentVariable(req, res);
       expect(
-        environmentVariablesService.prisma.environmentVariable.create
+        environmentVariablesService.prisma.environmentVariable.create,
       ).toHaveBeenCalledWith({
         data,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -117,7 +117,7 @@ describe("EnvironmentVariablesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        environmentVariablesService.prisma.environmentVariable.create
+        environmentVariablesService.prisma.environmentVariable.create,
       ).toHaveBeenCalledWith({
         data,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -125,7 +125,7 @@ describe("EnvironmentVariablesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "environment variable",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -135,7 +135,7 @@ describe("EnvironmentVariablesService", () => {
     it("Should return list of environmentVariables", async () => {
       await environmentVariablesService.getEnvironmentVariables(req, res);
       expect(
-        environmentVariablesService.prisma.environmentVariable.findMany
+        environmentVariablesService.prisma.environmentVariable.findMany,
       ).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith([mockEnvironmentVariableRecord]);
     });
@@ -144,7 +144,7 @@ describe("EnvironmentVariablesService", () => {
       jest
         .spyOn(
           environmentVariablesService.prisma.environmentVariable,
-          "findMany"
+          "findMany",
         )
         .mockRejectedValue(new Error());
       try {
@@ -153,12 +153,12 @@ describe("EnvironmentVariablesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        environmentVariablesService.prisma.environmentVariable.findMany
+        environmentVariablesService.prisma.environmentVariable.findMany,
       ).toHaveBeenCalled();
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "environment variable",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -168,7 +168,8 @@ describe("EnvironmentVariablesService", () => {
     it("Should return environmentVariable", async () => {
       await environmentVariablesService.getEnvironmentVariableById(req, res);
       expect(
-        environmentVariablesService.prisma.environmentVariable.findUniqueOrThrow
+        environmentVariablesService.prisma.environmentVariable
+          .findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -180,7 +181,7 @@ describe("EnvironmentVariablesService", () => {
       jest
         .spyOn(
           environmentVariablesService.prisma.environmentVariable,
-          "findUniqueOrThrow"
+          "findUniqueOrThrow",
         )
         .mockRejectedValue(new Error());
       try {
@@ -189,7 +190,8 @@ describe("EnvironmentVariablesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        environmentVariablesService.prisma.environmentVariable.findUniqueOrThrow
+        environmentVariablesService.prisma.environmentVariable
+          .findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -197,7 +199,7 @@ describe("EnvironmentVariablesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "environment variable",
-        [mockEnvironmentVariableRecord.id]
+        [mockEnvironmentVariableRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -207,7 +209,7 @@ describe("EnvironmentVariablesService", () => {
     it("Should patch environmentVariable", async () => {
       await environmentVariablesService.patchEnvironmentVariable(req, res);
       expect(
-        environmentVariablesService.prisma.environmentVariable.update
+        environmentVariablesService.prisma.environmentVariable.update,
       ).toHaveBeenCalledWith({
         data: { ...body },
         where,
@@ -226,7 +228,7 @@ describe("EnvironmentVariablesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        environmentVariablesService.prisma.environmentVariable.update
+        environmentVariablesService.prisma.environmentVariable.update,
       ).toHaveBeenCalledWith({
         data: { ...body },
         where,
@@ -235,7 +237,7 @@ describe("EnvironmentVariablesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "environment variable",
-        [mockEnvironmentVariableRecord.id]
+        [mockEnvironmentVariableRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -245,7 +247,7 @@ describe("EnvironmentVariablesService", () => {
     it("Should delete environmentVariable", async () => {
       await environmentVariablesService.deleteEnvironmentVariable(req, res);
       expect(
-        environmentVariablesService.prisma.environmentVariable.delete
+        environmentVariablesService.prisma.environmentVariable.delete,
       ).toHaveBeenCalledWith({
         where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -263,7 +265,7 @@ describe("EnvironmentVariablesService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        environmentVariablesService.prisma.environmentVariable.delete
+        environmentVariablesService.prisma.environmentVariable.delete,
       ).toHaveBeenCalledWith({
         where,
         select: EnvironmentVariablesService.defaultEnvironmentVariableSelect,
@@ -271,7 +273,7 @@ describe("EnvironmentVariablesService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "environment variable",
-        [mockEnvironmentVariableRecord.id]
+        [mockEnvironmentVariableRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });

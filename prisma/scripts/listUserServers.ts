@@ -7,22 +7,22 @@ const prisma = new PrismaClient();
 prisma.user
   .findMany({
     include: {
-      servers: true
-    }
+      servers: true,
+    },
   })
   .then((users) => {
-    users.map(user => {
+    users.map((user) => {
       console.groupEnd();
       console.group(user.id);
-      user.servers.map(server => {
+      user.servers.map((server) => {
         console.log({
           serverId: server.id,
           hostId: server.hostId,
           containerName: server.containerName,
-          applicationName: server.applicationName
-        })
-      })
-    })
+          applicationName: server.applicationName,
+        });
+      });
+    });
   })
   .catch((e) => {
     console.error(e);

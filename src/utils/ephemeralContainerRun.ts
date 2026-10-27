@@ -15,7 +15,7 @@ export async function ephemeralContainerRun(
   req: Request,
   res: Response,
   commands: string[],
-  responseJSON: object
+  responseJSON: object,
 ) {
   const ephemeralContainerRun = buildEphemeralContainerRun(commands);
   req.log.flush(); // Make sure the logs are written out in case the server gets torn down by the commands.

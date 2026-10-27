@@ -32,7 +32,7 @@ describe("ephemeralContainerRun", () => {
     (child_process.exec as unknown as jest.Mock).mockImplementation(
       (_, callback) => {
         callback(null, { stdout: "" });
-      }
+      },
     );
   });
 
@@ -41,13 +41,13 @@ describe("ephemeralContainerRun", () => {
       req,
       res,
       ["this", "is", "another", "command"],
-      mockServerRecord
+      mockServerRecord,
     );
     expect(child_process.exec as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.stringMatching(
-        /docker run --name=ephemeral-.*-.*-.*-.*-.* -d --rm -v \/var\/run\/docker.sock:\/var\/run\/docker.sock -t alpine sh -c 'apk add docker; addgroup \${USER} docker; this;is;another;command'/
+        /docker run --name=ephemeral-.*-.*-.*-.*-.* -d --rm -v \/var\/run\/docker.sock:\/var\/run\/docker.sock -t alpine sh -c 'apk add docker; addgroup \${USER} docker; this;is;another;command'/,
       ),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 });

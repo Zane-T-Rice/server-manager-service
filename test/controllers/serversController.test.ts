@@ -31,7 +31,7 @@ describe("ServersController", () => {
       await serversController.createServer(req, res);
       expect(ServersService.instance.createServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -41,7 +41,7 @@ describe("ServersController", () => {
       await serversController.updateServer(req, res);
       expect(ServersService.instance.updateServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -65,7 +65,7 @@ describe("ServersController", () => {
       await serversController.getServerById(req, res);
       expect(ServersService.instance.getServerById).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -75,7 +75,7 @@ describe("ServersController", () => {
       await serversController.patchServer(req, res);
       expect(ServersService.instance.patchServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -85,7 +85,7 @@ describe("ServersController", () => {
       await serversController.deleteServer(req, res);
       expect(ServersService.instance.deleteServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });

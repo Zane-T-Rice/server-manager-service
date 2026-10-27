@@ -29,7 +29,7 @@ describe("UserServersController", () => {
       await serversController.updateServer(req, res);
       expect(UserServersService.instance.updateServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -39,7 +39,7 @@ describe("UserServersController", () => {
       await serversController.stopServer(req, res);
       expect(UserServersService.instance.stopServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -49,7 +49,7 @@ describe("UserServersController", () => {
       await serversController.getServers(req, res);
       expect(UserServersService.instance.getServers).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -59,7 +59,7 @@ describe("UserServersController", () => {
       await serversController.getServerById(req, res);
       expect(UserServersService.instance.getServerById).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });
@@ -69,7 +69,7 @@ describe("UserServersController", () => {
       await serversController.deleteServer(req, res);
       expect(UserServersService.instance.deleteServer).toHaveBeenCalledWith(
         req,
-        res
+        res,
       );
     });
   });

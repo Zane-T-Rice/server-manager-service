@@ -30,7 +30,7 @@ describe("isHostMiddleware", () => {
     await isHostMiddleware(prisma as unknown as PrismaClient)(
       { params: { hostId } } as unknown as Request,
       {} as Response,
-      next
+      next,
     );
     expect(prisma.host.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id: hostId },
@@ -43,12 +43,12 @@ describe("isHostMiddleware", () => {
     await isHostMiddleware(prisma as unknown as PrismaClient)(
       { params: { hostId } } as unknown as Request,
       {} as Response,
-      next
+      next,
     );
     expect(handleDatabaseErrors).toHaveBeenCalledWith(
       expect.any(Error),
       "host",
-      [hostId]
+      [hostId],
     );
     expect(next).not.toHaveBeenCalled();
   });

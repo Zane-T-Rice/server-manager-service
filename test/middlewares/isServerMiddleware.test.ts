@@ -30,12 +30,12 @@ describe("isServerMiddleware", () => {
   describe("server-manager:admin", () => {
     it("should call next if server exists", async () => {
       prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
-        {} as unknown as Server
+        {} as unknown as Server,
       );
       await isServerMiddleware(prisma as unknown as PrismaClient)(
         { params: { hostId, serverId } } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: serverId, hostId },
@@ -48,12 +48,12 @@ describe("isServerMiddleware", () => {
       await isServerMiddleware(prisma as unknown as PrismaClient)(
         { params: { hostId, serverId } } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
       expect(next).not.toHaveBeenCalled();
     });
@@ -62,7 +62,7 @@ describe("isServerMiddleware", () => {
   describe("server-manager:public", () => {
     it("should call next if server exists", async () => {
       prisma.server.findUniqueOrThrow.mockResolvedValueOnce(
-        {} as unknown as Server
+        {} as unknown as Server,
       );
       await isServerMiddleware(prisma as unknown as PrismaClient)(
         {
@@ -70,7 +70,7 @@ describe("isServerMiddleware", () => {
           auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(prisma.server.findUniqueOrThrow).toHaveBeenCalledWith({
         where: {
@@ -93,12 +93,12 @@ describe("isServerMiddleware", () => {
           auth: { payload: { sub: userId } },
         } as unknown as Request,
         {} as Response,
-        next
+        next,
       );
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [serverId]
+        [serverId],
       );
       expect(next).not.toHaveBeenCalled();
     });

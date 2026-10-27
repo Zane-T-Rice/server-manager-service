@@ -71,7 +71,7 @@ const seed = async () => {
         },
         select: { id: true, url: true, name: true },
       });
-    })
+    }),
   );
   servers[0].hostId = dbHosts[0].id;
   servers[1].hostId = dbHosts[1].id;
@@ -106,7 +106,7 @@ const seed = async () => {
           },
           select: FilesService.defaultFileSelect,
         });
-      })
+      }),
     );
   });
   await Promise.all(promises);

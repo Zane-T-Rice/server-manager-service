@@ -21,7 +21,7 @@ class UserServerLinksController {
   async createUserServerLinkByUserId(req: Request, res: Response) {
     await UserServerLinksService.instance.createUserServerLinkByUserId(
       req,
-      res
+      res,
     );
   }
 
@@ -29,7 +29,7 @@ class UserServerLinksController {
   async deleteUserServerLinkByUserId(req: Request, res: Response) {
     await UserServerLinksService.instance.deleteUserServerLinkByUserId(
       req,
-      res
+      res,
     );
   }
 }

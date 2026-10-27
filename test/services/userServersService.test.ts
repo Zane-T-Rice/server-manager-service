@@ -108,7 +108,7 @@ describe("UserServersService", () => {
     it("Should stop server", async () => {
       await UserServersService.instance.stopServer(req, res);
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -121,7 +121,7 @@ describe("UserServersService", () => {
         select: { hostId: true },
       });
       expect(
-        ServersService.instance.stopServer as unknown as jest.Mock
+        ServersService.instance.stopServer as unknown as jest.Mock,
       ).toHaveBeenCalledWith(expReq, res);
     });
     it("should handle any database errors", async () => {
@@ -135,7 +135,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -150,7 +150,7 @@ describe("UserServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
     });
   });
@@ -159,7 +159,7 @@ describe("UserServersService", () => {
     it("Should update server", async () => {
       await UserServersService.instance.updateServer(req, res);
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -172,7 +172,7 @@ describe("UserServersService", () => {
         select: { hostId: true },
       });
       expect(
-        ServersService.instance.updateServer as unknown as jest.Mock
+        ServersService.instance.updateServer as unknown as jest.Mock,
       ).toHaveBeenCalledWith(expReq, res);
     });
     it("should handle any database errors", async () => {
@@ -186,7 +186,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -201,7 +201,7 @@ describe("UserServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
     });
   });
@@ -227,7 +227,7 @@ describe("UserServersService", () => {
     it("Should return list of servers", async () => {
       await UserServersService.instance.getServers(req, res);
       expect(
-        UserServersService.instance.prisma.server.findMany
+        UserServersService.instance.prisma.server.findMany,
       ).toHaveBeenCalledWith({
         select: UserServersService.defaultServerSelect,
         where: {
@@ -251,7 +251,7 @@ describe("UserServersService", () => {
       } as unknown as Request;
       await UserServersService.instance.getServers(isUpdatableRequest, res);
       expect(
-        UserServersService.instance.prisma.server.findMany
+        UserServersService.instance.prisma.server.findMany,
       ).toHaveBeenCalledWith({
         select: UserServersService.defaultServerSelect,
         where: {
@@ -307,10 +307,10 @@ describe("UserServersService", () => {
           `https://remote.example/2${Routes.PROXY}/users/servers`,
           expect.objectContaining({
             headers: { authorization: "Bearer token" },
-          })
+          }),
         );
         expect(
-          ServersService.instance.getContainerStatuses
+          ServersService.instance.getContainerStatuses,
         ).not.toHaveBeenCalled();
         expect(res.json).toHaveBeenCalledWith([
           { ...serverWithHost(remoteHost), status: "running" },
@@ -336,7 +336,7 @@ describe("UserServersService", () => {
             ...authedReq,
             originalUrl: `${Routes.PROXY}/users/servers`,
           } as unknown as Request,
-          res
+          res,
         );
         expect(fetchMock).not.toHaveBeenCalled();
         expect(res.json).toHaveBeenCalledWith([
@@ -355,7 +355,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServersService.instance.prisma.server.findMany
+        UserServersService.instance.prisma.server.findMany,
       ).toHaveBeenCalledWith({
         select: UserServersService.defaultServerSelect,
         where: {
@@ -369,7 +369,7 @@ describe("UserServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        []
+        [],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -382,7 +382,7 @@ describe("UserServersService", () => {
         .mockResolvedValue(new Map());
       await UserServersService.instance.getServerById(req, res);
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         select: UserServersService.defaultServerSelect,
         where: {
@@ -403,7 +403,7 @@ describe("UserServersService", () => {
       jest
         .spyOn(ServersService.instance, "getContainerStatuses")
         .mockResolvedValue(
-          new Map([[mockServerRecord.containerName, "running"]])
+          new Map([[mockServerRecord.containerName, "running"]]),
         );
       await UserServersService.instance.getServerById(req, res);
       expect(res.json).toHaveBeenCalledWith({
@@ -432,7 +432,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).toHaveBeenCalledWith({
         select: UserServersService.defaultServerSelect,
         where: {
@@ -447,7 +447,7 @@ describe("UserServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -457,7 +457,7 @@ describe("UserServersService", () => {
     it("Should delete server", async () => {
       await UserServersService.instance.deleteServer(req, res);
       expect(
-        UserServersService.instance.prisma.user.findMany
+        UserServersService.instance.prisma.user.findMany,
       ).toHaveBeenCalledWith({
         where: {
           servers: {
@@ -468,7 +468,7 @@ describe("UserServersService", () => {
         },
       });
       expect(
-        UserServersService.instance.prisma.server.delete
+        UserServersService.instance.prisma.server.delete,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -493,7 +493,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(Error);
       }
       expect(
-        UserServersService.instance.prisma.server.delete
+        UserServersService.instance.prisma.server.delete,
       ).toHaveBeenCalledWith({
         where: {
           id: mockServerRecord.id,
@@ -508,7 +508,7 @@ describe("UserServersService", () => {
       expect(handleDatabaseErrors).toHaveBeenCalledWith(
         expect.any(Error),
         "server",
-        [mockServerRecord.id]
+        [mockServerRecord.id],
       );
       expect(res.json).not.toHaveBeenCalled();
     });
@@ -523,7 +523,7 @@ describe("UserServersService", () => {
         expect(e).toBeInstanceOf(BadRequestError);
       }
       expect(
-        UserServersService.instance.prisma.server.findUniqueOrThrow
+        UserServersService.instance.prisma.server.findUniqueOrThrow,
       ).not.toHaveBeenCalled();
       expect(handleDatabaseErrors).not.toHaveBeenCalled();
       expect(res.json).not.toHaveBeenCalled();
@@ -539,12 +539,12 @@ describe("UserServersService", () => {
     });
     it('should return undefined for "badbooleantext"', () => {
       expect(
-        new UserServersService().stringToBoolean("badbooleantext")
+        new UserServersService().stringToBoolean("badbooleantext"),
       ).toBeUndefined();
     });
     it("should return undefined for undefined", () => {
       expect(
-        new UserServersService().stringToBoolean(undefined)
+        new UserServersService().stringToBoolean(undefined),
       ).toBeUndefined();
     });
     it("should return undefined for null", () => {

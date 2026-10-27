@@ -28,7 +28,7 @@ describe("EnvironmentVariablesController", () => {
     it("should call createEnvironmentVariable in EnvironmentVariablesService", async () => {
       await environmentVariablesController.createEnvironmentVariable(req, res);
       expect(
-        EnvironmentVariablesService.instance.createEnvironmentVariable
+        EnvironmentVariablesService.instance.createEnvironmentVariable,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -37,7 +37,7 @@ describe("EnvironmentVariablesController", () => {
     it("should call getEnvironmentVariables in EnvironmentVariablesService", async () => {
       await environmentVariablesController.getEnvironmentVariables(req, res);
       expect(
-        EnvironmentVariablesService.instance.getEnvironmentVariables
+        EnvironmentVariablesService.instance.getEnvironmentVariables,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -46,7 +46,7 @@ describe("EnvironmentVariablesController", () => {
     it("should call getEnvironmentVariableById in EnvironmentVariablesService", async () => {
       await environmentVariablesController.getEnvironmentVariableById(req, res);
       expect(
-        EnvironmentVariablesService.instance.getEnvironmentVariableById
+        EnvironmentVariablesService.instance.getEnvironmentVariableById,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -55,7 +55,7 @@ describe("EnvironmentVariablesController", () => {
     it("should call patchEnvironmentVariable in EnvironmentVariablesService", async () => {
       await environmentVariablesController.patchEnvironmentVariable(req, res);
       expect(
-        EnvironmentVariablesService.instance.patchEnvironmentVariable
+        EnvironmentVariablesService.instance.patchEnvironmentVariable,
       ).toHaveBeenCalledWith(req, res);
     });
   });
@@ -64,7 +64,7 @@ describe("EnvironmentVariablesController", () => {
     it("should call deleteEnvironmentVariable in EnvironmentVariablesService", async () => {
       await environmentVariablesController.deleteEnvironmentVariable(req, res);
       expect(
-        EnvironmentVariablesService.instance.deleteEnvironmentVariable
+        EnvironmentVariablesService.instance.deleteEnvironmentVariable,
       ).toHaveBeenCalledWith(req, res);
     });
   });

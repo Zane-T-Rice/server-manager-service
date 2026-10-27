@@ -12,13 +12,13 @@ prisma.user
   })
   .then(async (users) => {
     const usersWithNoServers = users.filter(
-      (user) => user.servers.length === 0
+      (user) => user.servers.length === 0,
     );
     if (usersWithNoServers) {
       await Promise.all(
         usersWithNoServers.map(
-          async (user) => await prisma.user.delete({ where: { id: user.id } })
-        )
+          async (user) => await prisma.user.delete({ where: { id: user.id } }),
+        ),
       );
     }
   })
