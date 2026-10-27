@@ -23,40 +23,41 @@ const hosts: PartialHost[] = [
     name: "HOST 2",
   },
 ];
+const minFiles = [
+  {
+    name: "Dockerfile",
+    content:
+      "IyBJIGhhdmUgZm91bmQgdGhpcyB1c2VmdWwgYXMgYSBkdW1teSBzZXJ2ZXIgZm9yIHRlc3RpbmcgZHVyaW5nIGRldmVsb3BtZW50LgpGUk9NIGFscGluZQpSVU4gYXBrIGFkZCBiYXNoCkNPUFkgLi9zdGFydC1taW4uc2ggL3N0YXJ0LW1pbi5zaApFTlRSWVBPSU5UIFsiYmFzaCIsICIvc3RhcnQtbWluLnNoIl0K",
+  },
+  {
+    name: "start-min.sh",
+    content: "d2hpbGUgdHJ1ZTtkbyBzbGVlcCAzMDsgZG9uZQ==",
+  },
+];
 const servers: PartialServer[] = [
   {
     applicationName: "min-app",
     containerName: "min-container",
     isInResponseChain: false,
     isUpdatable: true,
-    files: [
-      {
-        name: "Dockerfile",
-        content:
-          "IyBJIGhhdmUgZm91bmQgdGhpcyB1c2VmdWwgYXMgYSBkdW1teSBzZXJ2ZXIgZm9yIHRlc3RpbmcgZHVyaW5nIGRldmVsb3BtZW50LgpGUk9NIGFscGluZQpSVU4gYXBrIGFkZCBiYXNoCkNPUFkgLi9zdGFydC1taW4uc2ggL3N0YXJ0LW1pbi5zaApFTlRSWVBPSU5UIFsiYmFzaCIsICIvc3RhcnQtbWluLnNoIl0K",
-      },
-      {
-        name: "start-min.sh",
-        content: "d2hpbGUgdHJ1ZTtkbyBzbGVlcCAzMDsgZG9uZQ==",
-      },
-    ],
+    files: minFiles,
   },
   {
     applicationName: "min-app-2",
     containerName: "min-container-2",
     isInResponseChain: false,
     isUpdatable: true,
-    files: [
-      {
-        name: "Dockerfile",
-        content:
-          "IyBJIGhhdmUgZm91bmQgdGhpcyB1c2VmdWwgYXMgYSBkdW1teSBzZXJ2ZXIgZm9yIHRlc3RpbmcgZHVyaW5nIGRldmVsb3BtZW50LgpGUk9NIGFscGluZQpSVU4gYXBrIGFkZCBiYXNoCkNPUFkgLi9zdGFydC1taW4uc2ggL3N0YXJ0LW1pbi5zaApFTlRSWVBPSU5UIFsiYmFzaCIsICIvc3RhcnQtbWluLnNoIl0K",
-      },
-      {
-        name: "start-min.sh",
-        content: "d2hpbGUgdHJ1ZTtkbyBzbGVlcCAzMDsgZG9uZQ==",
-      },
-    ],
+    files: minFiles,
+  },
+  {
+    // Long names, to check how they lay out (i.e. on the My Servers cards).
+    applicationName:
+      "min-app-with-a-very-long-application-name-for-checking-the-layout",
+    containerName:
+      "min-container-with-a-very-long-container-name-for-checking-the-layout",
+    isInResponseChain: false,
+    isUpdatable: true,
+    files: minFiles,
   },
 ];
 
@@ -75,6 +76,7 @@ const seed = async () => {
   );
   servers[0].hostId = dbHosts[0].id;
   servers[1].hostId = dbHosts[1].id;
+  servers[2].hostId = dbHosts[0].id;
   const promises = servers.map(async (server) => {
     const {
       applicationName,
