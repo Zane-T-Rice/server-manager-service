@@ -26,7 +26,7 @@ import { Permissions } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { healthCheck, shutdownOnSignals } from "./utils";
+import { canCheckHealth, healthCheck, shutdownOnSignals } from "./utils";
 
 dotenv.config();
 
@@ -65,9 +65,6 @@ app.use(
   }),
 );
 
-// Anyone may ask whether the service is up, so this is registered before the token check.
-app.get("/health", healthCheck(prisma));
-
 // Swagger
 // Use a workaround for swagger-ui-dist not being able to set custom swagger URL
 // The swaggerPath accounts for running using ts-node (start:dev) versus tsc (start).
@@ -97,6 +94,9 @@ app.use(
     tokenSigningAlg: process.env.TOKEN_SIGNING_ALG,
   }),
 );
+
+// Whether the service is up. Needs a valid token and either permission, like the least a user can do.
+app.get("/health", canCheckHealth, healthCheck(prisma));
 
 // For routes that require a host, make sure the host is real.
 app.use(

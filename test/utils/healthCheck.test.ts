@@ -1,5 +1,41 @@
 import { Request } from "express";
-import { healthCheck } from "../../src/utils";
+import { canCheckHealth, healthCheck } from "../../src/utils";
+
+describe("canCheckHealth", () => {
+  const ask = (auth: object | undefined) => {
+    const next = jest.fn();
+    try {
+      canCheckHealth({ auth } as never, {} as never, next);
+    } catch (e) {
+      next(e);
+    }
+    return next;
+  };
+
+  it.each([
+    "server-manager:admin",
+    "server-manager:public",
+    "other server-manager:public",
+  ])("lets a token with the scope %s through", (scope) => {
+    const next = ask({ payload: { scope } });
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("refuses a valid token that has neither permission", () => {
+    const next = ask({ payload: { scope: "gloomhaven-companion:public" } });
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }));
+  });
+
+  it("refuses a token with no scopes at all", () => {
+    const next = ask({ payload: {} });
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }));
+  });
+
+  it("refuses a request that is not logged in", () => {
+    const next = ask(undefined);
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 401 }));
+  });
+});
 
 describe("healthCheck", () => {
   const res = () => {
