@@ -24,7 +24,9 @@ and `nixos-rebuild` makes the machine match it.
 
 2.  Built both new configurations without activating them. `build` only fills the nix store:
 
-    sudo nixos-rebuild build
+```sh
+sudo nixos-rebuild build
+```
 
 3.  Asked what activation would change:
 
@@ -37,23 +39,31 @@ and `nixos-rebuild` makes the machine match it.
 
 4.  Create the join token on 192.168.1.3. It lives outside the nix store, which anyone can read:
 
-    sudo install -d -m700 /var/lib/rancher/k3s
-    openssl rand -hex 32 | sudo install -m600 /dev/stdin /var/lib/rancher/k3s/shared-token
+```sh
+sudo install -d -m700 /var/lib/rancher/k3s
+openssl rand -hex 32 | sudo install -m600 /dev/stdin /var/lib/rancher/k3s/shared-token
+```
 
 5.  Copy the same token to 192.168.1.4 (piped machine to machine, so it is never printed):
 
-    ssh 192.168.1.3 'sudo cat /var/lib/rancher/k3s/shared-token' \
-     | ssh 192.168.1.4 'sudo install -d -m700 /var/lib/rancher/k3s && sudo install -m600 /dev/stdin /var/lib/rancher/k3s/shared-token'
+```sh
+ssh 192.168.1.3 'sudo cat /var/lib/rancher/k3s/shared-token' \
+ | ssh 192.168.1.4 'sudo install -d -m700 /var/lib/rancher/k3s && sudo install -m600 /dev/stdin /var/lib/rancher/k3s/shared-token'
+```
 
 6.  Activate on the control plane first, then wait for it to answer:
 
-    sudo nixos-rebuild switch # on 192.168.1.3
-    sudo k3s kubectl get nodes # `server` should become Ready
+```sh
+sudo nixos-rebuild switch # on 192.168.1.3
+sudo k3s kubectl get nodes # `server` should become Ready
+```
 
 7.  Activate on the second desktop and check that it joined:
 
-    sudo nixos-rebuild switch # on 192.168.1.4
-    sudo k3s kubectl get nodes # `server` and `server2`, both Ready
+```sh
+sudo nixos-rebuild switch # on 192.168.1.4
+sudo k3s kubectl get nodes # `server` and `server2`, both Ready
+```
 
 8.  Apply the manifests from this repo (on 192.168.1.3, after copying `deploy/` there). Edit
     `allowedHostPaths` in `20-admission-policy.yaml` first:
