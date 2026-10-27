@@ -55,6 +55,17 @@ describe("appErrorHandler", () => {
     expect(resMock.json).toHaveBeenCalledWith(notAuthorizedError);
   });
 
+  it.each(["InvalidRequestError", "InvalidTokenError"])(
+    "should set 401 status and return NotAuthorizedError for the token error %s",
+    (name) => {
+      const error = Object.assign(new Error(), { name });
+      appErrorHandler(error, reqMock, resMock, nextMock);
+
+      expect(resMock.status).toHaveBeenCalledWith(401);
+      expect(resMock.json).toHaveBeenCalledWith(new NotAuthorizedError());
+    },
+  );
+
   it("should set 500 status and return InternalServerError as a default", () => {
     const error = new Error();
     appErrorHandler(error, reqMock, resMock, nextMock);
