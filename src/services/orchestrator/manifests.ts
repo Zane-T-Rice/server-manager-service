@@ -80,6 +80,9 @@ export function buildDeployment(
         },
         spec: {
           restartPolicy: "Always",
+          // Servers find each other by name through DNS. The injected environment variables are noise that can
+          // collide with an application's own settings.
+          enableServiceLinks: false,
           ...(serviceAccountName
             ? { serviceAccountName }
             : { automountServiceAccountToken: false }),
@@ -93,8 +96,11 @@ export function buildDeployment(
                 name,
                 value,
               })),
+              // Published on the node the pod runs on, as `docker run -p N:N` did. Unlike a NodePort this
+              // does not need the number to be unique across the cluster.
               ports: server.ports.map((port) => ({
                 containerPort: port.number,
+                hostPort: port.number,
                 protocol: port.protocol.toUpperCase(),
               })),
               volumeMounts: server.volumes.map((volume, index) => ({
@@ -109,33 +115,6 @@ export function buildDeployment(
           })),
         },
       },
-    },
-  };
-}
-
-/* Publishes each port on the node under the same number, as `docker run -p N:N` did. */
-export function buildService(server: ServerSpec) {
-  return {
-    apiVersion: "v1",
-    kind: "Service",
-    metadata: {
-      name: resourceName(server),
-      namespace: WORKLOADS_NAMESPACE,
-      labels: labels(server),
-    },
-    spec: {
-      type: "NodePort",
-      // Only the node running the pod answers, as with docker, and players keep their real source address.
-      // Forwarding between nodes would hide it behind a pod-network address.
-      externalTrafficPolicy: "Local",
-      selector: labels(server),
-      ports: server.ports.map((port) => ({
-        name: `${port.protocol.toLowerCase()}-${port.number}`,
-        port: port.number,
-        targetPort: port.number,
-        nodePort: port.number,
-        protocol: port.protocol.toUpperCase(),
-      })),
     },
   };
 }

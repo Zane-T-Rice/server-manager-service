@@ -37,6 +37,7 @@ spec:
             # Plus DATABASE_URL, AUDIENCE, ISSUER, TOKEN_SIGNING_ALG, WEBSITE_DOMAIN, ... as in the README.
           ports:
             - containerPort: 3000
+              hostPort: 3000
           volumeMounts:
             - name: db
               mountPath: /server-manager-service/prisma/db
@@ -45,23 +46,3 @@ spec:
           hostPath:
             path: /srv/server-manager/db
             type: Directory
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: server-${SERVER_ID}
-  namespace: server-manager-workloads
-spec:
-  type: NodePort
-  externalTrafficPolicy: Local
-  selector:
-    app.kubernetes.io/managed-by: server-manager
-    server-manager/server-id: ${SERVER_ID}
-  ports:
-    - {
-        name: tcp-3000,
-        port: 3000,
-        targetPort: 3000,
-        nodePort: 3000,
-        protocol: TCP,
-      }

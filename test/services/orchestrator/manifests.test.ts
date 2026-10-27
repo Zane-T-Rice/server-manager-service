@@ -4,7 +4,6 @@ import {
   buildBuilderJob,
   buildContextConfigMap,
   buildDeployment,
-  buildService,
   deploymentStatus,
   imageRef,
   labelSelector,
@@ -57,10 +56,12 @@ describe("orchestrator manifests", () => {
     });
     const pod = deployment.spec.template.spec;
     expect(pod.nodeSelector).toEqual({ "kubernetes.io/hostname": "desktop-1" });
+    expect(pod.enableServiceLinks).toBe(false);
     expect(pod.containers[0].env).toEqual([{ name: "EULA", value: "true" }]);
+    // Published on the node under the same number, as `docker run -p N:N` did.
     expect(pod.containers[0].ports).toEqual([
-      { containerPort: 25565, protocol: "TCP" },
-      { containerPort: 19132, protocol: "UDP" },
+      { containerPort: 25565, hostPort: 25565, protocol: "TCP" },
+      { containerPort: 19132, hostPort: 19132, protocol: "UDP" },
     ]);
     expect(pod.containers[0].volumeMounts).toEqual([
       { name: "volume-0", mountPath: "/data" },
@@ -78,28 +79,6 @@ describe("orchestrator manifests", () => {
       .template.spec;
     expect(own).toMatchObject({ serviceAccountName: "server-manager" });
     expect(own).not.toHaveProperty("automountServiceAccountToken");
-  });
-
-  it("publishes each port on the node under the same number", () => {
-    const service = buildService(server);
-    expect(service.spec.type).toBe("NodePort");
-    expect(service.spec.externalTrafficPolicy).toBe("Local");
-    expect(service.spec.ports).toEqual([
-      {
-        name: "tcp-25565",
-        port: 25565,
-        targetPort: 25565,
-        nodePort: 25565,
-        protocol: "TCP",
-      },
-      {
-        name: "udp-19132",
-        port: 19132,
-        targetPort: 19132,
-        nodePort: 19132,
-        protocol: "UDP",
-      },
-    ]);
   });
 
   it("puts build files in a config map by base name", () => {

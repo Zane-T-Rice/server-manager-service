@@ -1,6 +1,6 @@
 # Pods in the workloads namespace cannot be reached from other pods (so one server cannot
 # attack another, or the service). Traffic from outside the pod network, which is how
-# players and the reverse proxy arrive through a NodePort, is still accepted.
+# players and the reverse proxy arrive on a hostPort, is still accepted.
 # 10.42.0.0/16 is the k3s default pod CIDR; change it if you changed cluster-cidr.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

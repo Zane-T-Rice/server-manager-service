@@ -1,7 +1,7 @@
 # /etc/rancher/k3s/config.yaml on the control-plane desktop.
-# Game servers keep the exact ports they use today, so NodePorts must cover them.
-# Beware: a NodePort on a port a host service already uses (22, 80, 443, 6443, 10250, ...)
-# hijacks that port on every node. Do not give a server one of those.
+# Only the registry (deploy/40-registry.yaml) uses a NodePort, on 5000, which the default range (30000-32767) excludes.
+# Servers publish their ports on the node they run on with hostPort, so the same number can be used on different nodes.
+# Do not give a server a port that a host service already listens on (22, 6443, 10250, ...): the pod cannot start.
 kube-apiserver-arg:
   - "service-node-port-range=1-65535"
 write-kubeconfig-mode: "0600"

@@ -5,7 +5,6 @@ import {
   buildDeployment,
   aliasName,
   buildAliasService,
-  buildService,
   CONTAINER_NAME_ANNOTATION,
   deploymentStatus,
   labelSelector,
@@ -118,14 +117,10 @@ export async function applyServer(server: ServerSpec) {
     await apps.createNamespacedDeployment({ namespace, body: deployment });
   }
 
-  // Services cannot be replaced without their cluster IP, and are cheap to recreate.
+  // Ports are published by the pod itself now. Remove the NodePort service earlier versions created.
   await ignoreNotFound(core.deleteNamespacedService({ name, namespace }));
-  if (server.ports.length > 0) {
-    await core.createNamespacedService({
-      namespace,
-      body: buildService(server),
-    });
-  }
+
+  // Services cannot be replaced without their cluster IP, and are cheap to recreate.
 
   const alias = buildAliasService(server);
   const aliasServiceName = aliasName(server);

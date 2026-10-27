@@ -61,6 +61,7 @@ Then update one low-stakes server through the API and check `kubectl -n server-m
 ## Notes
 
 - Old docker containers keep running and keep their ports. Stop each one before updating its server
-  through the new path, or the NodePort will clash with the still-bound host port.
+  through the new path, or the pod cannot bind the port the docker container still holds.
 - The registry is plain http on the LAN. Put it behind TLS if the desktops are not on a trusted network.
-- A NodePort on a port a host service already uses (22, 80, 443, 6443, 10250, ...) takes that port over.
+- Ports are published with hostPort on the node the pod runs on, like `docker run -p`. A port a host service already
+  listens on (22, 6443, 10250, ...) cannot be used by a server.

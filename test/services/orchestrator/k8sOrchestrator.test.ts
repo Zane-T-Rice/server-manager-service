@@ -113,16 +113,21 @@ describe("k8sOrchestrator", () => {
   });
 
   describe("applyServer", () => {
-    it("replaces an existing deployment and recreates the service", async () => {
+    it("replaces an existing deployment and recreates the name service", async () => {
       client.core.deleteNamespacedService.mockRejectedValue(notFound);
       await applyServer(server);
       expect(client.apps.replaceNamespacedDeployment).toHaveBeenCalledTimes(1);
       expect(client.apps.createNamespacedDeployment).not.toHaveBeenCalled();
-      // The published service, and the one other servers reach it by.
-      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(2);
+      // Ports are published by the pod, so the only service is the one other servers reach it by.
+      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(1);
       expect(
-        client.core.createNamespacedService.mock.calls[1][0].body.metadata.name,
+        client.core.createNamespacedService.mock.calls[0][0].body.metadata.name,
       ).toBe("game");
+      // The NodePort service older versions created is cleaned up.
+      expect(client.core.deleteNamespacedService).toHaveBeenCalledWith({
+        name: "server-abc",
+        namespace: "server-manager-workloads",
+      });
     });
 
     it("creates the deployment if it does not exist", async () => {
@@ -155,7 +160,7 @@ describe("k8sOrchestrator", () => {
 
     it("creates no alias for a name that is not a dns label", async () => {
       await applyServer({ ...server, containerName: "Not_A_Label!" });
-      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(1);
+      expect(client.core.createNamespacedService).not.toHaveBeenCalled();
     });
 
     it("rethrows other errors", async () => {
