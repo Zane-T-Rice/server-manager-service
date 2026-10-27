@@ -24,7 +24,7 @@ jest.mock("../../src/utils/handleDatabaseErrors", () => {
 });
 
 describe("HostsService", () => {
-  const body = { name: "host name", url: "https://localhost:3000" };
+  const body = { name: "host name" };
   const mockHostRecord = {
     id: "hostid",
     ...body,

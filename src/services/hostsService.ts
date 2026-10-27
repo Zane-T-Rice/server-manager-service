@@ -9,7 +9,6 @@ class HostsService {
   static defaultHostSelect = {
     id: true,
     name: true,
-    url: true,
   };
 
   constructor(prisma?: PrismaClient) {
@@ -22,11 +21,10 @@ class HostsService {
 
   /* POST a new host. */
   async createHost(req: Request, res: Response) {
-    const { name, url } = req.body;
+    const { name } = req.body;
     const host = await this.prisma.host
       .create({
         data: {
-          url,
           name,
         },
         select: HostsService.defaultHostSelect,
@@ -60,13 +58,12 @@ class HostsService {
   /* PATCH an existing host. */
   async patchHost(req: Request, res: Response) {
     const { hostId } = req.params;
-    const { name, url } = req.body;
+    const { name } = req.body;
     const host = await this.prisma.host
       .update({
         where: { id: String(hostId) },
         data: {
           name,
-          url,
         },
         select: HostsService.defaultHostSelect,
       })

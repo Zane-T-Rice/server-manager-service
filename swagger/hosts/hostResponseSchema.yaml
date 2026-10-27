@@ -1,7 +1,6 @@
 required:
   - id
   - name
-  - url
 type: object
 nullable: true
 properties:
@@ -9,6 +8,4 @@ properties:
     type: string
     format: uuid
   name:
-    type: string
-  url:
     type: string

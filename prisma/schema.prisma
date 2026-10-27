@@ -79,7 +79,6 @@ model File {
 
 model Host {
   id String @id @default(uuid())
-  url String
-  name String
+  name String // Must equal the name of a node in the cluster: it is where this host's servers run.
   servers Server[]
 }

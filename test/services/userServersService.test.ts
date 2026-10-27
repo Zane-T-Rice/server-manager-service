@@ -207,7 +207,7 @@ describe("UserServersService", () => {
   describe("GET /", () => {
     const serverWithHost = (host: string) => ({
       ...mockServerRecord,
-      host: { url: host },
+      host: { name: host },
     });
     const mockContainers = (containers: Map<string, string> | undefined) =>
       jest

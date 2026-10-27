@@ -26,11 +26,11 @@ properties:
   host:
     type: object
     properties:
-      url:
+      name:
         type: string
   status:
     type: string
     description: >-
-      Only present when getting all Servers. The state of the Server's container
-      on its host, i.e. running, paused, restarting, exited or created. "stopped"
-      means there is no container and "unknown" means the host could not be asked.
+      The state of the Server in the cluster: "running", or "starting" while it
+      is not ready yet. "stopped" means it is not deployed and "unknown" means the
+      cluster could not be asked.

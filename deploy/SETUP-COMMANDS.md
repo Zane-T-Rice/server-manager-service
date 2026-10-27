@@ -95,25 +95,25 @@ sudo k3s kubectl get nodes # `server` and `server2`, both Ready
 
 ## Servers on Kubernetes
 
-Everything that ran in docker now runs as a pod. The docker containers are stopped (restart disabled, not deleted) so
-each can be started again with `docker update --restart=always NAME && docker start NAME` after removing its Deployment:
+Everything that ran in docker now runs as a pod. The old docker containers have been deleted, so there is no
+docker rollback; an image can be rebuilt from the server's record at any time.
 
-| Server                               | Node     | Ports      | Reached by other servers as |
-| ------------------------------------ | -------- | ---------- | --------------------------- |
-| `salty`                              | server-1 | none       | n/a                         |
-| `jellyfin`                           | server-2 | 8096       | `jellyfin`                  |
-| `postfix`                            | server-2 | 25         | `postfix`                   |
-| `remarkable-sync`                    | server-2 | 3000, 8883 | `remarkable-sync`           |
-| service instance for host `server-1` | server-1 | 3000       | n/a                         |
-| service instance for host `server-2` | server-2 | 3001       | n/a                         |
+| Server            | Node     | Ports      | Reached by other servers as |
+| ----------------- | -------- | ---------- | --------------------------- |
+| `salty`           | server-1 | none       | n/a                         |
+| `jellyfin`        | server-2 | 8096       | `jellyfin`                  |
+| `postfix`         | server-2 | 25         | `postfix`                   |
+| `remarkable-sync` | server-2 | 3000, 8883 | `remarkable-sync`           |
+| the service       | server-1 | 3000       | n/a                         |
 
-There are still two service instances, one per host record, so the existing URLs (`.../1` and `.../2`) keep reaching
-the same machines. Each manages the whole cluster; neither holds the docker socket.
+There is one service instance. It manages the whole cluster, and a server's Host record (whose name is a node name)
+decides which desktop it runs on. A second instance existed for a while only so the URLs `.../1` and `.../2` kept
+working; it was retired on 2026-10-27 (record, pod and registry repo removed; backup
+`dev.db.bak-before-instance2-removal`). Everything now uses the plain `https://server-manager-service.zanesworld.click`.
 
 ```sh
-# Roll one back (example: jellyfin on 192.168.1.4)
-ssh 192.168.1.3 "sudo k3s kubectl -n server-manager-workloads delete deploy,svc -l server-manager/server-id=d3ac5159-2a98-4f05-ab61-66f797927653"
-ssh 192.168.1.4 "docker update --restart=always jellyfin && docker start jellyfin"
+# Stop a server by hand (example: jellyfin); the service does the same on a stop
+ssh 192.168.1.3 "sudo k3s kubectl -n server-manager-workloads delete deploy -l server-manager/server-id=d3ac5159-2a98-4f05-ab61-66f797927653"
 ```
 
 ## Database changes made
@@ -146,6 +146,12 @@ Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 `systemd.tmpfiles.rules` in each `k3s.nix`. The existing servers' paths stay allowed until their data moves under it:
 `/home/zane/{valheim,palworld,abioticfactor,eyedivinecybermancy,certs}`, `/home/zane/mount/NFS`,
 `/var/lib/jellyfin`, `/var/cache/jellyfin` and `/home/zane/Nix/hosting`. Checked against every volume row in the database.
+
+## Hosts
+
+A Host is only a name now, equal to a node name. The old `url` column was dropped by migration
+`20251027120000_drop_host_url` (checked with `prisma migrate diff`: no drift against schema.prisma). The My Servers cards
+show the address players connect to (`NEXT_PUBLIC_GAME_SERVER_HOST` in the apps repo, `zanesworld.click`).
 
 ## Still to do
 

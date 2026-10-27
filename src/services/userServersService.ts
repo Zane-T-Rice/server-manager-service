@@ -19,7 +19,7 @@ class UserServersService {
       select: { number: true },
     },
     host: {
-      select: { url: true },
+      select: { name: true },
     },
   };
 

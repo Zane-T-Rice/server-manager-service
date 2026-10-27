@@ -15,11 +15,9 @@ type PartialHost = Partial<Host>;
 const prisma = new PrismaClient();
 const hosts: PartialHost[] = [
   {
-    url: "http://localhost:3000",
     name: "HOST 1",
   },
   {
-    url: "http://localhost:3200",
     name: "HOST 2",
   },
 ];
@@ -64,13 +62,12 @@ const servers: PartialServer[] = [
 const seed = async () => {
   const dbHosts = await Promise.all(
     hosts.map(async (host) => {
-      const { url, name } = host as CastHost;
+      const { name } = host as CastHost;
       return await prisma.host.create({
         data: {
-          url,
           name,
         },
-        select: { id: true, url: true, name: true },
+        select: { id: true, name: true },
       });
     }),
   );

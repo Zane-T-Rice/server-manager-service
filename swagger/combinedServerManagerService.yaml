@@ -862,7 +862,6 @@ components:
       required:
         - id
         - name
-        - url
       type: object
       nullable: true
       properties:
@@ -870,8 +869,6 @@ components:
           type: string
           format: uuid
         name:
-          type: string
-        url:
           type: string
     hostNotFoundErrorSchema:
       type: object
@@ -885,12 +882,9 @@ components:
     hostRequestSchema:
       required:
         - name
-        - url
       type: object
       properties:
         name:
-          type: string
-        url:
           type: string
     serverResponseSchema:
       required:
@@ -917,7 +911,7 @@ components:
           format: uuid
         status:
           type: string
-          description: Only present when getting all Servers. The state of the Server's container on its host, i.e. running, paused, restarting, exited or created. "stopped" means there is no container and "unknown" means the host could not be asked.
+          description: 'The state of the Server in the cluster: "running", or "starting" while it is not ready yet. "stopped" means it is not deployed and "unknown" means the cluster could not be asked.'
     serverNotFoundErrorSchema:
       type: object
       properties:
@@ -1132,11 +1126,11 @@ components:
         host:
           type: object
           properties:
-            url:
+            name:
               type: string
         status:
           type: string
-          description: Only present when getting all Servers. The state of the Server's container on its host, i.e. running, paused, restarting, exited or created. "stopped" means there is no container and "unknown" means the host could not be asked.
+          description: 'The state of the Server in the cluster: "running", or "starting" while it is not ready yet. "stopped" means it is not deployed and "unknown" means the cluster could not be asked.'
   responses:
     auth0UserArrayResponse:
       description: Success
