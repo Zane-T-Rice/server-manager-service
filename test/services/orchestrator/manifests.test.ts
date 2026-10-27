@@ -117,9 +117,18 @@ describe("orchestrator manifests", () => {
       "--cache=false",
       "--build-arg=EULA=true",
     ]);
-    expect(job.spec.template.spec.volumes[0].configMap.name).toBe(
-      buildContextConfigMap(server).metadata.name,
+    // The build context is a real copy of the config map files, not the symlinks they are mounted as.
+    const pod = job.spec.template.spec;
+    expect(pod.initContainers[0].command.join(" ")).toContain(
+      "cp -L /config/*",
     );
+    expect(pod.volumes).toEqual([
+      {
+        name: "config",
+        configMap: { name: buildContextConfigMap(server).metadata.name },
+      },
+      { name: "context", emptyDir: {} },
+    ]);
   });
 
   it("passes --insecure to kaniko for a plain http registry", () => {

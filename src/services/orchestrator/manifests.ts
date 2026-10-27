@@ -167,6 +167,18 @@ export function buildBuilderJob(
         spec: {
           restartPolicy: "Never",
           automountServiceAccountToken: false,
+          // ConfigMap files are symlinks, which kaniko would copy as dangling links. Copy the real files.
+          initContainers: [
+            {
+              name: "context",
+              image: "busybox:1.36",
+              command: ["sh", "-c", "cp -L /config/* /workspace/"],
+              volumeMounts: [
+                { name: "config", mountPath: "/config" },
+                { name: "context", mountPath: "/workspace" },
+              ],
+            },
+          ],
           containers: [
             {
               name: "kaniko",
@@ -185,7 +197,10 @@ export function buildBuilderJob(
               volumeMounts: [{ name: "context", mountPath: "/workspace" }],
             },
           ],
-          volumes: [{ name: "context", configMap: { name } }],
+          volumes: [
+            { name: "config", configMap: { name } },
+            { name: "context", emptyDir: {} },
+          ],
         },
       },
     },
