@@ -821,6 +821,43 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    auth0UserResponseSchema:
+      required:
+        - userId
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The Auth0 user id.
+        email:
+          type: string
+          description: The user's email.
+        applicationName:
+          type: string
+          description: The name of the machine-to-machine application.
+        type:
+          type: string
+          enum:
+            - user
+            - machine
+    notAuthorizedErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: UnauthorizedError
+        message:
+          type: string
+          example: Requester is not authorized.
+    internalServerErrorSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          example: InternalServerError
+        message:
+          type: string
+          example: Your request cannot be processed at this time. The server may be having a bad day.
     hostResponseSchema:
       required:
         - id
@@ -836,15 +873,6 @@ components:
           type: string
         url:
           type: string
-    notAuthorizedErrorSchema:
-      type: object
-      properties:
-        description:
-          type: string
-          example: UnauthorizedError
-        message:
-          type: string
-          example: Requester is not authorized.
     hostNotFoundErrorSchema:
       type: object
       properties:
@@ -854,15 +882,6 @@ components:
         message:
           type: string
           example: The Host with id 0192de27-1917-702e-93ed-cc4e77227d99 was not found.
-    internalServerErrorSchema:
-      type: object
-      properties:
-        description:
-          type: string
-          example: InternalServerError
-        message:
-          type: string
-          example: Your request cannot be processed at this time. The server may be having a bad day.
     hostRequestSchema:
       required:
         - name
@@ -896,6 +915,9 @@ components:
         hostId:
           type: string
           format: uuid
+        status:
+          type: string
+          description: Only present when getting all Servers. The state of the Server's container on its host, i.e. running, paused, restarting, exited or created. "stopped" means there is no container and "unknown" means the host could not be asked.
     serverNotFoundErrorSchema:
       type: object
       properties:
@@ -947,25 +969,6 @@ components:
       properties:
         userId:
           type: string
-    auth0UserResponseSchema:
-      required:
-        - userId
-      type: object
-      properties:
-        userId:
-          type: string
-          description: The Auth0 user id.
-        email:
-          type: string
-          description: The user's email.
-        applicationName:
-          type: string
-          description: The name of the machine-to-machine application.
-        type:
-          type: string
-          enum:
-            - user
-            - machine
     portResponseSchema:
       required:
         - id
@@ -1131,7 +1134,30 @@ components:
           properties:
             url:
               type: string
+        status:
+          type: string
+          description: Only present when getting all Servers. The state of the Server's container on its host, i.e. running, paused, restarting, exited or created. "stopped" means there is no container and "unknown" means the host could not be asked.
   responses:
+    auth0UserArrayResponse:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/auth0UserResponseSchema'
+    notAuthorizedError:
+      description: Unauthorized Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/notAuthorizedErrorSchema'
+    internalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/internalServerErrorSchema'
     hostArrayResponse:
       description: Success
       content:
@@ -1140,24 +1166,12 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/hostResponseSchema'
-    notAuthorizedError:
-      description: Unauthorized Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/notAuthorizedErrorSchema'
     hostNotFoundError:
       description: The Host could not be found.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/hostNotFoundErrorSchema'
-    internalServerError:
-      description: Internal Server Error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/internalServerErrorSchema'
     hostResponse:
       description: Success
       content:
@@ -1192,14 +1206,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/userServerLinkResponseSchema'
-    auth0UserArrayResponse:
-      description: Success
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/auth0UserResponseSchema'
     userServerLinkResponse:
       description: Success
       content:
