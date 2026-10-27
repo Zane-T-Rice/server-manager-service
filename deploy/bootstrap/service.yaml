@@ -30,7 +30,6 @@ spec:
         - name: server
           image: ${IMAGE}
           env:
-            - { name: ORCHESTRATOR, value: k8s }
             - { name: REGISTRY, value: "${REGISTRY}" }
             - { name: REGISTRY_INSECURE, value: "true" }
             - { name: SELF_SERVER_ID, value: "${SERVER_ID}" }

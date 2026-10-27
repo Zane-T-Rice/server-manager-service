@@ -2,7 +2,6 @@
 
 Replaces the mounted `docker.sock`. The service only has the permissions in `10-rbac.yaml`,
 inside the `server-manager-workloads` namespace. The API server enforces `20-admission-policy.yaml`.
-Run the service with `ORCHESTRATOR=k8s`; unset, it still uses the docker CLI.
 
 ## 1. Cluster (once)
 

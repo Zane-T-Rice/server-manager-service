@@ -1,9 +1,7 @@
 # /etc/rancher/k3s/config.yaml on the control-plane desktop.
-# Only the registry (deploy/40-registry.yaml) uses a NodePort, on 5000, which the default range (30000-32767) excludes.
-# Servers publish their ports on the node they run on with hostPort, so the same number can be used on different nodes.
-# Do not give a server a port that a host service already listens on (22, 6443, 10250, ...): the pod cannot start.
-kube-apiserver-arg:
-  - "service-node-port-range=1-65535"
+# Servers and the registry publish their ports on the node they run on (hostPort), like `docker run -p`, so the same
+# number can be used on different nodes. Do not give a server a port that a host service already listens on
+# (22, 6443, 10250, ...): the pod cannot start.
 write-kubeconfig-mode: "0600"
 # Uncomment if the desktops are not on one private network (needs UDP 51820 between them).
 # flannel-backend: wireguard-native

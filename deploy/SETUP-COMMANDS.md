@@ -121,8 +121,10 @@ ssh 192.168.1.4 "docker update --restart=always jellyfin && docker start jellyfi
 Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 
 - `postfix`: `SMTP_NETWORKS` now also trusts `10.42.0.0/16` (the pod network), so mail from `remarkable-sync` is relayed.
-- Both service records: removed the `/var/run/docker.sock` volume and added `ORCHESTRATOR`, `REGISTRY`, `REGISTRY_INSECURE`
-  and `SELF_SERVER_ID`. Their stored Dockerfile still installs the docker CLI, which is unused and can be dropped.
+- Both service records: removed the `/var/run/docker.sock` volume and added `REGISTRY`, `REGISTRY_INSECURE` and
+  `SELF_SERVER_ID` (an `ORCHESTRATOR` variable added during the move was removed again). Their stored Dockerfile no longer
+  installs the docker CLI, and their stored start script now `exec`s node so a stop or update does not wait out the grace period.
+  Backups: `dev.db.bak-before-cleanup`.
 
 ## Problems met while migrating
 
@@ -142,7 +144,6 @@ Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 
 - Game servers (valheim, palworld, ...) are not running. Start them through the service and check that each mount is under
   `allowedHostPaths` (`/home/zane/valheim`, `/home/zane/palworld`, ... are not yet).
-- The service's stored Dockerfile can drop `docker` from its `apk add` line.
 
 ## Undo
 

@@ -61,7 +61,6 @@ The npx commands require the DATABASE_URL environment variable is set. You can e
 The service runs as a Pod on the cluster, started like any other server (see [deploy/README.md](deploy/README.md)).
 Its environment variables are stored as Environment Variables on its own server record:
 
-- ORCHESTRATOR=k8s is no longer needed; the service always uses Kubernetes.
 - REGISTRY is the registry that build jobs push to and nodes pull from (e.g. `192.168.1.3:5000`). REGISTRY_INSECURE=true if it is plain http.
 - SELF_SERVER_ID is the id of the service's own server record, so it can update itself with its own service account.
 - WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
@@ -91,8 +90,8 @@ point KUBECONFIG at a cluster set up as described in [deploy/README.md](deploy/R
 npm run start:dev
 ```
 
-The docker files in docker/development and docker/deployment build the same image that the build jobs produce for the
-service's own server record. They need no docker socket and no docker CLI.
+docker/deployment holds the Dockerfile and start script stored on the service's own server record, which the cluster's
+build job turns into its image. It needs no docker socket and no docker CLI.
 
 ### Manual Testing
 
@@ -102,7 +101,7 @@ You can also test by running the [front-end project](https://github.com/Zane-T-R
 
 ### File Ownership Issue
 
-When running this service in docker the generated files in prisma/ will belong to root:root. This can block you from editing the database manually, but can be corrected like so:
+When the service runs in a container the generated files in prisma/ belong to the container's user (root, which NFS maps to nobody). This can block you from editing the database manually, but can be corrected like so:
 
 ```sh
 sudo chown "$USER":users -R prisma
