@@ -1,11 +1,27 @@
 # k3s setup commands, with what each one does
 
+## Where everything lives
+
+| What                                                   | Where                                                                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Cluster objects (namespaces, RBAC, policies, registry) | `deploy/*.yaml` in this repo, applied with `kubectl apply -f deploy/` on 192.168.1.3                                                 |
+| Which mount paths servers may use                      | `allowedHostPaths` in `deploy/20-admission-policy.yaml`                                                                              |
+| Which servers may talk to each other                   | `deploy/35-server-links.yaml`                                                                                                        |
+| k3s itself, the firewall ports, `/home/zane/servers`   | `~/Nix/server/nixos/k3s.nix` and `~/Nix/server2/nixos/k3s.nix` (the `Nix` repo), applied with `nixos-rebuild switch`                 |
+| Join token (secret, not in git)                        | `/var/lib/rancher/k3s/shared-token` on both desktops                                                                                 |
+| Cluster-admin kubeconfig                               | `/etc/rancher/k3s/k3s.yaml` on 192.168.1.3 (use `sudo k3s kubectl`)                                                                  |
+| Registry images                                        | `/var/lib/server-manager-registry` on 192.168.1.3                                                                                    |
+| What runs where: servers, ports, volumes, env vars     | the service's SQLite database on the NFS share: `~/mount/NFS/server-manager-service-db/db/dev.db` (edit it in the apps UI)           |
+| How a server record becomes a Deployment               | `src/services/orchestrator/manifests.ts` and `k8sOrchestrator.ts`                                                                    |
+| The service's own image recipe                         | the Dockerfile and start script stored on its server record (`docker/deployment/` is the reference copy)                             |
+| Deploy pipelines                                       | `.github/workflows/cd.yml` in each repo (this one self-updates the service; `apps` and `gloomhaven-companion-service` use terraform) |
+
 Two NixOS desktops, both named `nixos`, so the k3s node names are set explicitly:
 
 | Machine   | LAN         | WireGuard  | k3s role               | k3s node name | Nix repo dir          |
 | --------- | ----------- | ---------- | ---------------------- | ------------- | --------------------- |
-| desktop 1 | 192.168.1.3 | 10.20.10.4 | server (control plane) | `server`      | `~/Nix/server/nixos`  |
-| desktop 2 | 192.168.1.4 | 10.20.10.5 | agent                  | `server2`     | `~/Nix/server2/nixos` |
+| desktop 1 | 192.168.1.3 | 10.20.10.4 | server (control plane) | `server-1`    | `~/Nix/server/nixos`  |
+| desktop 2 | 192.168.1.4 | 10.20.10.5 | agent                  | `server-2`    | `~/Nix/server2/nixos` |
 
 The proxy (10.20.10.1) reaches the service over WireGuard. Cluster traffic stays on the LAN
 (`--node-ip`), so WireGuard is not involved in k3s. Each `Host` record's `name` must equal its node name.
@@ -20,7 +36,7 @@ and `nixos-rebuild` makes the machine match it.
         ~/Nix/server/nixos/k3s.nix    # on 192.168.1.3 (role = "server")
         ~/Nix/server2/nixos/k3s.nix   # on 192.168.1.4 (role = "agent")
 
-    Review with `cd ~/Nix && git status && git diff`. Nothing is committed or pushed in that repo.
+    These are committed and pushed in the `Nix` repo (`git log` there shows them).
 
 2.  Built both new configurations without activating them. `build` only fills the nix store:
 
@@ -55,14 +71,14 @@ ssh 192.168.1.3 'sudo cat /var/lib/rancher/k3s/shared-token' \
 
 ```sh
 sudo nixos-rebuild switch # on 192.168.1.3
-sudo k3s kubectl get nodes # `server` should become Ready
+sudo k3s kubectl get nodes # `server-1` should become Ready
 ```
 
 7.  Activate on the second desktop and check that it joined:
 
 ```sh
 sudo nixos-rebuild switch # on 192.168.1.4
-sudo k3s kubectl get nodes # `server` and `server2`, both Ready
+sudo k3s kubectl get nodes # `server-1` and `server-2`, both Ready
 ```
 
 8.  Apply the manifests from this repo (on 192.168.1.3, after copying `deploy/` there). Edit
@@ -75,23 +91,20 @@ sudo k3s kubectl get nodes # `server` and `server2`, both Ready
 
 ## Results of the live test
 
-- Both nodes joined and are Ready (`server` = 192.168.1.3 control plane, `server2` = 192.168.1.4 agent).
+- Both nodes joined and are Ready (`server-1` = 192.168.1.3 control plane, `server-2` = 192.168.1.4 agent).
   All existing docker containers kept running through both switches.
 - The admission policy denied a privileged pod, an added capability, hostNetwork, `hostPath: /`,
   `docker.sock` and a path-prefix trick, and accepted a pod mounting a path under `allowedHostPaths`.
 - Used the service's own restricted service account (not cluster-admin): it could manage workloads and was
   refused (403) on cluster-wide resources.
 - A test server went through the real code path: kaniko built the image on one node and pushed it to the
-  registry, the pod ran on the pinned node, answered on its NodePort (LAN and WireGuard address), wrote to a
+  registry, the pod ran on the pinned node, answered on its published port (a NodePort then, a hostPort now; LAN and WireGuard address), wrote to a
   bind-mounted host directory, and was removed cleanly by the stop path. The test directory was removed afterwards.
 
 ## Things learned
 
 - `/home/zane/mount/NFS` is NFSv4 with root squash. Container root becomes `nobody`, so a mounted directory
   must be writable by `nobody` (your existing ones are owned by it). Docker behaves the same way.
-- Services use `externalTrafficPolicy: Local`. Without it, a request arriving at the _other_ node was
-  rejected by the network policy (the hop rewrites the source to a pod-network address). With it, a server
-  answers on the node it runs on, like docker, and sees real player addresses.
 
 ## Servers on Kubernetes
 
