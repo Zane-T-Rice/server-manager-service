@@ -26,7 +26,7 @@ import { Permissions } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { shutdownOnSignals } from "./utils";
+import { healthCheck, shutdownOnSignals } from "./utils";
 
 dotenv.config();
 
@@ -64,6 +64,9 @@ app.use(
     origin: process.env.WEBSITE_DOMAIN,
   }),
 );
+
+// Anyone may ask whether the service is up, so this is registered before the token check.
+app.get("/health", healthCheck(prisma));
 
 // Swagger
 // Use a workaround for swagger-ui-dist not being able to set custom swagger URL
