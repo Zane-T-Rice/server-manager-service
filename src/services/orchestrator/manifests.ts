@@ -113,6 +113,9 @@ export function buildService(server: ServerSpec) {
     },
     spec: {
       type: "NodePort",
+      // Only the node running the pod answers, as with docker, and players keep their real source address.
+      // Forwarding between nodes would hide it behind a pod-network address.
+      externalTrafficPolicy: "Local",
       selector: labels(server),
       ports: server.ports.map((port) => ({
         name: `${port.protocol.toLowerCase()}-${port.number}`,
@@ -191,10 +194,12 @@ export function buildBuilderJob(
 
 /* Maps the replica counts of a Deployment onto the statuses the API reports. */
 export function deploymentStatus(deployment: {
+  metadata?: { deletionTimestamp?: Date };
   spec?: { replicas?: number };
   status?: { readyReplicas?: number };
 }): string {
-  if (!deployment.spec?.replicas) {
+  // A deployment being deleted (a stop in progress) is already stopped as far as the API is concerned.
+  if (deployment.metadata?.deletionTimestamp || !deployment.spec?.replicas) {
     return "stopped";
   }
   return deployment.status?.readyReplicas ? "running" : "starting";

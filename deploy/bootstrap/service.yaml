@@ -53,6 +53,7 @@ metadata:
   namespace: server-manager-workloads
 spec:
   type: NodePort
+  externalTrafficPolicy: Local
   selector:
     app.kubernetes.io/managed-by: server-manager
     server-manager/server-id: ${SERVER_ID}

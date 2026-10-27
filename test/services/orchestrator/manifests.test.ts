@@ -81,6 +81,7 @@ describe("orchestrator manifests", () => {
   it("publishes each port on the node under the same number", () => {
     const service = buildService(server);
     expect(service.spec.type).toBe("NodePort");
+    expect(service.spec.externalTrafficPolicy).toBe("Local");
     expect(service.spec.ports).toEqual([
       {
         name: "tcp-25565",
@@ -133,6 +134,13 @@ describe("orchestrator manifests", () => {
   it("maps deployment replicas to a status", () => {
     expect(deploymentStatus({})).toBe("stopped");
     expect(deploymentStatus({ spec: { replicas: 0 } })).toBe("stopped");
+    expect(
+      deploymentStatus({
+        metadata: { deletionTimestamp: new Date() },
+        spec: { replicas: 1 },
+        status: { readyReplicas: 1 },
+      }),
+    ).toBe("stopped");
     expect(deploymentStatus({ spec: { replicas: 1 } })).toBe("starting");
     expect(
       deploymentStatus({ spec: { replicas: 1 }, status: { readyReplicas: 1 } }),

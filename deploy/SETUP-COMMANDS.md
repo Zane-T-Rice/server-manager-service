@@ -35,7 +35,7 @@ sudo nixos-rebuild build
     Result on both: reload `dbus-broker` and `firewall`, restart `polkit`, plus start `k3s` (new).
     Docker and the running containers (game server, Jellyfin, postfix, remarkable-sync) are not touched.
 
-## Not done yet: needs your go-ahead (it changes the live machines)
+## Done with your go-ahead (these changed the live machines)
 
 4.  Create the join token on 192.168.1.3. It lives outside the nix store, which anyone can read:
 
@@ -72,6 +72,32 @@ sudo k3s kubectl get nodes # `server` and `server2`, both Ready
         sudo k3s kubectl get pods -A
 
 9.  Run the policy checks from `deploy/README.md` section 4. The two test pods must be denied.
+
+## Results of the live test
+
+- Both nodes joined and are Ready (`server` = 192.168.1.3 control plane, `server2` = 192.168.1.4 agent).
+  All existing docker containers kept running through both switches.
+- The admission policy denied a privileged pod, an added capability, hostNetwork, `hostPath: /`,
+  `docker.sock` and a path-prefix trick, and accepted a pod mounting a path under `allowedHostPaths`.
+- Used the service's own restricted service account (not cluster-admin): it could manage workloads and was
+  refused (403) on cluster-wide resources.
+- A test server went through the real code path: kaniko built the image on one node and pushed it to the
+  registry, the pod ran on the pinned node, answered on its NodePort (LAN and WireGuard address), wrote to a
+  bind-mounted host directory, and was removed cleanly by the stop path. The test directory was removed afterwards.
+
+## Things learned
+
+- `/home/zane/mount/NFS` is NFSv4 with root squash. Container root becomes `nobody`, so a mounted directory
+  must be writable by `nobody` (your existing ones are owned by it). Docker behaves the same way.
+- Services use `externalTrafficPolicy: Local`. Without it, a request arriving at the _other_ node was
+  rejected by the network policy (the hop rewrites the source to a pod-network address). With it, a server
+  answers on the node it runs on, like docker, and sees real player addresses.
+
+## Still to do
+
+- Point each `Host` record's `name` at its node name (`server`, `server2`).
+- Create the service's own `Server` record and start it with `deploy/bootstrap/service.yaml`.
+- Migrate real servers one at a time: stop the docker container, then update through the API.
 
 ## Undo
 

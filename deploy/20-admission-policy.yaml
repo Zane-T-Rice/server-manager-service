@@ -10,7 +10,7 @@ metadata:
 data:
   # Comma separated host directories that servers may bind mount (the directory and anything below it).
   # Edit this to the parents of your servers' save data, then `kubectl apply` again.
-  allowedHostPaths: /srv/server-manager
+  allowedHostPaths: /home/zane/mount/NFS,/var/lib/jellyfin,/var/cache/jellyfin,/home/zane/Nix/hosting
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
