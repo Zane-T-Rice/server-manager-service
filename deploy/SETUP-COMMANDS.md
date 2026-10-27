@@ -120,7 +120,7 @@ ssh 192.168.1.4 "docker update --restart=always jellyfin && docker start jellyfi
 
 Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 
-- `postfix`: `SMTP_NETWORKS` now also trusts `10.42.0.0/16` (the pod network), so mail from `remarkable-sync` is relayed.
+- `postfix`: `SMTP_NETWORKS` now also trusts `10.42.0.0/16` (the pod network), so mail from `remarkable-sync` is relayed. Confirmed with a real send from the tablet on 2026-10-27.
 - Both service records: removed the `/var/run/docker.sock` volume and added `REGISTRY`, `REGISTRY_INSECURE` and
   `SELF_SERVER_ID` (an `ORCHESTRATOR` variable added during the move was removed again). Their stored Dockerfile no longer
   installs the docker CLI, and their stored start script now `exec`s node so a stop or update does not wait out the grace period.
