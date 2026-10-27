@@ -26,6 +26,7 @@ import { Permissions } from "./constants";
 import pino from "pino-http";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
+import { shutdownOnSignals } from "./utils";
 
 dotenv.config();
 
@@ -167,6 +168,6 @@ app.use("/users/servers", requiredScopes(Permissions.USER), userServersRouter);
 // error handler
 app.use(appErrorHandler);
 
-app.listen(process.env.PORT);
+shutdownOnSignals(app.listen(process.env.PORT));
 
 export default app;
