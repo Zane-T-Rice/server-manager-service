@@ -118,7 +118,11 @@ describe("k8sOrchestrator", () => {
       await applyServer(server);
       expect(client.apps.replaceNamespacedDeployment).toHaveBeenCalledTimes(1);
       expect(client.apps.createNamespacedDeployment).not.toHaveBeenCalled();
-      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(1);
+      // The published service, and the one other servers reach it by.
+      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(2);
+      expect(
+        client.core.createNamespacedService.mock.calls[1][0].body.metadata.name,
+      ).toBe("game");
     });
 
     it("creates the deployment if it does not exist", async () => {
@@ -149,6 +153,11 @@ describe("k8sOrchestrator", () => {
       expect(client.core.createNamespacedService).not.toHaveBeenCalled();
     });
 
+    it("creates no alias for a name that is not a dns label", async () => {
+      await applyServer({ ...server, containerName: "Not_A_Label!" });
+      expect(client.core.createNamespacedService).toHaveBeenCalledTimes(1);
+    });
+
     it("rethrows other errors", async () => {
       client.apps.replaceNamespacedDeployment.mockRejectedValue(serverError);
       await expect(applyServer(server)).rejects.toBe(serverError);
@@ -163,13 +172,26 @@ describe("k8sOrchestrator", () => {
         namespace: "server-manager-workloads",
         propagationPolicy: "Foreground",
       });
-      expect(client.core.deleteNamespacedService).toHaveBeenCalledTimes(1);
+      expect(client.core.deleteNamespacedService).toHaveBeenCalledTimes(2);
     });
 
     it("succeeds if the server is already gone", async () => {
       client.apps.deleteNamespacedDeployment.mockRejectedValue(notFound);
       client.core.deleteNamespacedService.mockRejectedValue(notFound);
       await expect(removeServer(server)).resolves.toBeUndefined();
+    });
+
+    it("also deletes the service other servers reach it by", async () => {
+      await removeServer(server);
+      expect(client.core.deleteNamespacedService).toHaveBeenCalledWith({
+        name: "game",
+        namespace: "server-manager-workloads",
+      });
+    });
+
+    it("has no such service for a name that is not a dns label", async () => {
+      await removeServer({ id: "abc", containerName: "Not_A_Label!" });
+      expect(client.core.deleteNamespacedService).toHaveBeenCalledTimes(1);
     });
   });
 

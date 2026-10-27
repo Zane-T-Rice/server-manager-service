@@ -19,6 +19,13 @@ export function resourceName(server: Pick<ServerSpec, "id">): string {
   return `server-${server.id}`;
 }
 
+/* The container name as a DNS label, or undefined if it cannot be one. Servers reach each other by this name,
+ * as they did on the docker network. */
+export function aliasName(server: Pick<ServerSpec, "containerName">) {
+  const name = server.containerName.toLowerCase();
+  return /^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$/.test(name) ? name : undefined;
+}
+
 export function labels(server: Pick<ServerSpec, "id">) {
   return {
     "app.kubernetes.io/managed-by": MANAGED_BY,
@@ -63,7 +70,12 @@ export function buildDeployment(
       selector: { matchLabels: labels(server) },
       template: {
         metadata: {
-          labels: labels(server),
+          labels: {
+            ...labels(server),
+            ...(aliasName(server) && {
+              "server-manager/name": aliasName(server),
+            }),
+          },
           annotations: { "server-manager/restarted-at": restartedAt },
         },
         spec: {
@@ -122,6 +134,30 @@ export function buildService(server: ServerSpec) {
         port: port.number,
         targetPort: port.number,
         nodePort: port.number,
+        protocol: port.protocol.toUpperCase(),
+      })),
+    },
+  };
+}
+
+/* Lets other servers reach this one by container name, as on the docker network. Undefined if there is no
+ * valid name or the server publishes no ports. */
+export function buildAliasService(server: ServerSpec) {
+  const name = aliasName(server);
+  if (!name || server.ports.length === 0) {
+    return undefined;
+  }
+  return {
+    apiVersion: "v1",
+    kind: "Service",
+    metadata: { name, namespace: WORKLOADS_NAMESPACE, labels: labels(server) },
+    spec: {
+      type: "ClusterIP",
+      selector: labels(server),
+      ports: server.ports.map((port) => ({
+        name: `${port.protocol.toLowerCase()}-${port.number}`,
+        port: port.number,
+        targetPort: port.number,
         protocol: port.protocol.toUpperCase(),
       })),
     },

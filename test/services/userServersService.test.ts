@@ -316,6 +316,19 @@ describe("UserServersService", () => {
           { ...serverWithHost(remoteHost), status: "running" },
         ]);
       });
+      it("Should ask the cluster, not the other host, on Kubernetes", async () => {
+        process.env.ORCHESTRATOR = "k8s";
+        try {
+          (
+            ServersService.instance.getContainerStatuses as jest.Mock
+          ).mockResolvedValue(new Map([["containerName", "running"]]));
+          await UserServersService.instance.getServers(authedReq, res);
+        } finally {
+          delete process.env.ORCHESTRATOR;
+        }
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(ServersService.instance.getContainerStatuses).toHaveBeenCalled();
+      });
       it("Should report status unknown if that host can not be reached", async () => {
         fetchMock.mockRejectedValue(new Error("connect ECONNREFUSED"));
         await UserServersService.instance.getServers(authedReq, res);

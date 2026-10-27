@@ -67,6 +67,10 @@ async function proxyToOtherHost(
 // Proxy to the host of the server acted upon if it is different than the current host.
 export function serverProxyMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
+    // One instance manages the whole cluster, so there is no other host to forward to.
+    if (process.env.ORCHESTRATOR === "k8s") {
+      return next();
+    }
     const { hostId, serverId } = req.params;
     const server = hostId
       ? await prisma.server
@@ -111,6 +115,9 @@ export function serverProxyMiddleware(prisma: PrismaClient) {
 // Used by routes that need to ask the host itself (i.e. for the status of its containers).
 export function hostProxyMiddleware(prisma: PrismaClient) {
   return async function (req: Request, res: Response, next: NextFunction) {
+    if (process.env.ORCHESTRATOR === "k8s") {
+      return next();
+    }
     const { hostId } = req.params;
     const host = await prisma.host
       .findUniqueOrThrow({

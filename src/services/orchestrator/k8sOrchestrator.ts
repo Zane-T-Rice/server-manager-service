@@ -3,6 +3,8 @@ import {
   buildBuilderJob,
   buildContextConfigMap,
   buildDeployment,
+  aliasName,
+  buildAliasService,
   buildService,
   CONTAINER_NAME_ANNOTATION,
   deploymentStatus,
@@ -124,10 +126,23 @@ export async function applyServer(server: ServerSpec) {
       body: buildService(server),
     });
   }
+
+  const alias = buildAliasService(server);
+  const aliasServiceName = aliasName(server);
+  if (aliasServiceName) {
+    await ignoreNotFound(
+      core.deleteNamespacedService({ name: aliasServiceName, namespace }),
+    );
+  }
+  if (alias) {
+    await core.createNamespacedService({ namespace, body: alias });
+  }
 }
 
 /* Removes the server's Deployment and Service. A server that is not running is already stopped. */
-export async function removeServer(server: Pick<ServerSpec, "id">) {
+export async function removeServer(
+  server: Pick<ServerSpec, "id" | "containerName">,
+) {
   const { apps, core } = await getClient();
   const namespace = WORKLOADS_NAMESPACE;
   const name = resourceName(server);
@@ -139,6 +154,12 @@ export async function removeServer(server: Pick<ServerSpec, "id">) {
     }),
   );
   await ignoreNotFound(core.deleteNamespacedService({ name, namespace }));
+  const aliasServiceName = aliasName(server);
+  if (aliasServiceName) {
+    await ignoreNotFound(
+      core.deleteNamespacedService({ name: aliasServiceName, namespace }),
+    );
+  }
 }
 
 /* Status of every managed server, keyed by container name. */

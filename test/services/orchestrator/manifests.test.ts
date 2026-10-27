@@ -1,4 +1,6 @@
 import {
+  aliasName,
+  buildAliasService,
   buildBuilderJob,
   buildContextConfigMap,
   buildDeployment,
@@ -138,6 +140,36 @@ describe("orchestrator manifests", () => {
     expect(buildBuilderJob(server, registry).spec.template.spec).toMatchObject({
       automountServiceAccountToken: false,
     });
+  });
+
+  it("lets other servers reach a server by its container name", () => {
+    const named = { ...server, containerName: "Postfix" };
+    expect(aliasName(named)).toBe("postfix");
+    const alias = buildAliasService(named);
+    expect(alias?.metadata.name).toBe("postfix");
+    expect(alias?.spec.type).toBe("ClusterIP");
+    expect(alias?.spec.ports[0]).toEqual({
+      name: "tcp-25565",
+      port: 25565,
+      targetPort: 25565,
+      protocol: "TCP",
+    });
+    expect(
+      buildDeployment(named, registry, "now").spec.template.metadata.labels,
+    ).toMatchObject({ "server-manager/name": "postfix" });
+  });
+
+  it("has no alias without a valid name or without ports", () => {
+    expect(aliasName({ containerName: "Minecraft Server!" })).toBeUndefined();
+    expect(aliasName({ containerName: "-bad" })).toBeUndefined();
+    expect(aliasName({ containerName: "a".repeat(64) })).toBeUndefined();
+    expect(buildAliasService(server)).toBeUndefined();
+    expect(
+      buildAliasService({ ...server, containerName: "ok", ports: [] }),
+    ).toBeUndefined();
+    expect(
+      buildDeployment(server, registry, "now").spec.template.metadata.labels,
+    ).not.toHaveProperty("server-manager/name");
   });
 
   it("maps deployment replicas to a status", () => {

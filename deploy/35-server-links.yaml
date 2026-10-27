@@ -1,0 +1,22 @@
+# Servers cannot reach each other (see 30-network-policy.yaml). A link is an explicit allow rule, selecting pods by
+# container name (the server-manager/name label). Servers find each other by that same name, as they did on the docker network.
+#
+# remarkable-sync sends its mail through postfix:25.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: remarkable-sync-to-postfix
+  namespace: server-manager-workloads
+spec:
+  podSelector:
+    matchLabels:
+      server-manager/name: postfix
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              server-manager/name: remarkable-sync
+      ports:
+        - protocol: TCP
+          port: 25

@@ -126,8 +126,9 @@ class UserServersService {
     req: Request,
     servers: { id: string; containerName: string; host: { url: string } }[],
   ): Promise<Map<string, string>> {
+    // On Kubernetes this instance sees every server in the cluster.
     const isLocal = (server: { host: { url: string } }) =>
-      server.host.url === process.env.HOST;
+      ServersService.useK8s() || server.host.url === process.env.HOST;
     const statuses = new Map<string, string>();
 
     // A proxied request is only asking for this host's own servers.

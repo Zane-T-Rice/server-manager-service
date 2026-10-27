@@ -44,6 +44,22 @@ describe("serverProxyMiddleware", () => {
     );
   });
 
+  it("should skip the proxy entirely on Kubernetes", async () => {
+    process.env.ORCHESTRATOR = "k8s";
+    try {
+      await serverProxyMiddleware(prisma as unknown as PrismaClient)(
+        { params: { hostId, serverId } } as unknown as Request,
+        {} as Response,
+        next,
+      );
+    } finally {
+      delete process.env.ORCHESTRATOR;
+    }
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(prisma.server.findUniqueOrThrow).not.toHaveBeenCalled();
+    expect(proxy as jest.Mock).not.toHaveBeenCalled();
+  });
+
   describe("server-manager:admin", () => {
     it("should call handleDatabaseErrors if server does not exist", async () => {
       prisma.server.findUniqueOrThrow.mockRejectedValueOnce(new Error());
@@ -299,6 +315,21 @@ describe("hostProxyMiddleware", () => {
     (handleDatabaseErrors as unknown as jest.Mock).mockRejectedValue(
       new Error(),
     );
+  });
+
+  it("should skip the proxy entirely on Kubernetes", async () => {
+    process.env.ORCHESTRATOR = "k8s";
+    try {
+      await hostProxyMiddleware(prisma as unknown as PrismaClient)(
+        { params: { hostId } } as unknown as Request,
+        {} as Response,
+        next,
+      );
+    } finally {
+      delete process.env.ORCHESTRATOR;
+    }
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(prisma.host.findUniqueOrThrow).not.toHaveBeenCalled();
   });
 
   it("should call handleDatabaseErrors if host does not exist", async () => {
