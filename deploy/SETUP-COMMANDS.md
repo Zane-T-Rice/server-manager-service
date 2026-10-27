@@ -142,7 +142,7 @@ Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 
 ## Where servers may mount from
 
-`/srv/server-manager` is the dedicated parent for new servers. It is created on both desktops by
+`/home/zane/servers` is the dedicated parent for new servers. It is created on both desktops by
 `systemd.tmpfiles.rules` in each `k3s.nix`. The existing servers' paths stay allowed until their data moves under it:
 `/home/zane/{valheim,palworld,abioticfactor,eyedivinecybermancy,certs}`, `/home/zane/mount/NFS`,
 `/var/lib/jellyfin`, `/var/cache/jellyfin` and `/home/zane/Nix/hosting`. Checked against every volume row in the database.

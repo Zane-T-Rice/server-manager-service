@@ -139,7 +139,7 @@ Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to se
 Things that differ from a plain `docker run`:
 
 - Ports are published on the node the server runs on (`hostPort`), as `docker run -p` did.
-- Volumes must be under one of the `allowedHostPaths` in [deploy/20-admission-policy.yaml](deploy/20-admission-policy.yaml), and privileged containers, host networking and added capabilities are refused by the cluster. Keep the data of new servers under `/srv/server-manager` on the node the server runs on (create the folder first; a missing folder stops the server from starting, as it did with docker) and nothing needs to change. The other allowed paths are where existing servers already keep theirs.
+- Volumes must be under one of the `allowedHostPaths` in [deploy/20-admission-policy.yaml](deploy/20-admission-policy.yaml), and privileged containers, host networking and added capabilities are refused by the cluster. Keep the data of new servers under `/home/zane/servers` on the node the server runs on (create the folder first; a missing folder stops the server from starting, as it did with docker) and nothing needs to change. The other allowed paths are where existing servers already keep theirs.
 - Servers cannot reach each other unless a link is added to [deploy/35-server-links.yaml](deploy/35-server-links.yaml). A server is reached by its container name, as on the old docker network.
 - The server runs on the node whose name equals its Host record's name. The content field of a File is the base64 encoded string of the File.
 

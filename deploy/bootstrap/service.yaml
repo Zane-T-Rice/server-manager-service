@@ -43,5 +43,5 @@ spec:
       volumes:
         - name: db
           hostPath:
-            path: /srv/server-manager/db
+            path: /home/zane/servers/db
             type: Directory
