@@ -9,8 +9,13 @@ metadata:
   namespace: server-manager-workloads
 data:
   # Comma separated host directories that servers may bind mount (the directory and anything below it).
-  # Edit this to the parents of your servers' save data, then `kubectl apply` again.
-  allowedHostPaths: /home/zane/mount/NFS,/var/lib/jellyfin,/var/cache/jellyfin,/home/zane/Nix/hosting
+  # Put the data of every new server under /srv/server-manager (created on each node by the NixOS config) and
+  # nothing here needs to change. The other entries are where existing servers already keep their data;
+  # remove each one once that server's data has moved under /srv/server-manager.
+  #   - /home/zane/valheim, palworld, abioticfactor, eyedivinecybermancy, certs: game servers on server-1
+  #   - /home/zane/mount/NFS: Anime, Track, Remarkable and the service database
+  #   - /var/lib/jellyfin, /var/cache/jellyfin, /home/zane/Nix/hosting: jellyfin on server-2
+  allowedHostPaths: /srv/server-manager,/home/zane/valheim,/home/zane/palworld,/home/zane/abioticfactor,/home/zane/eyedivinecybermancy,/home/zane/certs,/home/zane/mount/NFS,/var/lib/jellyfin,/var/cache/jellyfin,/home/zane/Nix/hosting
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy

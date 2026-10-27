@@ -19,8 +19,10 @@ On **every** node, copy `k3s/registries.yaml` to `/etc/rancher/k3s/registries.ya
 
 ## 2. Policy and registry
 
-Edit `allowedHostPaths` in `20-admission-policy.yaml` to the parent directories of your servers' save
-data (and the service's database directory), then:
+Servers may only bind mount from the `allowedHostPaths` in `20-admission-policy.yaml`. `/srv/server-manager` is the
+dedicated parent for new servers: the NixOS config creates it on every node, so a new server only needs a folder under it.
+The remaining entries are where existing servers keep their data (and the service's database directory); remove each once
+that data has moved. Then:
 
     kubectl apply -f deploy/
 

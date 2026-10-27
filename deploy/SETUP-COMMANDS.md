@@ -140,10 +140,16 @@ Backup: `dev.db.bak-before-k8s-migration` next to `dev.db`.
 - Node names are `server-1` and `server-2`, matching the `Host` records in the database.
 - Servers cannot reach each other unless `deploy/35-server-links.yaml` allows it. `remarkable-sync` to `postfix:25` is the only link.
 
+## Where servers may mount from
+
+`/srv/server-manager` is the dedicated parent for new servers. It is created on both desktops by
+`systemd.tmpfiles.rules` in each `k3s.nix`. The existing servers' paths stay allowed until their data moves under it:
+`/home/zane/{valheim,palworld,abioticfactor,eyedivinecybermancy,certs}`, `/home/zane/mount/NFS`,
+`/var/lib/jellyfin`, `/var/cache/jellyfin` and `/home/zane/Nix/hosting`. Checked against every volume row in the database.
+
 ## Still to do
 
-- Game servers (valheim, palworld, ...) are not running. Start them through the service and check that each mount is under
-  `allowedHostPaths` (`/home/zane/valheim`, `/home/zane/palworld`, ... are not yet).
+- Game servers (valheim, palworld, ...) are not running. Start them through the service when wanted; their paths are already allowed.
 
 ## Undo
 
