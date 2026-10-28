@@ -1,0 +1,24 @@
+# An example of letting one server reach another. Servers cannot reach each other (see 30-network-policy.yaml), so every
+# link is an explicit allow rule that selects pods by container name (the server-manager/name label). The server is then
+# reached by that same name, as on a docker network. Copy this file into deploy/ (or keep your links wherever you
+# like), change the names and port, and `kubectl apply -f` it.
+#
+# This one lets the server named `web` reach the server named `database` on tcp 5432.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-to-database
+  namespace: server-manager-workloads
+spec:
+  podSelector:
+    matchLabels:
+      server-manager/name: database
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              server-manager/name: web
+      ports:
+        - protocol: TCP
+          port: 5432

@@ -1,7 +1,9 @@
-# /etc/rancher/k3s/config.yaml on the control-plane desktop.
+# /etc/rancher/k3s/config.yaml on the control-plane node. Agents may use the same file.
 # Servers and the registry publish their ports on the node they run on (hostPort), like `docker run -p`, so the same
 # number can be used on different nodes. Do not give a server a port that a host service already listens on
 # (22, 6443, 10250, ...): the pod cannot start.
+# Node names must be unique, and must equal the name of the matching Host record in the service. The default is the hostname.
+# node-name: node-1
 write-kubeconfig-mode: "0600"
-# Uncomment if the desktops are not on one private network (needs UDP 51820 between them).
+# Uncomment if the nodes are not on one private network (needs UDP 51820 between them).
 # flannel-backend: wireguard-native

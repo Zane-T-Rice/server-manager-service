@@ -1,6 +1,7 @@
 # A plain http registry on the control-plane node. Build jobs push to it and every node pulls from it.
 # Each node's containerd must be told to trust it: see deploy/k3s/registries.yaml.
-# Its images live in a host directory, so it is pinned to the node that holds them.
+# Its images live in a host directory, so it is pinned to a control-plane node (k3s labels server nodes; with more than one,
+# label the node you want and change this selector).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +18,7 @@ spec:
       labels: { app: registry }
     spec:
       nodeSelector:
-        kubernetes.io/hostname: server-1
+        node-role.kubernetes.io/control-plane: "true"
       containers:
         - name: registry
           image: registry:2

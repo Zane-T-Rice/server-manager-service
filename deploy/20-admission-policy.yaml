@@ -9,13 +9,10 @@ metadata:
   namespace: server-manager-workloads
 data:
   # Comma separated host directories that servers may bind mount (the directory and anything below it).
-  # Put the data of every new server under /home/zane/servers (created, owned by zane, on each node by the NixOS config) and
-  # nothing here needs to change. The other entries are where existing servers already keep their data;
-  # remove each one once that server's data has moved under /home/zane/servers.
-  #   - /home/zane/valheim, palworld, abioticfactor, eyedivinecybermancy, certs: game servers on server-1
-  #   - /home/zane/mount/NFS: Anime, Track, Remarkable and the service database
-  #   - /var/lib/jellyfin, /var/cache/jellyfin, /home/zane/Nix/hosting: jellyfin on server-2
-  allowedHostPaths: /home/zane/servers,/home/zane/valheim,/home/zane/palworld,/home/zane/abioticfactor,/home/zane/eyedivinecybermancy,/home/zane/certs,/home/zane/mount/NFS,/var/lib/jellyfin,/var/cache/jellyfin,/home/zane/Nix/hosting
+  # Create /srv/servers on every node and give each server a folder under it, and nothing here needs to change.
+  # The service's own database directory (deploy/README.md section 3) must be under one of these too.
+  # Add other directories only if a server must mount data that already lives somewhere else.
+  allowedHostPaths: /srv/servers
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy

@@ -1,5 +1,5 @@
 # /etc/rancher/k3s/registries.yaml on EVERY node (server and agents), then restart k3s / k3s-agent.
-# Replace CONTROL_PLANE_IP with the control-plane desktop's LAN address.
+# Replace CONTROL_PLANE_IP with the control-plane node's LAN address.
 mirrors:
   "CONTROL_PLANE_IP:5000":
     endpoint:

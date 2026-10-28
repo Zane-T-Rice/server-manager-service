@@ -1,6 +1,7 @@
 # Starts the service the first time. After that it updates itself through its own Server record,
 # which replaces this Deployment (same name), so SERVER_ID must be that record's id.
-# Render with: SERVER_ID=... NODE_NAME=... REGISTRY=... IMAGE=... envsubst < deploy/bootstrap/service.yaml | kubectl apply -f -
+# Render with: SERVER_ID=... NODE_NAME=... IMAGE=... DB_DIR=... envsubst < deploy/bootstrap/service.yaml | kubectl apply -f -
+# The environment comes from the secret server-manager-bootstrap-env: see deploy/README.md section 3.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,11 +30,8 @@ spec:
       containers:
         - name: server
           image: ${IMAGE}
-          env:
-            - { name: REGISTRY, value: "${REGISTRY}" }
-            - { name: REGISTRY_INSECURE, value: "true" }
-            - { name: SELF_SERVER_ID, value: "${SERVER_ID}" }
-            # Plus DATABASE_URL, AUDIENCE, ISSUER, TOKEN_SIGNING_ALG, WEBSITE_DOMAIN, ... as in the README.
+          envFrom:
+            - secretRef: { name: server-manager-bootstrap-env }
           ports:
             - containerPort: 3000
               hostPort: 3000
@@ -43,5 +41,5 @@ spec:
       volumes:
         - name: db
           hostPath:
-            path: /home/zane/servers/db
+            path: ${DB_DIR}
             type: Directory

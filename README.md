@@ -3,8 +3,7 @@
 Provides server information and management functions such as update.
 The intent is to run servers on Kubernetes (k3s) based on information stored completely within the service.
 The service has no access to the host: it only holds a namespaced Kubernetes service account, and the cluster
-decides what is allowed. See [deploy/README.md](deploy/README.md) to set up the cluster and
-[deploy/SETUP-COMMANDS.md](deploy/SETUP-COMMANDS.md) for what was done on the current machines.
+decides what is allowed. See [deploy/README.md](deploy/README.md) to set up the cluster and start the service on it.
 
 ### Requirements
 
@@ -56,12 +55,35 @@ prismaPkg.prisma
 
 The npx commands require the DATABASE_URL environment variable is set. You can either set it on the command line before each command `DATABASE_URL="file:./db/dev.db" npx prisma studio` or in a .env file.
 
+### Authentication
+
+The service does not handle logins. Every request needs a bearer token from [Auth0](https://auth0.com), so you need a
+tenant (the free plan is enough). In it:
+
+1. Create an **API**. Its identifier is the service's `AUDIENCE`. Use the RS256 signing algorithm.
+2. In that API, add two permissions: `server-manager:admin` (manage every host and server) and `server-manager:public`
+   (the user routes under `/users/servers`). The service checks that the token's `scope` claim contains the permission
+   the route needs, so a token must have been granted it as a scope.
+3. Create a **Machine to Machine** application, authorize it for that API with `server-manager:admin`, and use it to
+   call the API from scripts. Any other client (a web front-end) works the same way: it requests a token with the scopes
+   its users are allowed to have.
+4. `ISSUER` is your tenant URL, e.g. `https://TENANT.auth0.com/`.
+5. Create a second Machine to Machine application authorized for the **Auth0 Management API** with `read:users` and
+   `read:clients`. Its id and secret are `AUTH0_MGMT_CLIENT_ID` and `AUTH0_MGMT_CLIENT_SECRET` (see below).
+
+To get an admin token for `curl`:
+
+```sh
+curl -s https://TENANT.auth0.com/oauth/token -H 'content-type: application/json' \
+  -d '{"grant_type":"client_credentials","client_id":"...","client_secret":"...","audience":"AUDIENCE"}'
+```
+
 ### How To Get This Running (Deployment)
 
 The service runs as a Pod on the cluster, started like any other server (see [deploy/README.md](deploy/README.md)).
 Its environment variables are stored as Environment Variables on its own server record:
 
-- REGISTRY is the registry that build jobs push to and nodes pull from (e.g. `192.168.1.3:5000`). REGISTRY_INSECURE=true if it is plain http.
+- REGISTRY is the registry that build jobs push to and nodes pull from (e.g. `10.0.0.5:5000`, the control-plane node). REGISTRY_INSECURE=true if it is plain http.
 - SELF_SERVER_ID is the id of the service's own server record, so it can update itself with its own service account.
 - WEBSITE_DOMAIN is needed if you want to use these APIs from client-side javascript in a browser.
 - ISSUER is the domain that issues OAuth2.0 tokens. The service is configured for jwt bearer tokens made with the RS256 algorithm. AUDIENCE is the API Audience.
@@ -97,14 +119,14 @@ build job turns into its image. It needs no docker socket and no docker CLI.
 
 To make trying the service out easier the service provides a Swagger spec at /swagger. So, if you were running this locally for instance, you could browse to http://localhost:3000/swagger to see and interact with the APIs.
 Additionally, there is a combined Swagger spec at swagger/combinedServerManagerService.yaml which can be used with many tools including to be imported in to Insomnia.
-You can also test by running the [front-end project](https://github.com/Zane-T-Rice/apps) locally and pointing it at the locally running service.
+The service is a plain REST API, so Swagger UI or `curl` with a token (see Authentication) is all you need. The author also uses a separate [front-end project](https://github.com/Zane-T-Rice/apps), which is optional and can be pointed at a locally running service.
 
 ### File Ownership Issue
 
 When the service runs in a container the generated files in prisma/ belong to the container's user (root, which NFS maps to nobody). This can block you from editing the database manually, but can be corrected like so:
 
 ```sh
-sudo chown "$USER":users -R prisma
+sudo chown "$USER": -R prisma
 ```
 
 ### Database
@@ -134,14 +156,25 @@ npx prisma migrate reset
 
 ### Configuring Servers
 
-Using the related [front-end project](https://github.com/Zane-T-Rice/apps) to setup servers takes most of the mystery out of it. However, one part that is not obvious is that you will need to make one of the Files a Dockerfile and of course add any Files that your Dockerfile needs as well. These are used to build the server in a build job on the cluster during the `/update` command.
+With a token (see Authentication), everything is a REST call; the Swagger UI at `/swagger` lists them all:
+
+1. `POST /hosts` with `{"name": "<node name>"}`. The name must equal a node name in `kubectl get nodes`.
+2. `POST /hosts/{hostId}/servers` with `applicationName`, `containerName`, `isInResponseChain` and `isUpdatable`.
+3. Add what the server needs under `/hosts/{hostId}/servers/{serverId}/`: `ports` (`number`, `protocol`), `volumes`
+   (`hostPath`, `containerPath`), `environmentVariables` (`name`, `value`) and `files` (`name`, `content`).
+   One of the files must be named `Dockerfile`, along with any files the Dockerfile copies. The `content` of a file is its
+   base64 encoded text.
+4. `POST /hosts/{hostId}/servers/{serverId}/update` builds the image in a job on the cluster and starts it.
+
+`prisma/scripts/seedServers.ts` shows the same records being made for a trivial server.
+A separate [front-end project](https://github.com/Zane-T-Rice/apps) can do all this from a UI; it is optional.
 
 Things that differ from a plain `docker run`:
 
 - Ports are published on the node the server runs on (`hostPort`), as `docker run -p` did.
-- Volumes must be under one of the `allowedHostPaths` in [deploy/20-admission-policy.yaml](deploy/20-admission-policy.yaml), and privileged containers, host networking and added capabilities are refused by the cluster. Keep the data of new servers under `/home/zane/servers` on the node the server runs on (create the folder first; a missing folder stops the server from starting, as it did with docker) and nothing needs to change. The other allowed paths are where existing servers already keep theirs.
-- Servers cannot reach each other unless a link is added to [deploy/35-server-links.yaml](deploy/35-server-links.yaml). A server is reached by its container name, as on the old docker network.
-- The server runs on the node whose name equals its Host record's name. The content field of a File is the base64 encoded string of the File.
+- Volumes must be under one of the `allowedHostPaths` in [deploy/20-admission-policy.yaml](deploy/20-admission-policy.yaml), and privileged containers, host networking and added capabilities are refused by the cluster. Keep the data of new servers under `/srv/servers` on the node the server runs on (create the folder first; a missing folder stops the server from starting, as it did with docker) and nothing needs to change.
+- Servers cannot reach each other unless a NetworkPolicy allows it, like [deploy/examples/server-link.yaml](deploy/examples/server-link.yaml). A server is reached by its container name, as on a docker network.
+- The server runs on the node whose name equals its Host record's name.
 
 ### To Do
 
